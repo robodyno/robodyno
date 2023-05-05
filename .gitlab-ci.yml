@@ -31,6 +31,18 @@ deploy-python:
     - python setup.py sdist bdist_wheel
     - python -m twine upload --repository $PYPI_URL --username $PYPI_USERNAME --password $PYPI_PASSWORD dist/*
 
+deploy-python-devel:
+  stage: deploy
+  tags:
+    - docker
+  only:
+    - devel
+  image: python:latest
+  script:
+    - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple twine
+    - python setup.py sdist bdist_wheel
+    - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
+
 deploy-doc:
   stage: deploy
   tags:
