@@ -1,0 +1,52 @@
+site_name: Robodyno 文档
+nav:
+  - 概述: index.md
+  - 入门指南:
+    - 安装: installation.md
+    - 准备工作: configuration.md
+    - 使用示例: usage.md
+    - 命令行工具: cli.md
+  - API 参考: 
+    - robodyno.interfaces:
+      - CanBus: references/canbus.md
+    - robodyno.components:
+      - Motor: references/motor.md
+  - 深入了解:
+    - 电机控制模式: control-mode.md
+    - 电机参数配置: motor-config.md
+    - CAN 总线通信协议: can-interface.md
+  - 常见问题解答: 
+    - API相关问题: api-qa.md
+    - 命令行工具相关问题: cli-qa.md
+  - 贡献: 
+    - 贡献指南: contribution.md
+    - 贡献者名单: contributors.md
+    - 开发计划: roadmap.md
+  - 相关声明:
+    - 开源协议: license.md
+    - 免责声明: disclaimer.md
+theme:
+  name: material
+  language: zh
+  logo: assets/logo.png
+  favicon: assets/favicon.png
+  features:
+    - navigation.sections
+extra_css:
+  - stylesheets/custom.css
+plugins:
+  - mike
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+  - search:
+      separator: '[\s\u200b\-]'
+
+copyright: Copyright &copy; 2007 - 2023 RobotTime
+
+extra:
+  generator: false
+  version:
+    provider: mike

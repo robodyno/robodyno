@@ -1,0 +1,1 @@
+from .three_dof_pallet_robot import ThreeDoFPallet

@@ -1,0 +1,5 @@
+mkdocs >= 1.4.2
+mkdocs-material >= 9.1.8
+jieba >= 0.42.1
+mike >= 1.1.2
+mkdocstrings[python] >= 0.21.2

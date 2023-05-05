@@ -1,0 +1,1 @@
+from .four_dof_pallet_robot import FourDoFPallet
