@@ -115,7 +115,7 @@ motor.save_configuration()
 ### 10. 设置电机CAN_ID
 
 ```python
-motor.config_can_bus(id = 0x10, heartbeat = 1)
+motor.config_can_bus(new_id = 0x11, heartbeat = 1)
 ```
 
 `config_can_bus(new_id, heartbeat = 1, bitrate = 'CAN_1M')`
