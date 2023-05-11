@@ -181,17 +181,39 @@ class CanBus(object):
 
     @classmethod
     def get_from_bus(cls, command_id, format):
-        """Decorator for getting data from can bus.
-        
+        """Returns a decorator for subscribing to a specific command ID on the CAN bus.
+
         Args:
-            command_id: command id
-            format: python struct format to unpack msg bytes
-        
+            command_id (int): The command ID to subscribe to on the CAN bus.
+            format (str): The format string used to unpack the received data.
+
         Returns:
-            decorated function
+            Callable: A decorator that wraps a function to handle the communication
+                      with the CAN bus.
         """
         def wrapper(func):
+            """Wraps a function to handle the communication with the CAN bus.
+
+            Args:
+                func (Callable): The function to be wrapped.
+
+            Returns:
+                Callable: The wrapped function.
+            """
             def innerwrapper(self, timeout = 0):
+                """Subscribes to the specified command ID on the CAN bus.
+
+                Args:
+                    self (object): An instance of the class containing this method.
+                    timeout (float, optional): The maximum time to wait for a response in seconds. Defaults to 0.
+
+                Returns:
+                    Any: The result of calling the wrapped function with the unpacked data.
+
+                Raises:
+                    ValueError: If the received data cannot be unpacked using the provided format.
+                    RuntimeError: If there is an error getting data from the CAN bus.
+                """
                 try:
                     def callback(device_id, command_id, data, timestamp):
                         callback.data = data

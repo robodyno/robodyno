@@ -41,6 +41,11 @@ plugins:
         python:
           options:
             show_source: false
+            show_root_heading: true
+            heading_level: 1
+            members_order: source
+            group_by_category: false
+          paths: [src]
   - search:
       separator: '[\s\u200b\-]'
 
