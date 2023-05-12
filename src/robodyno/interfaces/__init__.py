@@ -16,6 +16,6 @@ def GET_IFACE_TYPE(iface):
     if isinstance(iface, CanBus):
         return InterfaceType.CanBus
     elif isinstance(iface, Webots):
-        return InterfaceType.CanBus.Webots
+        return InterfaceType.Webots
     else:
         return InterfaceType.Unknown
