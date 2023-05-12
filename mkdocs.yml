@@ -32,6 +32,7 @@ theme:
   favicon: assets/favicon.png
   features:
     - navigation.sections
+    - content.code.copy
 extra_css:
   - stylesheets/custom.css
 plugins:
