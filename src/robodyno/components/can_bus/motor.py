@@ -387,6 +387,10 @@ class Motor(CanBusDevice):
             (float): The absolute position in rad. Returns None if the request timed
                      out.
         """
+        if self.fw_ver < 1.0:
+            raise NotImplementedError(
+                'Absolute position is not supported on firmware < 1.0'
+            )
         return pos / self._rot_factor
 
     def get_vel(self, timeout=0):
@@ -599,6 +603,10 @@ class Motor(CanBusDevice):
             vel_ff (float): The velocity feedforward in rad/s.
             torque_ff (float): The torque feedforward in Nm.
         """
+        if self.fw_ver < 1.0:
+            raise NotImplementedError(
+                'Absolute position is not supported on firmware < 1.0'
+            )
         return (
             pos * self._rot_factor,
             vel_ff * self._rot_factor,
@@ -621,6 +629,10 @@ class Motor(CanBusDevice):
         Args:
             offset (float): The initial offset in rad.
         """
+        if self.fw_ver < 1.0:
+            raise NotImplementedError(
+                'Absolute position is not supported on firmware < 1.0'
+            )
         return (offset * self._rot_factor,)
 
     @CanBus.send_to_bus(_CMD_SET_VEL, '<ff')
@@ -655,7 +667,7 @@ class Motor(CanBusDevice):
     def unlock(self):
         """Unlocks the motor."""
         if not self.with_brake:
-            raise ValueError('The motor does not have a brake.')
+            raise NotImplementedError('unlock is not supported on motors without brake')
 
     class MotorState(Enum):
         """Enumerates motor working states."""
