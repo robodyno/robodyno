@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - motor.config_can_bus example in robodyno/README.md.
+- delete copysign(1, self.reduction) in robodyno/components/webots.
 
 ## [1.6.0] - 2023-05-05
 
