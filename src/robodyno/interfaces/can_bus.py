@@ -1,280 +1,264 @@
-#!/usr/bin/env python
 # -*-coding:utf-8 -*-
-"""can_bus.py
-Time    :   2023/01/02
-Author  :   song 
-Version :   1.0
-Contact :   zhaosongy@126.com
-License :   (C)Copyright 2022, robottime / robodyno
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-Robodyno can bus interface
+"""This module provides CAN bus interface for robodyno devices.
 
-  Typical usage example:
+Examples:
 
-  can = CanBus(bitrate = 'CAN_1M', channel = 'can0', auto_connect = True)
-  can.disconnect()
+    >>> from robodyno.interfaces import CanBus
+    >>> can_bus = CanBus()
+    >>> can.send(0x10, 0x0e, 'fee', 50, 0.02, 0.1)
+    >>> can.get(0x10, 0x0d, 'fee')
+    (50.0, 0.0200042724609375, 0.0999755859375)
+    >>> can_bus.subscribe(callback, 0x10, 0x02)
+    >>> can_bus.unsubscribe(callback, 0x10, 0x02)
+    >>> can_bus.disconnect()
 """
 
 import sys
-import time
-import threading
-import can
+from time import time, sleep
+from threading import Lock, Thread, Event
+from queue import Queue
 from collections import defaultdict
-from enum import Enum
 import struct
+from typing import Optional, Callable
 
-if sys.platform == 'win32':
-    BUS_TYPE = 'candle'
-elif sys.platform.startswith('linux'):
-    BUS_TYPE = 'socketcan'
+import can
 
 
 class CanBus(object):
-    """Can bus interface manage can id, rx thread and listeners."""
+    """CAN bus interface for robodyno devices.
 
-    class CanSpeed(Enum):
-        CAN_1M = 1000000
-        CAN_1000K = 1000000
-        CAN_500K = 500000
-        CAN_250K = 250000
+    This class provides CAN bus interface for robodyno devices. It supports
+    sending and receiving data from CAN bus. It also supports subscribing data
+    from CAN bus.
 
-    _MAX_DEVICE_NUM = 0x40
-    _DEVICE_ID_ALL = _MAX_DEVICE_NUM
-
-    _MAX_COMMAND_NUM = 0x20
-    _COMMAND_ID_ALL = _MAX_COMMAND_NUM
+    A thread is created to receive data from CAN bus. When a device ID and a
+    command ID is subscribed, the callback function will be called when the
+    corresponding data is received.
+    """
 
     def __init__(
-        self, bitrate='CAN_1000K', channel='can0', auto_connect=True, *args, **kwargs
+        self,
+        bitrate: int = 1000000,
+        channel: str = 'can0',
+        connect: bool = True,
     ):
-        """Init can driver interface.
+        """Initialize CAN bus interface with given channel and bitrate.
 
         Args:
-            bitrate: can bus bandwidth, choose from 'CAN_1M', CAN_1000K', 'CAN_500K', 'CAN_250K'
-            channel: can bus channel name, default 'can0'
-            auto_connect: if set to False, you need to call connect() manually
+            bitrate (int): CAN bus bitrate, e.g. 1000000.
+            channel (str): CAN bus channel name, e.g. 'can0'.
+            connect (bool): Whether to connect to CAN bus.
         """
-        self._bitrate = self.CanSpeed[bitrate].value
         self._channel = channel
+        self._bitrate = bitrate
+        if sys.platform == 'win32':
+            self._bus_type = 'candle'
+        elif sys.platform.startswith('linux'):
+            self._bus_type = 'socketcan'
+        else:
+            raise NotImplementedError(f'Unsupported platform: {sys.platform}')
         self._bus = None
-        self._listeners = defaultdict(lambda: defaultdict(list))
-        self._send_lock = threading.Lock()
-        self._thread_running = False
-        self._rx_thread = threading.Thread(
-            target=self._rx_thread_method,
-            name='can.rx',
-            daemon=True,
-        )
-        if auto_connect:
+        self._recv_callbacks = defaultdict(lambda: defaultdict(set))
+        self._recv_lock = Lock()
+        self._send_lock = Lock()
+
+        self._recv_event = Event()
+        self._listening_event = Event()
+        self._rx_queue = Queue()
+
+        self._recv_thread = Thread(target=self._recv_loop, daemon=True)
+
+        if connect:
             self.connect()
-            time.sleep(0.1)
+            sleep(0.1)
 
-    def pack_can_id(self, device_id, command_id):
-        """calculate can frame id from device id and command id
+    def connect(self) -> None:
+        """Connect to CAN bus."""
+        self._bus = can.interface.Bus(
+            channel=self._channel, bustype=self._bus_type, bitrate=self._bitrate
+        )
+        self._recv_event.set()
+        self._recv_thread.start()
 
-        Args:
-            device_id: robodyno device id
-            command_id: device command id
-
-        Returns:
-            can frame id
-        """
-        return device_id << 5 | command_id
-
-    def unpack_can_id(self, can_id):
-        """split can frame id into device id and command id
-
-        Args:
-            can_id: can frame id
-
-        Returns:
-            (device_id, command_id)
-        """
-        return ((can_id & 0x7FF) >> 5, can_id & 0x1F)
-
-    def connect(self):
-        """Connect to can bus."""
-        try:
-            self._bus = can.interface.Bus(
-                channel=self._channel, bitrate=self._bitrate, bustype=BUS_TYPE
-            )
-            self._thread_running = True
-            self._rx_thread.start()
-        except:
-            raise IOError('Failed to connect can bus.')
-
-    def disconnect(self):
-        """Disconnect to can bus."""
-        self._thread_running = False
-        self._rx_thread.join(1)
-        try:
+    def disconnect(self) -> None:
+        """Disconnect from CAN bus."""
+        if self._recv_thread is not None:
+            self._recv_event.clear()
+            self._recv_thread.join()
+            self._recv_thread = None
+        if self._bus is not None:
             self._bus.shutdown()
-        except:
-            raise IOError('Failed to disconnect can bus.')
+            self._bus = None
 
-    def send_can_msg(self, device_id, command_id, data=b'', remote=False):
-        """Send message from can bus.
+    def _combine_ids(self, device_id: int, cmd_id: int) -> int:
+        """Combine device ID and command ID to arbitration ID.
 
         Args:
-            device_id: robodyno device id, upper 6 bits of can frame id
-            command_id: device command id, lower 5 bits of can frame id
-            data: bytes of can frame payload
-            remotr: can frame rtr bit
+            device_id (int): Device ID.
+            cmd_id (int): Command ID.
+
+        Returns:
+            (int): Arbitration ID.
+        """
+        return (device_id << 5) + cmd_id
+
+    def _split_ids(self, arbitration_id: int) -> tuple:
+        """Split arbitration ID to device ID and command ID.
+
+        Args:
+            arbitration_id (int): Combined ID.
+
+        Returns:
+            (tuple): Device ID and command ID.
+        """
+        device_id = arbitration_id >> 5
+        cmd_id = arbitration_id & 0x1F
+        return device_id, cmd_id
+
+    def send(self, device_id: int, cmd_id: int, fmt: str, *args) -> None:
+        """Send data to CAN bus.
+
+        Args:
+            device_id (int): Device ID.
+            cmd_id (int): Command ID.
+            fmt (str): Format string for packing data. See [struct module](
+                https://docs.python.org/3/library/struct.html#format-characters)
+                for details.
+            *args: Data to be sent.
         """
         with self._send_lock:
-            can_frame_id = self.pack_can_id(device_id, command_id)
+            arbitration_id = self._combine_ids(device_id, cmd_id)
+            data = struct.pack('<' + fmt, *args)
             msg = can.Message(
-                arbitration_id=can_frame_id,
-                data=data,
+                arbitration_id=arbitration_id,
                 is_extended_id=False,
-                is_remote_frame=remote,
+                data=data,
             )
             self._bus.send(msg)
 
-    def subscribe(self, device_id, command_id, callback):
-        """Subscribe specific device id and command id from can bus.
+    def _send_remote(self, device_id: int, cmd_id: int) -> None:
+        """Send remote frame to CAN bus.
 
         Args:
-            device_id: robodyno device id or Interface._DEVICE_ID_ALL
-            command_id: device command id or Interface._COMMAND_ID_ALL
-            callback: func(device_id, command_id, data, timestamp)
+            device_id (int): Device ID.
+            cmd_id (int): Command ID.
         """
-        if callback not in self._listeners[device_id][command_id]:
-            self._listeners[device_id][command_id].append(callback)
+        with self._send_lock:
+            arbitration_id = self._combine_ids(device_id, cmd_id)
+            msg = can.Message(
+                arbitration_id=arbitration_id,
+                is_extended_id=False,
+                is_remote_frame=True,
+            )
+            self._bus.send(msg)
 
-    def unsubscribe(self, device_id, command_id, callback=None):
-        """Unsubscribe specific device id and command id from can bus.
-
-        Args:
-            device_id: robodyno device id or Interface._DEVICE_ID_ALL
-            command_id: device command id or Interface._COMMAND_ID_ALL
-            callback: callback to unsubscribe or leave None to unsubscribe all callbacks
-        """
-        if callback:
-            try:
-                self._listeners[device_id][command_id].remove(callback)
-            except:
-                raise ValueError('Failed to find callback to unsubscribe.')
-        else:
-            self._listeners[device_id][command_id] = []
-
-    def _notify(self, frame_id, data, timestamp):
-        """Protected method, notify listeners when can frame received.
+    def get(
+        self, device_id: int, cmd_id: int, fmt: str, timeout: Optional[float] = None
+    ) -> tuple:
+        """Get data from CAN bus.
 
         Args:
-            frame_id: can frame id
-            data: can frame payload
-            timestamp: can frame timestamp
-        """
-        device_id, command_id = self.unpack_can_id(frame_id)
-        for callback in self._listeners[device_id][command_id]:
-            callback(device_id, command_id, data, timestamp)
-        for callback in self._listeners[device_id][self._COMMAND_ID_ALL]:
-            callback(device_id, command_id, data, timestamp)
-        for callback in self._listeners[self._DEVICE_ID_ALL][command_id]:
-            callback(device_id, command_id, data, timestamp)
-        for callback in self._listeners[self._DEVICE_ID_ALL][self._COMMAND_ID_ALL]:
-            callback(device_id, command_id, data, timestamp)
-
-    def _rx_thread_method(self):
-        """read can bus thread method"""
-        while self._thread_running:
-            try:
-                msg = self._bus.recv(0.1)
-                self._notify(msg.arbitration_id, msg.data, msg.timestamp)
-            except:
-                pass
-
-    @classmethod
-    def get_from_bus(cls, command_id, format):
-        """Returns a decorator for subscribing to a specific command ID on the CAN bus.
-
-        Args:
-            command_id (int): The command ID to subscribe to on the CAN bus.
-            format (str): The format string used to unpack the received data.
+            device_id (int): Device ID.
+            cmd_id (int): Command ID.
+            fmt (str): Format string for unpacking data. See [struct module](
+                https://docs.python.org/3/library/struct.html#format-characters)
+                for details.
+            timeout (float): Timeout for receiving data.
 
         Returns:
-            Callable: A decorator that wraps a function to handle the communication
-                      with the CAN bus.
+            (tuple): Received data. None if timeout.
         """
+        start_time = time()
+        with self._rx_queue.mutex:
+            self._rx_queue.queue.clear()
+        self._listening_event.set()
+        self._send_remote(device_id, cmd_id)
+        while True:
+            arbitration_id = self._combine_ids(device_id, cmd_id)
+            msg = self._rx_queue.get()
+            if msg.arbitration_id == arbitration_id:
+                self._listening_event.clear()
+                return struct.unpack('<' + fmt, msg.data)
+            if timeout is not None and time() - start_time > timeout:
+                self._listening_event.clear()
+                break
+        return None
 
-        def wrapper(func):
-            """Wraps a function to handle the communication with the CAN bus.
-
-            Args:
-                func (Callable): The function to be wrapped.
-
-            Returns:
-                Callable: The wrapped function.
-            """
-
-            def innerwrapper(self, timeout=0):
-                """Subscribes to the specified command ID on the CAN bus.
-
-                Args:
-                    self (object): An instance of the class containing this method.
-                    timeout (float, optional): The maximum time to wait for a response in seconds. Defaults to 0.
-
-                Returns:
-                    Any: The result of calling the wrapped function with the unpacked data.
-
-                Raises:
-                    ValueError: If the received data cannot be unpacked using the provided format.
-                    RuntimeError: If there is an error getting data from the CAN bus.
-                """
-                try:
-
-                    def callback(device_id, command_id, data, timestamp):
-                        callback.data = data
-                        callback.updated = True
-
-                    callback.updated = False
-
-                    self._iface.subscribe(
-                        device_id=self.id, command_id=command_id, callback=callback
-                    )
-                    self._iface.send_can_msg(self.id, command_id, b'', True)
-
-                    start = time.time()
-                    while timeout == 0 or time.time() - start < timeout:
-                        if callback.updated:
-                            try:
-                                return func(self, *struct.unpack(format, callback.data))
-                            except:
-                                raise ValueError()
-                    self._iface.unsubscribe(
-                        device_id=self.id, command_id=command_id, callback=callback
-                    )
-                except:
-                    raise RuntimeError('Failed to get data from can bus.')
-
-            return innerwrapper
-
-        return wrapper
-
-    @classmethod
-    def send_to_bus(cls, command_id, format='', remote=False):
-        """Decorator for sending data from can bus.
+    def subscribe(
+        self, callback: Callable, device_id: int = -1, cmd_id: int = -1
+    ) -> None:
+        """Subscribe data from CAN bus.
 
         Args:
-            command_id: command id
-            format: python struct format to pack msg bytes
-            remote: can frame rtr bit
+            callback (func): Callback function. 
 
-        Returns:
-            decorated function
+                The function should accept four arguments,     
+                e.g. `callback(data, timestamp, device_id, cmd_id)`.
+            
+            device_id (int): Device ID. -1 for all devices.
+            cmd_id (int): Command ID. -1 for all commands.
         """
+        with self._recv_lock:
+            self._recv_callbacks[device_id][cmd_id].add(callback)
 
-        def wrapper(func):
-            def inner_wrapper(self, *args, **kwargs):
-                try:
-                    data = b''
-                    if len(format) > 0:
-                        data = struct.pack(format, *func(self, *args, **kwargs))
-                    self._iface.send_can_msg(self.id, command_id, data, remote)
-                except:
-                    raise RuntimeError('Failed to send data from can bus.')
+    def unsubscribe(
+        self, callback: Callable, device_id: int = -1, cmd_id: int = -1
+    ) -> None:
+        """Unsubscribe data from CAN bus.
 
-            return inner_wrapper
+        Args:
+            callback (func): Callback function.
+            device_id (int): Device ID. -1 for all devices.
+            cmd_id (int): Command ID. -1 for all commands.
+        """
+        with self._recv_lock:
+            self._recv_callbacks[device_id][cmd_id].remove(callback)
 
-        return wrapper
+    def _notify(self, msg: can.Message) -> None:
+        """Notify received data."""
+        if self._listening_event.is_set():
+            self._rx_queue.put(msg)
+        device_id, cmd_id = self._split_ids(msg.arbitration_id)
+        for callback in self._recv_callbacks[device_id][cmd_id]:
+            callback(msg.data, msg.timestamp, device_id, cmd_id)
+        for callback in self._recv_callbacks[device_id][-1]:
+            callback(msg.data, msg.timestamp, device_id, cmd_id)
+        for callback in self._recv_callbacks[-1][cmd_id]:
+            callback(msg.data, msg.timestamp, device_id, cmd_id)
+        for callback in self._recv_callbacks[-1][-1]:
+            callback(msg.data, msg.timestamp, device_id, cmd_id)
+
+    def _recv_loop(self) -> None:
+        """Receive data from CAN bus."""
+        while self._recv_event.is_set():
+            try:
+                msg = self._bus.recv(timeout=1.0)
+            except TimeoutError:
+                continue
+            if msg.is_remote_frame:
+                continue
+            with self._recv_lock:
+                self._notify(msg)

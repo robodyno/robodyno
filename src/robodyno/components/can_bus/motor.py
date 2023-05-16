@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""The motor module provides a class for controlling Robodyno motors.
+"""This module provides a class for controlling Robodyno motors.
 
 The Motor class provided by this module is used to control Robodyno motors
 through the CAN bus. It provides methods for setting motor parameters, reading motor
@@ -275,7 +275,7 @@ class Motor(CanBusDevice):
             new_id (int): The new device id.
             heartbeat (int): The heartbeat period in milliseconds.
             bitrate (str): The bitrate of the CAN bus. Choose from 'CAN_250K',
-                            'CAN_500K', and 'CAN_1000K' or 'CAN_1M'.
+                'CAN_500K', and 'CAN_1000K' or 'CAN_1M'.
 
         Raises:
             ValueError: If the new CAN id is not in the range of 0x01-0x3f.
@@ -352,7 +352,7 @@ class Motor(CanBusDevice):
 
         Args:
             bandwidth (float): The bandwidth of the filter in Hz. The value is suggested
-                               to be the control loop frequency in Hz.
+                to be the control loop frequency in Hz.
         """
         cmode, imode = self.MotorControlMode.POSITION_FILTER_MODE.value
         return (cmode, imode, bandwidth)
@@ -535,7 +535,7 @@ class Motor(CanBusDevice):
 
         Returns:
             (float): The DC bus voltage in volts. Returns None if the request
-                     timed out.
+                timed out.
         """
         return vbus
 
@@ -548,7 +548,7 @@ class Motor(CanBusDevice):
 
         Returns:
             (float): The temperature in degrees Celsius. Returns None if the
-                     request timed out.
+                request timed out.
         """
         return temperature
 
@@ -593,7 +593,7 @@ class Motor(CanBusDevice):
 
         Returns:
             (float, float, float): The position(rad), velocity(rad/s) and torque(Nm)
-                                   of the motor. Returns None if the request timed out.
+                of the motor. Returns None if the request timed out.
         """
         return pos / self._rot_factor, vel / self._rot_factor, torque * self.reduction
 
@@ -617,7 +617,7 @@ class Motor(CanBusDevice):
 
         Returns:
             (float): The absolute position in rad. Returns None if the request timed
-                     out.
+                out.
 
         Raises:
             NotImplementedError: If the firmware version is < 1.0.
@@ -659,8 +659,8 @@ class Motor(CanBusDevice):
 
         Returns:
             (float, float, float): The Kp of the position control loop, Kp of the
-                                   velocity control loop, and Ki of the velocity
-                                   control loop. Returns None if the request timed out.
+                velocity control loop, and Ki of the velocity control loop. Returns
+                None if the request timed out.
         """
         return (pos_kp, vel_kp, vel_ki)
 
@@ -673,7 +673,7 @@ class Motor(CanBusDevice):
 
         Returns:
             (float, float): The velocity limit in rad/s and the current limit in amps.
-                            Returns None if the request timed out.
+                Returns None if the request timed out.
         """
         return vel_limit / fabs(self._rot_factor)
 
