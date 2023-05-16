@@ -71,6 +71,9 @@ class CanBus(object):
             bitrate (int): CAN bus bitrate, e.g. 1000000.
             channel (str): CAN bus channel name, e.g. 'can0'.
             connect (bool): Whether to connect to CAN bus.
+
+        Raises:
+            NotImplementedError: If the platform is not supported.
         """
         self._channel = channel
         self._bitrate = bitrate

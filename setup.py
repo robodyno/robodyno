@@ -49,7 +49,7 @@ setup(
     packages=[
         'robodyno',
         'robodyno.components',
-        'robodyno.components.brands',
+        'robodyno.components.config',
         'robodyno.components.can_bus',
         'robodyno.components.webots',
         'robodyno.interfaces',
@@ -77,26 +77,26 @@ setup(
     entry_points={
         'robodyno.components.can_bus': [
             'Motor = robodyno.components.can_bus.motor:Motor',
-            'PwmDriver = robodyno.components.can_bus.pwm_driver:PwmDriver',
-            'StepperDriver = robodyno.components.can_bus.stepper_driver:StepperDriver',
-            'VGripper = robodyno.components.can_bus.vacuum_gripper:VGripper',
-            'SliderModule = robodyno.components.can_bus.slider_module:SliderModule',
-            'ImuSensor = robodyno.components.can_bus.imu_sensor:ImuSensor',
+            # 'PwmDriver = robodyno.components.can_bus.pwm_driver:PwmDriver',
+            # 'StepperDriver = robodyno.components.can_bus.stepper_driver:StepperDriver',
+            # 'VGripper = robodyno.components.can_bus.vacuum_gripper:VGripper',
+            # 'SliderModule = robodyno.components.can_bus.slider_module:SliderModule',
+            # 'ImuSensor = robodyno.components.can_bus.imu_sensor:ImuSensor',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',
             'SliderModule = robodyno.components.webots.slider_module:SliderModule',
         ],
         'robodyno.robots': [
-            'FourDoFPallet = robodyno.robots.four_dof_palletizing_robot.four_dof_pallet_robot:FourDoFPallet',
-            'FourDoFScara = robodyno.robots.four_dof_scara_robot.four_dof_scara_robot:FourDoFScara',
-            'SixDoFCollabRobot = robodyno.robots.six_dof_collaborative_robot.six_dof_collab_robot:SixDoFCollabRobot',
-            'ThreeDoFDelta = robodyno.robots.three_dof_delta_robot.three_dof_delta_robot:ThreeDoFDelta',
-            'ThreeDoFPallet = robodyno.robots.three_dof_palletizing_robot.three_dof_pallet_robot:ThreeDoFPallet',
+            # 'FourDoFPallet = robodyno.robots.four_dof_palletizing_robot.four_dof_pallet_robot:FourDoFPallet',
+            # 'FourDoFScara = robodyno.robots.four_dof_scara_robot.four_dof_scara_robot:FourDoFScara',
+            # 'SixDoFCollabRobot = robodyno.robots.six_dof_collaborative_robot.six_dof_collab_robot:SixDoFCollabRobot',
+            # 'ThreeDoFDelta = robodyno.robots.three_dof_delta_robot.three_dof_delta_robot:ThreeDoFDelta',
+            # 'ThreeDoFPallet = robodyno.robots.three_dof_palletizing_robot.three_dof_pallet_robot:ThreeDoFPallet',
         ],
         'console_scripts': [
-            'robodyno = robodyno:robodyno',
-            'robodyno-motor = robodyno:robodyno_motor'
+            # 'robodyno = robodyno:robodyno',
+            # 'robodyno-motor = robodyno:robodyno_motor'
         ],
     }
 )

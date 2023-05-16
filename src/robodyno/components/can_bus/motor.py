@@ -29,17 +29,15 @@ through the CAN bus. It provides methods for setting motor parameters, reading m
 states, and controlling the motor to run in different modes.
 
 Examples:
-    To initialize a motor, use the following code:
 
     >>> from robodyno.components import Motor
-    >>> can = CanBus()
-    >>> motor = Motor(can)
+    >>> from robodyno.interfaces import CanBus
+    >>> can_bus = CanBus()
+    >>> motor = Motor(can_bus)
+    >>> print(motor)
+    Motor(id=0x10, type=ROBODYNO_PRO_P44, state=DISABLED, error=NONE)
+    >>> can_bus.disconnect()
 
-    To control the motor to run in velocity mode, use the following code:
-
-    >>> motor.velocity_mode()
-    >>> motor.enable()
-    >>> motor.set_velocity(1) # Set the velocity to 1 rad/s
 """
 
 import time
@@ -49,7 +47,9 @@ import struct
 from typing import Optional
 
 from robodyno.interfaces import CanBus
-from robodyno.components import DeviceType, ROBODYNO_MOTOR_SPECS, CanBusDevice
+from robodyno.components import CanBusDevice
+from robodyno.components.config.model import Model
+from robodyno.components.config.robottime_config import ROBOTTIME_PARAMS
 
 
 class Motor(CanBusDevice):
@@ -57,7 +57,7 @@ class Motor(CanBusDevice):
 
     Attributes:
         id (int): The ID of the motor device on the CAN bus.
-        type (DeviceType): The model type of the motor.
+        type (Model): The model type of the motor.
         reduction (float): The reduction ratio of the motor.
         available_velocity (float): The maximum velocity of the motor.
         available_torque (float): The maximum torque of the motor.
@@ -98,41 +98,30 @@ class Motor(CanBusDevice):
     _CMD_INIT_ABS_POS = 0x19
     _CMD_GET_STATE = 0x20
 
-    def __init__(
-        self, iface: CanBus, id_: int = 0x10, type_: Optional[DeviceType] = None
-    ):
+    def __init__(self, can: CanBus, id_: int = 0x10, type_: Optional[str] = None):
         """Initializes the Robodyno motor based on the device id and type.
 
         Args:
-            iface: The CAN bus interface.
+            can: The CAN bus interface.
             id_: The device id. The default factory id of the motor is 0x10.
             type_: The motor model type.
 
         Raises:
             ValueError: If the motor type is invalid.
         """
-        super().__init__(iface, id_)
-        valid_motor_types = [
-            DeviceType.ROBODYNO_PRO_44,
-            DeviceType.ROBODYNO_PRO_12,
-            DeviceType.ROBODYNO_PRO_50,
-            DeviceType.ROBODYNO_PRO_100,
-            DeviceType.ROBODYNO_PRO_DIRECT,
-            DeviceType.ROBODYNO_PLUS_50,
-            DeviceType.ROBODYNO_PLUS_100,
-            DeviceType.ROBODYNO_PLUS_12,
-            DeviceType.ROBODYNO_PLUS_DIRECT,
-            DeviceType.ROBODYNO_NANO_100,
-        ]
+        super().__init__(can, id_)
         self.get_version(timeout=0.15)
         if type_:
-            self.type = DeviceType[type_]
-        if self.type not in valid_motor_types:
+            self.type = Model(type_)
+        if self.type not in ROBOTTIME_PARAMS['motor']:
+            valid_models = list(
+                map(lambda model: model.name, ROBOTTIME_PARAMS['motor'].keys())
+            )
             raise ValueError(
-                f'Invalid motor type. Valid motor types are: {valid_motor_types!r}'
+                f'Invalid motor type. Valid motor types are: {valid_models}.'
             )
 
-        self.__dict__.update(ROBODYNO_MOTOR_SPECS.get(self.type, None))
+        self.__dict__.update(ROBOTTIME_PARAMS['motor'].get(self.type, None))
 
         self.state = self.MotorState.UNKNOWN
         self.error = {
@@ -149,27 +138,28 @@ class Motor(CanBusDevice):
         self._rot_factor = -self.reduction / 2.0 / pi
         if self.fw_ver <= 0.3:
             self._rot_factor = -self._rot_factor
-        self._iface.subscribe(
+        self._can.subscribe(
+            self._heartbeat_callback,
             device_id=self.id,
-            command_id=self._CMD_HEARTBEAT,
-            callback=self._heartbeat_callback,
+            cmd_id=self._CMD_HEARTBEAT,
         )
 
     def __repr__(self) -> str:
         return (
             f'{self.__class__.__name__}'
-            f'(id={self.id}, type={self.type.name},'
+            f'(id=0x{self.id:02X}, type={self.type.name}, '
             f'state={self.state.name}, error={self.error["error"].name})'
         )
 
     def __del__(self):
-        self._iface.unsubscribe(
+        self._can.unsubscribe(
+            self._heartbeat_callback,
             device_id=self.id,
-            command_id=self._CMD_HEARTBEAT,
-            callback=self._heartbeat_callback,
+            cmd_id=self._CMD_HEARTBEAT,
         )
 
-    def _heartbeat_callback(self, device_id, command_id, data, timestamp):
+    def _heartbeat_callback(self, data, timestamp, device_id, command_id):
+        """Updates the motor attributes when receiving the heartbeat command."""
         del device_id, command_id
         state, err, merr, eerr, cerr, cm, im, _ = struct.unpack('<BBBBBBBB', data)
         self.state = self.MotorState(state)
@@ -196,14 +186,13 @@ class Motor(CanBusDevice):
         self.mode = self.MotorControlMode((cm, im))
         self.sync_time = timestamp
 
-    @CanBus.send_to_bus(_CMD_SET_STATE, '<I')
     def _set_state(self, state):
         """Sets the motor working state.
 
         Args:
             state (Motor.MotorState): The motor working state to set.
         """
-        return (state.value,)
+        self._can.send(self.id, self._CMD_SET_STATE, 'I', state.value)
 
     def enable(self):
         """Enables the motor.
@@ -221,7 +210,6 @@ class Motor(CanBusDevice):
         """
         self._set_state(self.MotorState.DISABLED)
 
-    @CanBus.send_to_bus(_CMD_UNLOCK)
     def unlock(self):
         """Unlocks the motor.
 
@@ -233,18 +221,17 @@ class Motor(CanBusDevice):
         """
         if not self.with_brake:
             raise NotImplementedError('unlock is not supported on motors without brake')
+        self._can.send(self.id, self._CMD_UNLOCK, '')
 
-    @CanBus.send_to_bus(_CMD_INIT_POS, '<f')
-    def init_pos(self, initial_pos=0):
+    def init_pos(self, initial_pos: float = 0):
         """Sets the current position of the motor as the initial position.
 
         Args:
             initial_pos (float): The initial position in rad.
         """
-        return (initial_pos * self._rot_factor,)
+        self._can.send(self.id, self._CMD_INIT_POS, 'f', initial_pos * self._rot_factor)
 
-    @CanBus.send_to_bus(_CMD_INIT_ABS_POS, '<f')
-    def init_abs_pos(self, initial_pos=0):
+    def init_abs_pos(self, initial_pos: float = 0):
         """Sets the current absolute position of the motor as the initial position.
 
         Args:
@@ -257,7 +244,9 @@ class Motor(CanBusDevice):
             raise NotImplementedError(
                 'Absolute position is not supported on firmware < 1.0'
             )
-        return (initial_pos * self._rot_factor,)
+        self._can.send(
+            self.id, self._CMD_INIT_ABS_POS, 'f', initial_pos * self._rot_factor
+        )
 
     def calibrate(self):
         """Calibrates the motor.
@@ -267,15 +256,16 @@ class Motor(CanBusDevice):
         """
         self._set_state(self.MotorState.CALIBRATE)
 
-    @CanBus.send_to_bus(_CMD_CONFIG_CAN, '<HHI')
-    def config_can_bus(self, new_id, heartbeat=1000, bitrate='CAN_1M'):
+    def config_can_bus(
+        self, new_id: int, heartbeat: int = 1000, bitrate: int = 1000000
+    ):
         """Configures the CAN bus settings of the motor.
 
         Args:
             new_id (int): The new device id.
             heartbeat (int): The heartbeat period in milliseconds.
-            bitrate (str): The bitrate of the CAN bus. Choose from 'CAN_250K',
-                'CAN_500K', and 'CAN_1000K' or 'CAN_1M'.
+            bitrate (int): The bitrate of the CAN bus. Choose from 250000,
+                500000, 1000000.
 
         Raises:
             ValueError: If the new CAN id is not in the range of 0x01-0x3f.
@@ -283,23 +273,23 @@ class Motor(CanBusDevice):
         if new_id < 0x01 or new_id > 0x3F:
             raise ValueError('New CAN id must be in the range of 0x01-0x3f.')
 
-        bitrate = CanBus.CanSpeed[bitrate].value
-        if bitrate == 250000:
-            bitrate_id = 0
-        elif bitrate == 500000:
-            bitrate_id = 1
-        else:
-            bitrate_id = 2
-        return (new_id, bitrate_id, int(heartbeat))
+        bitrate_id = {
+            250000: 0,
+            500000: 1,
+            1000000: 2,
+        }.get(bitrate, 2)
+        self._can.send(
+            self.id, self._CMD_CONFIG_CAN, 'HHI', new_id, bitrate_id, int(heartbeat)
+        )
 
-    @CanBus.send_to_bus(_CMD_SAVE)
     def save(self):
         """Saves the motor configurations.
 
         If the motor is in a running state, the motor will stop and save the
         configurations.
         """
-        pass
+        self._can.send(self.id, self._CMD_SAVE, '')
+        self.clear_errors()
 
     def save_configuration(self):
         """Saves the motor configurations.
@@ -307,31 +297,26 @@ class Motor(CanBusDevice):
         This method will be deprecated. Use `save` instead.
         """
         self.save()
-        self.clear_errors()
 
-    @CanBus.send_to_bus(_CMD_CLEAR_ERRORS)
     def clear_errors(self):
         """Clears the motor errors.
 
         Most errors are cleared automatically if the cause is resolved except
         for the ESTOP error.
         """
-        pass
+        self._can.send(self.id, self._CMD_CLEAR_ERRORS, '')
 
-    @CanBus.send_to_bus(_CMD_ESTOP)
     def estop(self):
         """Requests an emergency stop.
 
         The motor will loose torque immediately and report an ESTOP error.
         """
-        pass
+        self._can.send(self.id, self._CMD_ESTOP, '')
 
-    @CanBus.send_to_bus(_CMD_REBOOT)
     def reboot(self):
         """Reboots the motor."""
-        pass
+        self._can.send(self.id, self._CMD_REBOOT, '')
 
-    @CanBus.send_to_bus(_CMD_RESET)
     def reset(self):
         """Resets the motor.
 
@@ -339,15 +324,18 @@ class Motor(CanBusDevice):
         configurations will be lost and the id will be reset to 0x10.
         The motor must be calibrated again after reset.
         """
-        pass
+        self._can.send(self.id, self._CMD_RESET, '')
 
-    @CanBus.send_to_bus(_CMD_SET_MODE, '<BB')
     def position_mode(self):
         """Sets the motor to position mode."""
-        return self.MotorControlMode.POSITION_MODE.value
+        self._can.send(
+            self.id,
+            self._CMD_SET_MODE,
+            'BB',
+            *self.MotorControlMode.POSITION_MODE.value,
+        )
 
-    @CanBus.send_to_bus(_CMD_SET_MODE, '<BBf')
-    def position_filter_mode(self, bandwidth):
+    def position_filter_mode(self, bandwidth: float):
         """Sets the motor to position filter mode.
 
         Args:
@@ -355,10 +343,9 @@ class Motor(CanBusDevice):
                 to be the control loop frequency in Hz.
         """
         cmode, imode = self.MotorControlMode.POSITION_FILTER_MODE.value
-        return (cmode, imode, bandwidth)
+        self._can.send(self.id, self._CMD_SET_MODE, 'BBf', cmode, imode, bandwidth)
 
-    @CanBus.send_to_bus(_CMD_SET_MODE, '<BBeee')
-    def position_track_mode(self, vel, acc, dec):
+    def position_track_mode(self, vel: float, acc: float, dec: float):
         """Sets the motor to position track mode.
 
         Args:
@@ -367,7 +354,10 @@ class Motor(CanBusDevice):
             dec (float): The deceleration in rad/s^2. The value must be positive.
         """
         cmode, imode = self.MotorControlMode.POSITION_TRACK_MODE.value
-        return (
+        self._can.send(
+            self.id,
+            self._CMD_SET_MODE,
+            'BBeee',
             cmode,
             imode,
             fabs(vel * self._rot_factor),
@@ -375,28 +365,38 @@ class Motor(CanBusDevice):
             fabs(dec * self._rot_factor),
         )
 
-    @CanBus.send_to_bus(_CMD_SET_MODE, '<BB')
     def velocity_mode(self):
         """Sets the motor to velocity mode."""
-        return self.MotorControlMode.VELOCITY_MODE.value
+        self._can.send(
+            self.id,
+            self._CMD_SET_MODE,
+            'BB',
+            *self.MotorControlMode.VELOCITY_MODE.value,
+        )
 
-    @CanBus.send_to_bus(_CMD_SET_MODE, '<BBf')
-    def velocity_ramp_mode(self, ramp):
+    def velocity_ramp_mode(self, ramp: float):
         """Sets the motor to velocity ramp mode.
 
         Args:
             ramp (float): The velocity ramp in rad/s^2. The value must be positive.
         """
         cmode, imode = self.MotorControlMode.VELOCITY_RAMP_MODE.value
-        return (cmode, imode, fabs(ramp * self._rot_factor))
+        self._can.send(
+            self.id,
+            self._CMD_SET_MODE,
+            'BBf',
+            cmode,
+            imode,
+            fabs(ramp * self._rot_factor),
+        )
 
-    @CanBus.send_to_bus(_CMD_SET_MODE, '<BB')
     def torque_mode(self):
         """Sets the motor to torque mode."""
-        return self.MotorControlMode.TORQUE_MODE.value
+        self._can.send(
+            self.id, self._CMD_SET_MODE, 'BB', *self.MotorControlMode.TORQUE_MODE.value
+        )
 
-    @CanBus.send_to_bus(_CMD_SET_POS, '<fee')
-    def set_pos(self, pos, vel_ff=0, torque_ff=0):
+    def set_pos(self, pos: float, vel_ff: float = 0, torque_ff: float = 0):
         """Sets the target position of the motor.
 
         Args:
@@ -404,14 +404,16 @@ class Motor(CanBusDevice):
             vel_ff (float): The velocity feedforward in rad/s.
             torque_ff (float): The torque feedforward in Nm.
         """
-        return (
+        self._can.send(
+            self.id,
+            self._CMD_SET_POS,
+            'fee',
             pos * self._rot_factor,
             vel_ff * self._rot_factor,
             torque_ff / self.reduction,
         )
 
-    @CanBus.send_to_bus(_CMD_SET_ABS_POS, '<fee')
-    def set_abs_pos(self, pos, vel_ff=0, torque_ff=0):
+    def set_abs_pos(self, pos: float, vel_ff: float = 0, torque_ff: float = 0):
         """Sets the target absolute position of the motor.
 
         Args:
@@ -426,33 +428,39 @@ class Motor(CanBusDevice):
             raise NotImplementedError(
                 'Absolute position is not supported on firmware < 1.0'
             )
-        return (
+        self._can.send(
+            self.id,
+            self._CMD_SET_ABS_POS,
+            'fee',
             pos * self._rot_factor,
             vel_ff * self._rot_factor,
             torque_ff / self.reduction,
         )
 
-    @CanBus.send_to_bus(_CMD_SET_VEL, '<ff')
-    def set_vel(self, vel, torque_ff=0):
+    def set_vel(self, vel: float, torque_ff: float = 0):
         """Sets the target velocity of the motor.
 
         Args:
             vel (float): The target velocity in rad/s.
             torque_ff (float): The torque feedforward in Nm.
         """
-        return (vel * self._rot_factor, torque_ff / self.reduction)
+        self._can.send(
+            self.id,
+            self._CMD_SET_VEL,
+            'ff',
+            vel * self._rot_factor,
+            torque_ff / self.reduction,
+        )
 
-    @CanBus.send_to_bus(_CMD_SET_TORQUE, '<f')
-    def set_torque(self, torque):
+    def set_torque(self, torque: float):
         """Sets the target torque of the motor.
 
         Args:
             torque (float): The target torque in Nm.
         """
-        return (torque / self.reduction,)
+        self._can.send(self.id, self._CMD_SET_TORQUE, 'f', torque / self.reduction)
 
-    @CanBus.send_to_bus(_CMD_SET_PID, '<fee')
-    def set_pid(self, pos_kp, vel_kp, vel_ki):
+    def set_pid(self, pos_kp: float, vel_kp: float, vel_ki: float):
         """Sets the PID parameters of the motor.
 
         Args:
@@ -460,10 +468,9 @@ class Motor(CanBusDevice):
             vel_kp (float): The Kp of the velocity control loop.
             vel_ki (float): The Ki of the velocity control loop.
         """
-        return (pos_kp, vel_kp, vel_ki)
+        self._can.send(self.id, self._CMD_SET_PID, 'fee', pos_kp, vel_kp, vel_ki)
 
-    @CanBus.send_to_bus(_CMD_SET_LIMITS, '<ff')
-    def set_vel_limit(self, vel_lim):
+    def set_vel_limit(self, vel_lim: float):
         """Sets the velocity limit of the motor.
 
         Args:
@@ -474,10 +481,11 @@ class Motor(CanBusDevice):
         """
         if not 0 <= vel_lim <= self.available_velocity:
             raise ValueError(f'Velocity limit {vel_lim} is out of range.')
-        return (fabs(vel_lim * self._rot_factor), 0)
+        self._can.send(
+            self.id, self._CMD_SET_LIMITS, 'ff', fabs(vel_lim * self._rot_factor), 0
+        )
 
-    @CanBus.send_to_bus(_CMD_SET_LIMITS, '<ff')
-    def set_current_limit(self, current_lim):
+    def set_current_limit(self, current_lim: float):
         """Sets the current limit of the motor.
 
         Args:
@@ -488,80 +496,76 @@ class Motor(CanBusDevice):
         """
         if not 0 <= current_lim <= self.available_current:
             raise ValueError(f'Current limit {current_lim} is out of range.')
-        return (0, current_lim)
+        self._can.send(self.id, self._CMD_SET_LIMITS, 'ff', 0, current_lim)
 
-    @CanBus.get_from_bus(_CMD_GET_STATE, '<BBBBBBBB')
-    def get_state(self, state, err, merr, eerr, cerr, cm, im, uuid):
+    def get_state(self, timeout: Optional[float] = None):
         """Reads the motor state and error.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (tuple): The motor state, error, and control mode. Returns None if the
                      request timed out.
+
+        Raises:
+            NotImplementedError: If the firmware version is < 1.0.
         """
-        del uuid
+        if self.fw_ver < 1.0:
+            raise NotImplementedError('get_state is not supported on firmware < 1.0')
+        state, err, merr, eerr, cerr, cm, im, _ = self._can.get(
+            self.id, self._CMD_GET_STATE, 'B' * 8, timeout
+        )
         self.state = self.MotorState(state)
-        if self.fw_ver < 1:
-            self.error.update(
-                {
-                    'error': self.MotorError(err + 1 if err > 0 else 0),
-                    'motor_err': self.MotorMotorError(merr + 1 if merr > 0 else 0),
-                    'encoder_err': self.MotorEncoderError(eerr + 1 if eerr > 0 else 0),
-                    'controller_err': self.MotorControllerError(
-                        cerr + 1 if cerr > 0 else 0
-                    ),
-                }
-            )
-        else:
-            self.error.update(
-                {
-                    'error': self.MotorError(err),
-                    'motor_err': self.MotorMotorError(merr),
-                    'encoder_err': self.MotorEncoderError(eerr),
-                    'controller_err': self.MotorControllerError(cerr),
-                }
-            )
+        self.error.update(
+            {
+                'error': self.MotorError(err),
+                'motor_err': self.MotorMotorError(merr),
+                'encoder_err': self.MotorEncoderError(eerr),
+                'controller_err': self.MotorControllerError(cerr),
+            }
+        )
         self.mode = self.MotorControlMode((cm, im))
         return (self.state, self.error, self.mode)
 
-    @CanBus.get_from_bus(_CMD_GET_HARDWARE_STATUS, '<ff')
-    def get_voltage(self, vbus, _):
+    def get_voltage(self, timeout: Optional[float] = None):
         """Reads the DC bus voltage of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float): The DC bus voltage in volts. Returns None if the request
                 timed out.
         """
+        vbus = self._can.get(self.id, self._CMD_GET_HARDWARE_STATUS, 'ff', timeout)[0]
         return vbus
 
-    @CanBus.get_from_bus(_CMD_GET_HARDWARE_STATUS, '<ff')
-    def get_temperature(self, _, temperature):
+    def get_temperature(self, timeout: Optional[float] = None):
         """Reads the temperature of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float): The temperature in degrees Celsius. Returns None if the
                 request timed out.
         """
+        temperature = self._can.get(
+            self.id, self._CMD_GET_HARDWARE_STATUS, 'ff', timeout
+        )[1]
         return temperature
 
-    @CanBus.get_from_bus(_CMD_GET_MODE, '8s')
-    def get_mode(self, payload):
+    def get_mode(self, timeout: Optional[float] = None):
         """Reads the control mode and the mode parameters of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (MotorControlMode, dict): The control mode and the mode parameters.
         """
+        payload = self._can.get(self.id, self._CMD_GET_MODE, '8s', timeout)[0]
         control_mode, input_mode = struct.unpack('<BB', payload[:2])
         mode = self.MotorControlMode((control_mode, input_mode))
         self.mode = mode
@@ -584,36 +588,37 @@ class Motor(CanBusDevice):
         else:
             return (mode,)
 
-    @CanBus.get_from_bus(_CMD_GET_MOTOR_FEEDBACK, '<fee')
-    def get_feedback(self, pos, vel, torque):
+    def get_feedback(self, timeout: Optional[float] = None):
         """Reads the feedbacks of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float, float, float): The position(rad), velocity(rad/s) and torque(Nm)
                 of the motor. Returns None if the request timed out.
         """
+        pos, vel, torque = self._can.get(
+            self.id, self._CMD_GET_MOTOR_FEEDBACK, 'fee', timeout
+        )
         return pos / self._rot_factor, vel / self._rot_factor, torque * self.reduction
 
-    def get_pos(self, timeout=0):
+    def get_pos(self, timeout: Optional[float] = None):
         """Reads the position of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float): The position in rad. Returns None if the request timed out.
         """
         return self.get_feedback(timeout)[0]
 
-    @CanBus.get_from_bus(_CMD_GET_ABS_POS, '<f')
-    def get_abs_pos(self, pos):
+    def get_abs_pos(self, timeout: Optional[float] = None):
         """Reads the absolute position of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float): The absolute position in rad. Returns None if the request timed
@@ -626,67 +631,70 @@ class Motor(CanBusDevice):
             raise NotImplementedError(
                 'Absolute position is not supported on firmware < 1.0'
             )
+        pos = self._can.get(self.id, self._CMD_GET_ABS_POS, 'f', timeout)[0]
         return pos / self._rot_factor
 
-    def get_vel(self, timeout=0):
+    def get_vel(self, timeout: Optional[float] = None):
         """Reads the velocity of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float): The velocity in rad/s. Returns None if the request timed out.
         """
         return self.get_feedback(timeout)[1]
 
-    def get_torque(self, timeout=0):
+    def get_torque(self, timeout: Optional[float] = None):
         """Reads the torque of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float): The torque in Nm. Returns None if the request timed out.
         """
         return self.get_feedback(timeout)[2]
 
-    @CanBus.get_from_bus(_CMD_GET_PID, '<fee')
-    def get_pid(self, pos_kp, vel_kp, vel_ki):
+    def get_pid(self, timeout: Optional[float] = None):
         """Reads the PID parameters of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float, float, float): The Kp of the position control loop, Kp of the
                 velocity control loop, and Ki of the velocity control loop. Returns
                 None if the request timed out.
         """
+        pos_kp, vel_kp, vel_ki = self._can.get(
+            self.id, self._CMD_GET_PID, 'fee', timeout
+        )
         return (pos_kp, vel_kp, vel_ki)
 
-    @CanBus.get_from_bus(_CMD_GET_LIMITS, '<ff')
-    def get_vel_limit(self, vel_limit, _):
+    def get_vel_limit(self, timeout: Optional[float] = None):
         """Reads the velocity limit and the current limit of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             (float, float): The velocity limit in rad/s and the current limit in amps.
                 Returns None if the request timed out.
         """
+        vel_limit = self._can.get(self.id, self._CMD_GET_LIMITS, 'ff', timeout)[0]
         return vel_limit / fabs(self._rot_factor)
 
-    @CanBus.get_from_bus(_CMD_GET_LIMITS, '<ff')
-    def get_current_limit(self, _, current_limit):
+    def get_current_limit(self, timeout: Optional[float] = None):
         """Reads the current limit of the motor.
 
         Args:
-            timeout (float): The timeout in seconds. Set to 0 to disable timeout.
+            timeout (float, optional): The timeout in seconds.
 
         Returns:
             float: The current limit in amps. Returns None if the request timed out.
         """
+        current_limit = self._can.get(self.id, self._CMD_GET_LIMITS, 'ff', timeout)[1]
         return current_limit
 
     class MotorState(Enum):

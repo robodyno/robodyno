@@ -1,55 +1,106 @@
-#!/usr/bin/env python
 # -*-coding:utf-8 -*-
-"""can_bus_device.py
-Time    :   2023/01/02
-Author  :   song 
-Version :   1.0
-Contact :   zhaosongy@126.com
-License :   (C)Copyright 2022, robottime / robodyno
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-Can bus device base class.
+"""Base class for all robodyno devices.
+
+All robodyno devices which use can bus as communication interface should
+inherit this class.
+
+Examples:
+
+    >>> from robodyno.components import CanBusDevice
+    >>> from robodyno.interfaces import CanBus
+    >>> can_bus = CanBus()
+    >>> device = CanBusDevice(can_bus, 0x01)
+    >>> device.get_version()
+    {'main_version': 1, 'sub_version': 0, 'type': <Model.THIRD_PARTY: 255>}
+    >>> device.fw_ver
+    1.0
+    >>> device.type
+    <Model.THIRD_PARTY: 255>
+    >>> can_bus.disconnect()
+
 """
 
-from enum import Enum
-from robodyno.components import DeviceType
+from typing import Optional
+
+from robodyno.components.config.model import Model
 from robodyno.interfaces import CanBus
 
-class CanBusDevice(object):
-    """Can bus robodyno common device node."""
-    
-    CMD_GET_VERSION = 0x01
 
-    def __init__(self, iface, id = 0x10):
-        """Init device with interface and id
-        
+class CanBusDevice(object):
+    """Base class for all robodyno devices which use can bus as communication
+    interface.
+
+    This class provides basic functions for all robodyno devices which use can
+    bus as communication interface. It provides functions to get device
+    firmware version and device type.
+
+    Attributes:
+        id: Device id.
+        fw_ver: Device firmware version.
+        type: Device type.
+    """
+
+    _CMD_GET_VERSION = 0x01
+
+    def __init__(self, can, device_id):
+        """Init device with interface and id.
+
         Args:
-            iface: can bus interface
-            id: device id
+            can (CanBus): Can bus interface.
+            device_id (int): Device id.
+
+        Raises:
+            ValueError: If device id is not in range [0x01, 0x40).
+            TypeError: If can is not CanBus.
         """
-        if id < 0x01 or id >= 0x40:
-            raise ValueError('Use a valid device id range from 0x01 to 0x40.')
-        if not isinstance(iface, CanBus):
-            raise ValueError('Use a can bus interface to init a can bus device.')
-        self._iface = iface
-        self.id = id
+        if not 0x01 <= device_id < 0x40:
+            raise ValueError('Device id should be in range [0x01, 0x40).')
+        if not isinstance(can, CanBus):
+            raise TypeError('CanBusDevice can only be initialized with CanBus.')
+        self._can = can
+        self.id = device_id
         self.fw_ver = None
-        self.type = DeviceType.ROBODYNO_THIRD_PARTY
-    
-    @CanBus.get_from_bus(CMD_GET_VERSION, '<HHI')
-    def get_version(self, main_ver, sub_ver, type):
-        """Get device firmware version.
-        
+        self.type = Model.THIRD_PARTY
+
+    def get_version(self, timeout: Optional[float] = None):
+        """Get device firmware version and type.
+
         Args:
-            timeout: 0 indicates unlimited timeout(s)
-        
+            timeout (float, optional): Timeout in seconds.
+
         Returns:
-            dictionary of device version
-            None if timeout
+            (dict): Device firmware version and type.
         """
-        self.fw_ver = float('{}.{}'.format(main_ver, sub_ver))
-        self.type = DeviceType(type)
+        main_ver, sub_ver, type_ = self._can.get(
+            self.id, self._CMD_GET_VERSION, 'HHI', timeout
+        )
+        self.fw_ver = float(f'{main_ver}.{sub_ver}')
+        self.type = Model(type_)
         return {
             'main_version': main_ver,
             'sub_version': sub_ver,
-            'type': DeviceType(type)
+            'type': Model(type_),
         }

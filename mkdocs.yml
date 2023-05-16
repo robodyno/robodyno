@@ -8,8 +8,9 @@ nav:
     - 命令行工具: cli.md
   - API 参考: 
     - robodyno.interfaces:
-      - CanBus: references/canbus.md
+      - CanBus: references/can_bus.md
     - robodyno.components:
+      - CanBusDevice: references/can_bus_device.md
       - Motor: references/motor.md
   - 深入了解:
     - 电机控制模式: control-mode.md
@@ -43,7 +44,7 @@ plugins:
           options:
             show_source: false
             show_root_heading: true
-            heading_level: 1
+            heading_level: 2
             members_order: source
             group_by_category: false
           paths: [src]
