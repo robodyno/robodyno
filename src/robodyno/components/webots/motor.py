@@ -307,7 +307,7 @@ class Motor(WebotsDevice):
             position(rad)
             None if timeout
         """
-        return self._pos_feedback * copysign(1, self.reduction)
+        return self._pos_feedback 
 
     def get_abs_pos(self, timeout = 0):
         """Get motor absolute position.
@@ -319,7 +319,7 @@ class Motor(WebotsDevice):
             position(rad)
             None if timeout
         """
-        return self._pos_feedback * copysign(1, self.reduction)
+        return self._pos_feedback 
 
 
     def get_vel(self, timeout = 0):
@@ -332,7 +332,7 @@ class Motor(WebotsDevice):
             velocity(rad/s)
             None if timeout
         """
-        return self._vel_feedback * copysign(1, self.reduction)
+        return self._vel_feedback 
 
     def get_torque(self, timeout = 0):
         """Get motor torque.
@@ -344,7 +344,7 @@ class Motor(WebotsDevice):
             torque(Nm)
             None if timeout
         """
-        return self._torque_feedback * copysign(1, self.reduction)
+        return self._torque_feedback 
 
     def get_mode(self, payload):
         """Get motor control mode and params.
@@ -505,7 +505,7 @@ class Motor(WebotsDevice):
             torque_ff:torque feed forward(Nm)
         """
         self._iface._mutex.acquire()
-        pos = pos * copysign(1, self.reduction)
+        pos = pos 
         self._input_pos = pos
         self._filter_controller.set_pos(pos)
         self._track_controller.set_pos(pos, self._pos_feedback, self._vel_feedback)
@@ -520,7 +520,7 @@ class Motor(WebotsDevice):
             torque_ff:torque feed forward(Nm)
         """
         self._iface._mutex.acquire()
-        pos = pos * copysign(1, self.reduction)
+        pos = pos 
         self._input_pos = pos
         self._filter_controller.set_pos(pos)
         self._track_controller.set_pos(pos, self._pos_feedback, self._vel_feedback)
@@ -534,7 +534,7 @@ class Motor(WebotsDevice):
             torque_ff: torque feed forward(Nm)
         """
         self._iface._mutex.acquire()
-        vel = vel * copysign(1, self.reduction)
+        vel = vel 
         self._input_vel = vel
         self._iface._mutex.release()
     
@@ -545,6 +545,6 @@ class Motor(WebotsDevice):
             torque: target torque(Nm)
         """
         self._iface._mutex.acquire()
-        torque = torque * copysign(1, self.reduction)
+        torque = torque 
         self._input_torque = torque
         self._iface._mutex.release()
