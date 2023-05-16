@@ -59,8 +59,8 @@ class CanBusDevice(object):
 
     Attributes:
         id: Device id.
-        fw_ver: Device firmware version.
         type: Device type.
+        fw_ver: Device firmware version.
     """
 
     _CMD_GET_VERSION = 0x01

@@ -58,6 +58,7 @@ class Motor(CanBusDevice):
     Attributes:
         id (int): The ID of the motor device on the CAN bus.
         type (Model): The model type of the motor.
+        fw_ver (float): The firmware version of the motor.
         reduction (float): The reduction ratio of the motor.
         available_velocity (float): The maximum velocity of the motor.
         available_torque (float): The maximum torque of the motor.
@@ -270,7 +271,7 @@ class Motor(CanBusDevice):
         Raises:
             ValueError: If the new CAN id is not in the range of 0x01-0x3f.
         """
-        if new_id < 0x01 or new_id > 0x3F:
+        if not 0x01 <= new_id <= 0x3f:
             raise ValueError('New CAN id must be in the range of 0x01-0x3f.')
 
         bitrate_id = {
@@ -692,7 +693,7 @@ class Motor(CanBusDevice):
             timeout (float, optional): The timeout in seconds.
 
         Returns:
-            float: The current limit in amps. Returns None if the request timed out.
+            (float): The current limit in amps. Returns None if the request timed out.
         """
         current_limit = self._can.get(self.id, self._CMD_GET_LIMITS, 'ff', timeout)[1]
         return current_limit

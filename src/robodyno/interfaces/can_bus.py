@@ -261,7 +261,7 @@ class CanBus(object):
                 msg = self._bus.recv(timeout=1.0)
             except TimeoutError:
                 continue
-            if msg.is_remote_frame:
+            if msg is None or msg.is_remote_frame:
                 continue
             with self._recv_lock:
                 self._notify(msg)

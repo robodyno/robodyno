@@ -1,166 +1,246 @@
-#!/usr/bin/env python
 # -*-coding:utf-8 -*-
-"""imu_sensor.py
-Time    :   2023/04/20
-Author  :   song 
-Version :   1.0
-Contact :   zhaosongy@126.com
-License :   (C)Copyright 2022, robottime / robodyno
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-Robodyno IMU sensor
+"""Imu sensor driver.
 
-  Typical usage example:
+This module provides a class to control imu sensor.
 
-  from robodyno.interfaces import CanBus
-  from robodyno.components import ImuSensor
-
-  can = CanBus()
-  imu = ImuSensor(can)
-  imu.get_gyro(timeout = 1)
-
-  can.disconnect()
+Examples:
+    >>> from robodyno.components import ImuSensor
+    >>> from robodyno.interfaces import CanBus
+    >>> can = CanBus()
+    >>> imu = ImuSensor(can)
+    >>> imu.get_euler()
+    (-0.6930452576214104, -0.5058813752928343, 0.33744507654497824)
+    >>> can.disconnect()
+    
 """
 
-import math
+from math import pi, atan2, asin
 import struct
+from typing import Optional
 
 from robodyno.interfaces import CanBus
-from robodyno.components import DeviceType, CanBusDevice
+from robodyno.components import CanBusDevice
+from robodyno.components.config.model import Model
+
 
 class ImuSensor(CanBusDevice):
-    """Robodyno IMU sensor
-    
-    Attributes:
-        id: can bus device id
-        type: robodyno device type
-        fw_ver: firmware version
-    """
-    
-    FC_HEARTBEAT = 0x02
-    FC_CONFIG_CAN = 0x03
-    FC_GET_ORIENTATION = 0x04
-    FC_GET_GYROSCOPE = 0x05
-    FC_GET_ACCELERATOR = 0x06
-    FC_SET_RANGES = 0x07
+    """Imu sensor driver.
 
-    def __init__(self, iface, id = 0x31):
-        """Init imu sensor node
-        
+    This class provides functions to control imu sensor.
+
+    Attributes:
+        id (int): Device id.
+        type (Model): Device type.
+        fw_ver (float): Firmware version.
+    """
+
+    _FC_HEARTBEAT = 0x02
+    _FC_CONFIG_CAN = 0x03
+    _FC_GET_ORIENTATION = 0x04
+    _FC_GET_GYROSCOPE = 0x05
+    _FC_GET_ACCELERATOR = 0x06
+    _FC_SET_RANGES = 0x07
+
+    def __init__(self, can: CanBus, id_: int = 0x31):
+        """Initialize imu sensor.
+
         Args:
-            iface: can bus interface
-            id: robodyno node id, default = 0x31
-            quaternion: imu orientation in quaternion
-            euler: imu orientation in rpy
+            can: Can bus instance.
+            id_: Device id. The default factory id is 0x31.
+
+        Raises:
+            ValueError: If the device is not a imu sensor.
         """
-        super().__init__(iface, id)
-        self.get_version(timeout = 0.2)
-        if not self.type or self.type != DeviceType.ROBODYNO_IMU_SENSOR:
-            raise TypeError('There is not a imu driver on can bus with id 0x{:02X}.'.format(id))
-        self.quaternion = (0,0,0,1)
-        self.euler = (0, 0, 0)
-        self._gyro_factor = math.pi / 23592.96 # raw to rad/s
-        self._accel_factor = 9.80665 / 16384.0 # raw to m/s^2
-        self._iface.subscribe(
-            device_id = self.id, 
-            command_id = self.FC_HEARTBEAT, 
-            callback = self._heartbeat_callback
+        super().__init__(can, id_)
+        self.get_version(timeout=0.15)
+        if self.type is None or self.type != Model.ROBODYNO_IMU_SENSOR:
+            raise ValueError(f'Device of id {id_} is not a imu sensor')
+        self._quaternion = (0, 0, 0, 1)
+        self._euler = (0, 0, 0)
+        self._gyro_factor = pi / 23592.96  # raw to rad/s
+        self._accel_factor = 9.80665 / 16384.0  # raw to m/s^2
+        self._can.subscribe(
+            callback=self._heartbeat_callback,
+            device_id=self.id,
+            cmd_id=self._FC_HEARTBEAT,
         )
 
     def __del__(self):
-        """Collect node from memory."""
-        self._iface.unsubscribe(
-            device_id = self.id, 
-            command_id = self.FC_HEARTBEAT, 
-            callback = self._heartbeat_callback
+        self._can.unsubscribe(
+            callback=self._heartbeat_callback,
+            device_id=self.id,
+            cmd_id=self._FC_HEARTBEAT,
         )
 
+    @property
+    def quaternion(self):
+        """Quaternion of imu sensor.
+
+        Returns:
+            (tuple): Quaternion of imu sensor.
+        """
+        return self._quaternion
+
+    @property
+    def euler(self):
+        """Euler angles of imu sensor.
+
+        Returns:
+            (tuple): Euler angles of imu sensor.
+        """
+        return self._euler
+
+    def _update_quaternion(self, value):
+        self._quaternion = value
+        self._euler = self.quat_to_euler(*value)
+
     @classmethod
-    def quat_to_euler(cls, x, y, z, w):
-        roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
-        pitch = math.asin(2 * (w * y - x * z))
-        yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))
+    def quat_to_euler(cls, x: float, y: float, z: float, w: float):
+        """Convert quaternion to euler angles.
+
+        Args:
+            x (float): x of quaternion.
+            y (float): y of quaternion.
+            z (float): z of quaternion.
+            w (float): w of quaternion.
+
+        Returns:
+            (tuple): euler angles(roll, pitch, yaw).
+        """
+        roll = atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
+        pitch = asin(2 * (w * y - x * z))
+        yaw = atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))
         return (roll, pitch, yaw)
 
-    def _heartbeat_callback(self, device_id, command_id, data, timestamp):
-        """Update orientation from heartbeat."""
-        self.quaternion = struct.unpack('<eeee', data)
-        self.euler = self.quat_to_euler(*self.quaternion)
+    def _heartbeat_callback(self, data, timestamp, device_id, command_id):
+        """Updates the imu sensor state."""
+        del timestamp, device_id, command_id
+        self._update_quaternion(struct.unpack('<eeee', data))
 
-    @CanBus.send_to_bus(FC_CONFIG_CAN, '<HHI')
-    def config_can_bus(self, new_id, heartbeat = 1000, bitrate = 'CAN_1M'):
-        """Configure can bus settings.
-        
-        Args:
-            new_id: device id(0x01-0x3f)
-            heartbeat: heartbeat period(ms)
-            bitrate: choose from 'CAN_1000K', 'CAN_500K', 'CAN_250K'
-        """
-        if new_id < 0x01 or new_id > 0x3f:
-            raise ValueError('Can id is not available. Choose from 0x01-0x3f')
+    def config_can_bus(self, new_id: int, heartbeat: int = 1000, bitrate=1000000):
+        """Configures the CAN bus settings.
 
-        bitrate = CanBus.CanSpeed[bitrate].value
-        if bitrate == 250000:
-            bitrate_id = 0
-        elif bitrate == 500000:
-            bitrate_id = 1
-        else:
-            bitrate_id = 2
-        return (new_id, bitrate_id, int(heartbeat))
-    
-    @CanBus.get_from_bus(FC_GET_ORIENTATION, '<eeee')
-    def get_quaternion(self, x, y, z, w):
-        """Query Quaternion from imu.
-        
         Args:
-            timeout: 0 indicates unlimited timeout(s)
-        
-        Returns:
-            imu quaternion(x, y, z, w)
+            new_id (int): The new device id.
+            heartbeat (int): The heartbeat period in milliseconds.
+            bitrate (int): The bitrate of the CAN bus. Choose from 250000,
+                500000, 1000000.
+
+        Raises:
+            ValueError: If the new CAN id is not in the range of 0x01-0x3f.
         """
-        self.quaternion = (x, y, z, w)
-        self.euler = self.quat_to_euler(x, y, z, w)
-        return self.quaternion
-    
-    @CanBus.get_from_bus(FC_GET_ORIENTATION, '<eeee')
-    def get_euler(self, x, y, z, w):
-        """Query euler angle from imu.
-        
+        if not 0x01 <= new_id <= 0x3F:
+            raise ValueError('New CAN id must be in the range of 0x01-0x3f.')
+        bitrate_id = {
+            250000: 0,
+            500000: 1,
+            1000000: 2,
+        }.get(bitrate, 2)
+        self._can.send(
+            self.id, self._FC_CONFIG_CAN, 'HHI', new_id, bitrate_id, int(heartbeat)
+        )
+
+    def set_ranges(self, gyro_range: int, accel_range: int):
+        """Set gyro and accel range.
+
         Args:
-            timeout: 0 indicates unlimited timeout(s)
-        
-        Returns:
-            imu euler angle(roll, pitch, yaw)
+            gyro_range: gyro range, 0: 250dps, 1: 500dps, 2: 1000dps, 3: 2000dps
+            accel_range: accel range, 0: 2g, 1: 4g, 2: 8g, 3: 16g
+
+        Raises:
+            ValueError: If gyro_range or accel_range is not in the range of 0-3.
         """
-        self.quaternion = (x, y, z, w)
-        self.euler = self.quat_to_euler(x, y, z, w)
-        return self.euler
-    
-    @CanBus.get_from_bus(FC_GET_GYROSCOPE, '<hhhH')
-    def get_gyro(self, x, y, z, range):
-        """Query gyroscope from imu.
-        
+        if not 0 <= gyro_range <= 3:
+            raise ValueError('gyro_range must be in the range of 0-3.')
+        if not 0 <= accel_range <= 3:
+            raise ValueError('accel_range must be in the range of 0-3.')
+        self._can.send(self.id, self._FC_SET_RANGES, 'HH', gyro_range, accel_range)
+
+    def get_quaternion(self, timeout: Optional[float] = None):
+        """Reads the quaternion of imu sensor.
+
         Args:
-            timeout: 0 indicates unlimited timeout(s)
-        
+            timeout (float, optional): Timeout in seconds.
+
         Returns:
-            imu gyroscope(gyro_x, gyro_y, gyro_z) in rad/s
+            (tuple): Quaternion of imu sensor.
         """
-        k = 2 ** range
-        return (x * self._gyro_factor / k, y * self._gyro_factor / k, z * self._gyro_factor / k)
-        
-    @CanBus.get_from_bus(FC_GET_ACCELERATOR, '<hhhH')
-    def get_accel(self, x, y, z, range):
-        """Query acceleration from imu.
-        
+        self._update_quaternion(
+            self._can.get(self.id, self._FC_GET_ORIENTATION, 'eeee', timeout)
+        )
+        return self._quaternion
+
+    def get_euler(self, timeout: Optional[float] = None):
+        """Reads the euler angles of imu sensor.
+
         Args:
-            timeout: 0 indicates unlimited timeout(s)
-        
+            timeout (float, optional): Timeout in seconds.
+
         Returns:
-            imu acceleration(accel_x, accel_y, accel_z) in m/s^2
+            (tuple): Euler angles of imu sensor.
         """
-        k = 2 ** range
-        return (x * self._accel_factor / k, y * self._accel_factor / k, z * self._accel_factor / k)
-        
-    @CanBus.send_to_bus(FC_SET_RANGES, '<HH')
-    def set_ranges(self, gyro_range, accel_range):
-        return (gyro_range, accel_range)
+        self._update_quaternion(
+            self._can.get(self.id, self._FC_GET_ORIENTATION, 'eeee', timeout)
+        )
+        return self._euler
+
+    def get_gyro(self, timeout: Optional[float] = None):
+        """Reads the gyro of imu sensor.
+
+        Args:
+            timeout (float, optional): Timeout in seconds.
+
+        Returns:
+            (tuple): Gyro of imu sensor.
+        """
+        x, y, z, range_ = self._can.get(
+            self.id, self._FC_GET_GYROSCOPE, 'hhhH', timeout
+        )
+        k = 2**range_
+        return (
+            x * self._gyro_factor / k,
+            y * self._gyro_factor / k,
+            z * self._gyro_factor / k,
+        )
+
+    def get_accel(self, timeout: Optional[float] = None):
+        """Reads the accel of imu sensor.
+
+        Args:
+            timeout (float, optional): Timeout in seconds.
+
+        Returns:
+            (tuple): Accel of imu sensor.
+        """
+        x, y, z, range_ = self._can.get(
+            self.id, self._FC_GET_ACCELERATOR, 'hhhH', timeout
+        )
+        k = 2**range_
+        return (
+            x * self._accel_factor / k,
+            y * self._accel_factor / k,
+            z * self._accel_factor / k,
+        )
