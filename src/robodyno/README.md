@@ -105,10 +105,10 @@ motor.clear_errors()
 
 ### 9. 保存设置
 ```python
-motor.save_configuration()
+motor.save() # or motor.save_configuration()
 ```
 
-`save_configuration()`
+`save()`
 
 设置参数后默认不会保存，直到调用此函数
 

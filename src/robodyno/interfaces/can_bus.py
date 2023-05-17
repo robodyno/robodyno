@@ -28,8 +28,8 @@ Examples:
 
     >>> from robodyno.interfaces import CanBus
     >>> can_bus = CanBus()
-    >>> can.send(0x10, 0x0e, 'fee', 50, 0.02, 0.1)
-    >>> can.get(0x10, 0x0d, 'fee')
+    >>> can_bus.send(0x10, 0x0e, 'fee', 50, 0.02, 0.1)
+    >>> can_bus.get(0x10, 0x0d, 'fee')
     (50.0, 0.0200042724609375, 0.0999755859375)
     >>> can_bus.subscribe(callback, 0x10, 0x02)
     >>> can_bus.unsubscribe(callback, 0x10, 0x02)
@@ -39,7 +39,7 @@ Examples:
 import sys
 from time import time, sleep
 from threading import Lock, Thread, Event
-from queue import Queue
+from queue import Queue, Empty
 from collections import defaultdict
 import struct
 from typing import Optional, Callable
@@ -92,8 +92,6 @@ class CanBus(object):
         self._listening_event = Event()
         self._rx_queue = Queue()
 
-        self._recv_thread = Thread(target=self._recv_loop, daemon=True)
-
         if connect:
             self.connect()
             sleep(0.1)
@@ -103,6 +101,7 @@ class CanBus(object):
         self._bus = can.interface.Bus(
             channel=self._channel, bustype=self._bus_type, bitrate=self._bitrate
         )
+        self._recv_thread = Thread(target=self._recv_loop, daemon=True)
         self._recv_event.set()
         self._recv_thread.start()
 
@@ -192,23 +191,28 @@ class CanBus(object):
             timeout (float): Timeout for receiving data.
 
         Returns:
-            (tuple): Received data. None if timeout.
+            (tuple): Received data.
+
+        Raises:
+            TimeoutError: If timeout.
         """
         start_time = time()
         with self._rx_queue.mutex:
             self._rx_queue.queue.clear()
         self._listening_event.set()
         self._send_remote(device_id, cmd_id)
+        arbitration_id = self._combine_ids(device_id, cmd_id)
         while True:
-            arbitration_id = self._combine_ids(device_id, cmd_id)
-            msg = self._rx_queue.get()
+            if timeout is not None and time() - start_time > timeout:
+                self._listening_event.clear()
+                raise TimeoutError('Timeout when receiving data.')
+            try:
+                msg = self._rx_queue.get(timeout=0.001)
+            except Empty:
+                continue
             if msg.arbitration_id == arbitration_id:
                 self._listening_event.clear()
                 return struct.unpack('<' + fmt, msg.data)
-            if timeout is not None and time() - start_time > timeout:
-                self._listening_event.clear()
-                break
-        return None
 
     def subscribe(
         self, callback: Callable, device_id: int = -1, cmd_id: int = -1
@@ -216,11 +220,11 @@ class CanBus(object):
         """Subscribe data from CAN bus.
 
         Args:
-            callback (func): Callback function. 
+            callback (func): Callback function.
 
-                The function should accept four arguments,     
+                The function should accept four arguments,
                 e.g. `callback(data, timestamp, device_id, cmd_id)`.
-            
+
             device_id (int): Device ID. -1 for all devices.
             cmd_id (int): Command ID. -1 for all commands.
         """

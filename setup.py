@@ -1,12 +1,44 @@
+# -*-coding:utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+"""Setup script for robodyno."""
+
 import os
 import re
 from setuptools import setup
 
-with open(os.path.join(os.path.dirname(__file__), 'src', 'robodyno', 'README.md'), encoding='utf-8') as f:
+with open(
+    os.path.join(os.path.dirname(__file__), 'src', 'robodyno', 'README.md'),
+    mode='r',
+    encoding='utf-8',
+) as f:
     long_description = f.read()
 
 # 从changelog文件中获取最新版本的版本号
-with open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.md'), 'r') as f:
+with open(
+    os.path.join(os.path.dirname(__file__), 'CHANGELOG.md'), mode='r', encoding='utf-8'
+) as f:
     for line in f:
         if line.startswith('##'):
             match = re.search(r'\d+\.\d+\.\d+', line)
@@ -64,23 +96,20 @@ setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        'numpy>=1.10.0', 
+        'numpy>=1.10.0',
         'colorama>=0.4.5',
         'python-can>=3.2.0, <4.0',
         'importlib-metadata',
     ],
     extras_require={
-        ':sys_platform == "win32"': [
-            'candle-bus'
-        ],
+        ':sys_platform == "win32"': ['candle-bus'],
     },
     entry_points={
         'robodyno.components.can_bus': [
             'Motor = robodyno.components.can_bus.motor:Motor',
-            # 'PwmDriver = robodyno.components.can_bus.pwm_driver:PwmDriver',
-            # 'StepperDriver = robodyno.components.can_bus.stepper_driver:StepperDriver',
-            # 'VGripper = robodyno.components.can_bus.vacuum_gripper:VGripper',
-            # 'SliderModule = robodyno.components.can_bus.slider_module:SliderModule',
+            'PwmDriver = robodyno.components.can_bus.pwm_driver:PwmDriver',
+            'StepperDriver = robodyno.components.can_bus.stepper_driver:StepperDriver',
+            'SliderModule = robodyno.components.can_bus.slider_module:SliderModule',
             'ImuSensor = robodyno.components.can_bus.imu_sensor:ImuSensor',
         ],
         'robodyno.components.webots': [
@@ -88,15 +117,15 @@ setup(
             'SliderModule = robodyno.components.webots.slider_module:SliderModule',
         ],
         'robodyno.robots': [
-            # 'FourDoFPallet = robodyno.robots.four_dof_palletizing_robot.four_dof_pallet_robot:FourDoFPallet',
-            # 'FourDoFScara = robodyno.robots.four_dof_scara_robot.four_dof_scara_robot:FourDoFScara',
-            # 'SixDoFCollabRobot = robodyno.robots.six_dof_collaborative_robot.six_dof_collab_robot:SixDoFCollabRobot',
-            # 'ThreeDoFDelta = robodyno.robots.three_dof_delta_robot.three_dof_delta_robot:ThreeDoFDelta',
-            # 'ThreeDoFPallet = robodyno.robots.three_dof_palletizing_robot.three_dof_pallet_robot:ThreeDoFPallet',
+            'FourDoFPallet = robodyno.robots.four_dof_palletizing_robot.four_dof_pallet_robot:FourDoFPallet',
+            'FourDoFScara = robodyno.robots.four_dof_scara_robot.four_dof_scara_robot:FourDoFScara',
+            'SixDoFCollabRobot = robodyno.robots.six_dof_collaborative_robot.six_dof_collab_robot:SixDoFCollabRobot',
+            'ThreeDoFDelta = robodyno.robots.three_dof_delta_robot.three_dof_delta_robot:ThreeDoFDelta',
+            'ThreeDoFPallet = robodyno.robots.three_dof_palletizing_robot.three_dof_pallet_robot:ThreeDoFPallet',
         ],
         'console_scripts': [
             # 'robodyno = robodyno:robodyno',
             # 'robodyno-motor = robodyno:robodyno_motor'
         ],
-    }
+    },
 )

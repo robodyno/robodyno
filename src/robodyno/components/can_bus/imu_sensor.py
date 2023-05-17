@@ -24,9 +24,13 @@
 
 """Imu sensor driver.
 
-This module provides a class to control imu sensor.
+The imu sensor is a 6-axis inertial measurement unit (IMU) that provides
+accurate acceleration and angular rate (gyroscope) measurement data for
+space-constrained applications. This device also calculates and outputs
+quaternions that can be used to track the absolute orientation of the sensor.
 
 Examples:
+
     >>> from robodyno.components import ImuSensor
     >>> from robodyno.interfaces import CanBus
     >>> can = CanBus()
@@ -49,8 +53,6 @@ from robodyno.components.config.model import Model
 class ImuSensor(CanBusDevice):
     """Imu sensor driver.
 
-    This class provides functions to control imu sensor.
-
     Attributes:
         id (int): Device id.
         type (Model): Device type.
@@ -65,11 +67,11 @@ class ImuSensor(CanBusDevice):
     _FC_SET_RANGES = 0x07
 
     def __init__(self, can: CanBus, id_: int = 0x31):
-        """Initialize imu sensor.
+        """Initializes the imu sensor.
 
         Args:
-            can: Can bus instance.
-            id_: Device id. The default factory id is 0x31.
+            can (CanBus): Can bus instance.
+            id_ (int): Device id. The default factory id is 0x31.
 
         Raises:
             ValueError: If the device is not a imu sensor.
@@ -96,7 +98,7 @@ class ImuSensor(CanBusDevice):
         )
 
     @property
-    def quaternion(self):
+    def quaternion(self) -> tuple:
         """Quaternion of imu sensor.
 
         Returns:
@@ -105,7 +107,7 @@ class ImuSensor(CanBusDevice):
         return self._quaternion
 
     @property
-    def euler(self):
+    def euler(self) -> tuple:
         """Euler angles of imu sensor.
 
         Returns:
@@ -113,12 +115,17 @@ class ImuSensor(CanBusDevice):
         """
         return self._euler
 
-    def _update_quaternion(self, value):
+    def _update_quaternion(self, value: tuple) -> None:
+        """Updates the quaternion of imu sensor.
+
+        Args:
+            value (tuple): Quaternion of imu sensor.
+        """
         self._quaternion = value
         self._euler = self.quat_to_euler(*value)
 
     @classmethod
-    def quat_to_euler(cls, x: float, y: float, z: float, w: float):
+    def quat_to_euler(cls, x: float, y: float, z: float, w: float) -> tuple:
         """Convert quaternion to euler angles.
 
         Args:
@@ -135,12 +142,14 @@ class ImuSensor(CanBusDevice):
         yaw = atan2(2 * (w * z + x * y), 1 - 2 * (z * z + y * y))
         return (roll, pitch, yaw)
 
-    def _heartbeat_callback(self, data, timestamp, device_id, command_id):
+    def _heartbeat_callback(self, data, timestamp, device_id, command_id) -> None:
         """Updates the imu sensor state."""
         del timestamp, device_id, command_id
         self._update_quaternion(struct.unpack('<eeee', data))
 
-    def config_can_bus(self, new_id: int, heartbeat: int = 1000, bitrate=1000000):
+    def config_can_bus(
+        self, new_id: int, heartbeat: int = 1000, bitrate=1000000
+    ) -> None:
         """Configures the CAN bus settings.
 
         Args:
@@ -163,7 +172,7 @@ class ImuSensor(CanBusDevice):
             self.id, self._FC_CONFIG_CAN, 'HHI', new_id, bitrate_id, int(heartbeat)
         )
 
-    def set_ranges(self, gyro_range: int, accel_range: int):
+    def set_ranges(self, gyro_range: int, accel_range: int) -> None:
         """Set gyro and accel range.
 
         Args:
@@ -179,66 +188,76 @@ class ImuSensor(CanBusDevice):
             raise ValueError('accel_range must be in the range of 0-3.')
         self._can.send(self.id, self._FC_SET_RANGES, 'HH', gyro_range, accel_range)
 
-    def get_quaternion(self, timeout: Optional[float] = None):
+    def get_quaternion(self, timeout: Optional[float] = None) -> Optional[tuple]:
         """Reads the quaternion of imu sensor.
 
         Args:
-            timeout (float, optional): Timeout in seconds.
+            timeout (float): Timeout in seconds.
 
         Returns:
-            (tuple): Quaternion of imu sensor.
+            (tuple | None): Quaternion of imu sensor. (x, y, z, w)
         """
-        self._update_quaternion(
-            self._can.get(self.id, self._FC_GET_ORIENTATION, 'eeee', timeout)
-        )
+        try:
+            quat = self._can.get(self.id, self._FC_GET_ORIENTATION, 'eeee', timeout)
+        except TimeoutError:
+            return None
+        self._update_quaternion(quat)
         return self._quaternion
 
-    def get_euler(self, timeout: Optional[float] = None):
+    def get_euler(self, timeout: Optional[float] = None) -> Optional[tuple]:
         """Reads the euler angles of imu sensor.
 
         Args:
-            timeout (float, optional): Timeout in seconds.
+            timeout (float): Timeout in seconds.
 
         Returns:
-            (tuple): Euler angles of imu sensor.
+            (tuple | None): Euler angles of imu sensor. (roll, pitch, yaw)
         """
-        self._update_quaternion(
-            self._can.get(self.id, self._FC_GET_ORIENTATION, 'eeee', timeout)
-        )
+        try:
+            quat = self._can.get(self.id, self._FC_GET_ORIENTATION, 'eeee', timeout)
+        except TimeoutError:
+            return None
+        self._update_quaternion(quat)
         return self._euler
 
-    def get_gyro(self, timeout: Optional[float] = None):
+    def get_gyro(self, timeout: Optional[float] = None) -> Optional[tuple]:
         """Reads the gyro of imu sensor.
 
         Args:
-            timeout (float, optional): Timeout in seconds.
+            timeout (float): Timeout in seconds.
 
         Returns:
-            (tuple): Gyro of imu sensor.
+            (tuple | None): Gyroscope of imu sensor. (gyro_x, gyro_y, gyro_z)
         """
-        x, y, z, range_ = self._can.get(
-            self.id, self._FC_GET_GYROSCOPE, 'hhhH', timeout
-        )
-        k = 2**range_
+        try:
+            x, y, z, gyro_range = self._can.get(
+                self.id, self._FC_GET_GYROSCOPE, 'hhhH', timeout
+            )
+        except TimeoutError:
+            return None
+        k = 2**gyro_range
         return (
             x * self._gyro_factor / k,
             y * self._gyro_factor / k,
             z * self._gyro_factor / k,
         )
 
-    def get_accel(self, timeout: Optional[float] = None):
+    def get_accel(self, timeout: Optional[float] = None) -> Optional[tuple]:
         """Reads the accel of imu sensor.
 
         Args:
-            timeout (float, optional): Timeout in seconds.
+            timeout (float): Timeout in seconds.
 
         Returns:
-            (tuple): Accel of imu sensor.
+            (tuple | None): Acceleration of imu sensor. (accel_x, accel_y, accel_z)
         """
-        x, y, z, range_ = self._can.get(
-            self.id, self._FC_GET_ACCELERATOR, 'hhhH', timeout
-        )
-        k = 2**range_
+        try:
+            x, y, z, accel_range = self._can.get(
+                self.id, self._FC_GET_ACCELERATOR, 'hhhH', timeout
+            )
+        except TimeoutError:
+            return None
+        k = 2**accel_range
         return (
             x * self._accel_factor / k,
             y * self._accel_factor / k,

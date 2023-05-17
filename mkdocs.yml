@@ -10,9 +10,13 @@ nav:
     - robodyno.interfaces:
       - CanBus: references/interfaces/can_bus.md
     - robodyno.components:
-      - CanBusDevice: references/can_bus/can_bus_device.md
-      - Motor: references/can_bus/motor.md
-      - ImuSensor: references/can_bus/imu_sensor.md
+      - can_bus:
+        - CanBusDevice: references/can_bus/can_bus_device.md
+        - Motor: references/can_bus/motor.md
+        - SliderModule: references/can_bus/slider_module.md
+        - PwmDriver: references/can_bus/pwm_driver.md
+        - StepperDriver: references/can_bus/stepper_driver.md
+        - ImuSensor: references/can_bus/imu_sensor.md
   - 深入了解:
     - 电机控制模式: control-mode.md
     - 电机参数配置: motor-config.md
@@ -33,6 +37,7 @@ theme:
   logo: assets/logo.png
   favicon: assets/favicon.png
   features:
+    - navigation.footer
     - navigation.sections
     - content.code.copy
 extra_css:

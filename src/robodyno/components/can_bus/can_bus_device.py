@@ -40,7 +40,6 @@ Examples:
     >>> device.type
     <Model.THIRD_PARTY: 255>
     >>> can_bus.disconnect()
-
 """
 
 from typing import Optional
@@ -85,18 +84,21 @@ class CanBusDevice(object):
         self.fw_ver = None
         self.type = Model.THIRD_PARTY
 
-    def get_version(self, timeout: Optional[float] = None):
+    def get_version(self, timeout: Optional[float] = None) -> Optional[dict]:
         """Get device firmware version and type.
 
         Args:
-            timeout (float, optional): Timeout in seconds.
+            timeout (float): Timeout in seconds.
 
         Returns:
-            (dict): Device firmware version and type.
+            (dict | None): Device firmware version and type.
         """
-        main_ver, sub_ver, type_ = self._can.get(
-            self.id, self._CMD_GET_VERSION, 'HHI', timeout
-        )
+        try:
+            main_ver, sub_ver, type_ = self._can.get(
+                self.id, self._CMD_GET_VERSION, 'HHI', timeout
+            )
+        except TimeoutError:
+            return None
         self.fw_ver = float(f'{main_ver}.{sub_ver}')
         self.type = Model(type_)
         return {
