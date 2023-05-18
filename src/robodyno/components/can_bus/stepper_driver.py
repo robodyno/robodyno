@@ -78,7 +78,7 @@ class StepperDriver(CanBusDevice):
             ValueError: If the device is not a stepper develop board.
         """
         super().__init__(can, id_)
-        self.get_version(timeout=0.15)
+        self.get_version(timeout=0.015)
         if self.type is None or self.type != Model.ROBODYNO_STEPPER_DRIVER:
             raise ValueError('The device is not a stepper develop board.')
         self._reduction = reduction

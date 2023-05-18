@@ -25,8 +25,9 @@
 """Setup script for robodyno."""
 
 import os
-import re
 from setuptools import setup
+
+from src.robodyno import __version__
 
 with open(
     os.path.join(os.path.dirname(__file__), 'src', 'robodyno', 'README.md'),
@@ -35,20 +36,9 @@ with open(
 ) as f:
     long_description = f.read()
 
-# 从changelog文件中获取最新版本的版本号
-with open(
-    os.path.join(os.path.dirname(__file__), 'CHANGELOG.md'), mode='r', encoding='utf-8'
-) as f:
-    for line in f:
-        if line.startswith('##'):
-            match = re.search(r'\d+\.\d+\.\d+', line)
-            if match:
-                version = match.group(0)
-                break
-
 setup(
     name='robodyno',
-    version=version,
+    version=__version__,
     maintainer='robottime',
     maintainer_email='lab@robottime.cn',
     author='song',
@@ -97,7 +87,8 @@ setup(
     python_requires='>=3.6',
     install_requires=[
         'numpy>=1.10.0',
-        'colorama>=0.4.5',
+        'rich >= 12.6.0',
+        'click >= 7.1.2',
         'python-can>=3.2.0, <4.0',
         'importlib-metadata',
     ],
@@ -124,8 +115,7 @@ setup(
             'ThreeDoFPallet = robodyno.robots.three_dof_palletizing_robot.three_dof_pallet_robot:ThreeDoFPallet',
         ],
         'console_scripts': [
-            # 'robodyno = robodyno:robodyno',
-            # 'robodyno-motor = robodyno:robodyno_motor'
+            'robodyno = robodyno.tools.cli:cli',
         ],
     },
 )

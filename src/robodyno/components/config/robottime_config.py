@@ -24,7 +24,7 @@
 
 """Hardware parameters of robottime devices."""
 
-from .model import Model
+from robodyno.components.config.model import Model
 
 ROBOTTIME_PARAMS = {
     'motor': {

@@ -1,6 +1,6 @@
-from .can_bus import CanBus
+from robodyno.interfaces.can_bus import CanBus
 try:
-    from .webots import Webots
+    from robodyno.interfaces.webots import Webots
 except:
     Webots = None
 

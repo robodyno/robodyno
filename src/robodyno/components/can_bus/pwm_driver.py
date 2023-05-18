@@ -67,7 +67,7 @@ class PwmDriver(CanBusDevice):
             ValueError: If the device is not a pwm develop board.
         """
         super().__init__(can, id_)
-        self.get_version(timeout=0.15)
+        self.get_version(timeout=0.015)
         if self.type is None or self.type != Model.ROBODYNO_D_VAC01:
             raise ValueError('The device is not a pwm develop board.')
         self.off()

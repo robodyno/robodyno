@@ -30,8 +30,8 @@ setup.py.
 
 import sys
 
-from ..interfaces import InterfaceType, GET_IFACE_TYPE
-from .can_bus.can_bus_device import CanBusDevice
+from robodyno.interfaces import InterfaceType, GET_IFACE_TYPE
+from robodyno.components.can_bus.can_bus_device import CanBusDevice
 
 if sys.version_info < (3, 10):
     from importlib_metadata import entry_points
@@ -50,7 +50,7 @@ for ep in can_eps:
         __components.update({ep.name: {InterfaceType.CanBus: ep.load()}})
 
 try:
-    from .webots.webots_device import WebotsDevice
+    from robodyno.components.webots.webots_device import WebotsDevice
 
     wb_eps = entry_points(group='robodyno.components.webots')
     for ep in wb_eps:

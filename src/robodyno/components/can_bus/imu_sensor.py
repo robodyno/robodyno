@@ -77,7 +77,7 @@ class ImuSensor(CanBusDevice):
             ValueError: If the device is not a imu sensor.
         """
         super().__init__(can, id_)
-        self.get_version(timeout=0.15)
+        self.get_version(timeout=0.015)
         if self.type is None or self.type != Model.ROBODYNO_IMU_SENSOR:
             raise ValueError(f'Device of id {id_} is not a imu sensor')
         self._quaternion = (0, 0, 0, 1)

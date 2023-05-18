@@ -104,17 +104,17 @@ class Motor(CanBusDevice):
         Args:
             can (CanBus): The CAN bus interface.
             id_ (int): The device id. The default factory id of the motor is 0x10.
-            type_ (string): The model type of the motor.
+            type_ (string): Forcing the motor type. The default is None.
 
         Raises:
             ValueError: If the motor type is invalid.
         """
         super().__init__(can, id_)
-        self.get_version(timeout=0.15)
+        self.get_version(timeout=0.015)
         if type_:
             self.type = getattr(Model, type_.upper(), None)
         if self.type not in ROBOTTIME_PARAMS['motor']:
-            valid_models = list(
+            valid_models = ', '.join(
                 map(lambda model: model.name, ROBOTTIME_PARAMS['motor'].keys())
             )
             raise ValueError(
@@ -152,11 +152,14 @@ class Motor(CanBusDevice):
         )
 
     def __del__(self):
-        self._can.unsubscribe(
-            self._heartbeat_callback,
-            device_id=self.id,
-            cmd_id=self._CMD_HEARTBEAT,
-        )
+        try:
+            self._can.unsubscribe(
+                self._heartbeat_callback,
+                device_id=self.id,
+                cmd_id=self._CMD_HEARTBEAT,
+            )
+        except KeyError:
+            pass
 
     def _heartbeat_callback(self, data, timestamp, device_id, command_id) -> None:
         """Updates the motor attributes when receiving the heartbeat command."""
