@@ -96,7 +96,7 @@ class Motor(CanBusDevice):
     _CMD_SET_ABS_POS = 0x17
     _CMD_INIT_POS = 0x18
     _CMD_INIT_ABS_POS = 0x19
-    _CMD_GET_STATE = 0x1a
+    _CMD_GET_STATE = 0x1A
 
     def __init__(self, can: CanBus, id_: int = 0x10, type_: Optional[str] = None):
         """Initializes the Robodyno motor based on the device id and type.
@@ -267,7 +267,7 @@ class Motor(CanBusDevice):
         self._set_state(self.MotorState.CALIBRATE)
 
     def config_can_bus(
-        self, new_id: int, heartbeat: int = 1000, bitrate: int = 1000000
+        self, new_id: int = None, heartbeat: int = 1000, bitrate: int = 1000000
     ) -> None:
         """Configures the CAN bus settings of the motor.
 
@@ -281,6 +281,8 @@ class Motor(CanBusDevice):
             ValueError: If the new CAN id is not in the range of 0x01-0x3f.
             ValueError: If the bitrate is not one of 250000, 500000, 1000000.
         """
+        if new_id is None:
+            new_id = self.id
         if not 0x01 <= new_id <= 0x3F:
             raise ValueError('New CAN id must be in the range of 0x01-0x3f.')
 
@@ -320,8 +322,7 @@ class Motor(CanBusDevice):
     def clear_errors(self) -> None:
         """Clears the motor errors.
 
-        Most errors are cleared automatically if the cause is resolved except
-        for the ESTOP error.
+        Most errors are cleared automatically if the cause is resolved.
         """
         self._can.send(self.id, self._CMD_CLEAR_ERRORS, '')
 
@@ -774,6 +775,8 @@ class Motor(CanBusDevice):
         """The motor is calibrating the encoder."""
         ENABLED = 8
         """The motor is enabled."""
+        HOMING = 11
+        """The motor is aligning the encoders."""
 
     class MotorError(Enum):
         """Enumerates motor errors."""

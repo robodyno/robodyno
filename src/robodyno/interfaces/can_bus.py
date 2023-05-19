@@ -149,7 +149,7 @@ class CanBus(object):
             fmt (str): Format string for packing data. See [struct module](
                 https://docs.python.org/3/library/struct.html#format-characters)
                 for details.
-            *args: Data to be sent.
+            *args (): Data to be sent.
         """
         with self._send_lock:
             arbitration_id = self._combine_ids(device_id, cmd_id)

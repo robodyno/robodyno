@@ -115,7 +115,7 @@ setup(
             'ThreeDoFPallet = robodyno.robots.three_dof_palletizing_robot.three_dof_pallet_robot:ThreeDoFPallet',
         ],
         'console_scripts': [
-            'robodyno = robodyno.tools.cli:cli',
+            'robodyno = robodyno.tools.cli:robodyno',
         ],
     },
 )

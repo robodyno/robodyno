@@ -25,6 +25,8 @@
 """Provides parameter types for the CLI."""
 
 import click
+from rich.prompt import PromptBase, DefaultType, InvalidResponse
+from rich.text import Text
 
 
 class DeviceIdListParamType(click.ParamType):
@@ -70,3 +72,27 @@ class BasedIntParamType(click.ParamType):
 
 
 BASED_INT = BasedIntParamType()
+
+
+class BasedIntPrompt(PromptBase[int]):
+    """A based integer prompt.
+
+    Example:
+        >>> id = BasedIntPrompt.ask("Please enter a device id", default=0x01)
+    """
+
+    response_type = int
+    validate_error_message = '[prompt.invalid]Please enter a valid integer number'
+
+    def render_default(self, default: DefaultType) -> Text:
+        """Render the default as (y) or (n) rather than True/False."""
+        return Text(f'(0x{default:02X})', style='prompt.default')
+
+    def process_response(self, value: str) -> int:
+        """Convert choices to a int."""
+        value = value.strip().lower()
+        try:
+            value = int(value, 0)
+        except ValueError as error:
+            raise InvalidResponse(self.validate_error_message) from error
+        return value

@@ -31,6 +31,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.columns import Columns
 from rich.traceback import install
+from rich.prompt import Prompt, Confirm, IntPrompt, FloatPrompt
 
 from robodyno import __version__
 from robodyno.interfaces import CanBus
@@ -38,27 +39,29 @@ from robodyno.components.can_bus.motor import Motor
 from robodyno.components.config.model import Model
 from robodyno.tools.can_bus_monitor import CanBusMonitor
 from robodyno.tools.motor_info_table import motor_info_table
-from robodyno.tools.cli_param_types import ID_LIST, BASED_INT
-
-console = Console()
+from robodyno.tools.cli_param_types import ID_LIST, BasedIntPrompt
 
 
 @click.group()
 @click.version_option(__version__)
 @click.option('--can-bus', '-c', default='can0', help='CAN bus interface channel.')
-@click.option('--baud-rate', '-b', default=1000000, help='CAN bus baud rate.')
+@click.option('--baudrate', '-b', default=1000000, help='CAN bus baud rate.')
 @click.pass_context
-def cli(ctx: click.Context, can_bus: str, baud_rate: int) -> None:
+def robodyno(ctx: click.Context, can_bus: str, baudrate: int) -> None:
     """Robodyno command line interface."""
     install(suppress=[click])
     ctx.ensure_object(dict)
-    ctx.obj['can'] = CanBus(baud_rate, can_bus)
+    ctx.obj['console'] = Console()
+    ctx.obj['can'] = CanBus(baudrate, can_bus)
+    ctx.obj['can_bitrate'] = baudrate
 
 
-@cli.command(name='list')
+@robodyno.command(name='list')
 @click.pass_context
 def list_devices(ctx: click.Context) -> None:
     """List all devices on the CAN bus."""
+    console = ctx.obj['console']
+
     table = Table()
     table.add_column('ID', style='cyan', justify='right', no_wrap=True)
     table.add_column('Model', style='green', justify='left', no_wrap=True)
@@ -80,17 +83,18 @@ def list_devices(ctx: click.Context) -> None:
         console.print('[i]No device found...[/i]')
 
 
-@cli.command()
+@robodyno.command()
 @click.option('--group', '-g', is_flag=True, help='Group messages by CAN ID.')
 @click.pass_context
 def monitor(ctx: click.Context, group: bool) -> None:
     """Monitor all devices on the CAN bus."""
+    console = ctx.obj['console']
     console.print('Press Ctrl+C to exit.')
     m = CanBusMonitor(ctx.obj['can'], group, console)
     m.monitor()
 
 
-@cli.group()
+@robodyno.group()
 @click.option(
     '--id', '-i', 'id_set', type=ID_LIST, default=0x10, help='Device ID list.'
 )
@@ -98,6 +102,7 @@ def monitor(ctx: click.Context, group: bool) -> None:
 def motor(ctx: click.Context, id_set) -> None:
     """Motor commands."""
     ctx.obj['motors'] = []
+    console = ctx.obj['console']
     can = ctx.obj['can']
     for device_id in id_set:
         try:
@@ -112,6 +117,7 @@ def motor(ctx: click.Context, id_set) -> None:
 @click.pass_context
 def info(ctx: click.Context) -> None:
     """Get motor info."""
+    console = ctx.obj['console']
     motors = ctx.obj['motors']
     tables = []
     for m in motors:
@@ -138,7 +144,7 @@ def disable(ctx: click.Context) -> None:
 
 
 @motor.command(name='init')
-@click.option('--position', '-p', type=float, default=0.0, help='Initial position.')
+@click.option('--pos', '-p', type=float, default=0.0, help='Initial position.')
 @click.option('--absolute', '-a', is_flag=True, help='Use absolute position.')
 @click.option(
     '--save/--not-save',
@@ -149,6 +155,7 @@ def disable(ctx: click.Context) -> None:
 @click.pass_context
 def init_pos(ctx: click.Context, position: float, absolute: bool, save: bool) -> None:
     """Initialize motor."""
+    console = ctx.obj['console']
     motors = ctx.obj['motors']
     for m in motors:
         if m.fw_ver < 1:
@@ -274,35 +281,215 @@ def set_torque(ctx: click.Context, torque: float) -> None:
         m.set_torque(torque)
 
 
-@motor.command(name='id')
-@click.argument('new_id', type=BASED_INT)
-@click.option('--save', '-s', is_flag=True, help='Save the new ID.')
+@motor.command(name='config')
+@click.option('--vel-limit', '-v', is_flag=True, help='Set velocity limit.')
+@click.option('--current-limit', '-c', is_flag=True, help='Set current limit.')
+@click.option('--pid', '-p', is_flag=True, help='Set PID gains.')
+@click.option('--heartbeat-rate', '-h', is_flag=True, help='Set heartbeat rate.')
+@click.option('--new-id', '-i', is_flag=True, help='Set new ID.')
+@click.option('--can-baudrate', '-b', is_flag=True, help='Set CAN baudrate.')
 @click.pass_context
-def set_id(ctx: click.Context, new_id: int, save: bool) -> None:
-    """Set motor ID."""
+def config(
+    ctx: click.Context,
+    vel_limit: bool,
+    current_limit: bool,
+    pid: bool,
+    heartbeat_rate: bool,
+    new_id: bool,
+    can_baudrate: bool,
+) -> None:
+    """Configure motor parameters."""
+    console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:
-        console.print('[i]Please specify only [yellow bold]one[/] motor.[/i]')
+        console.print(
+            '[i]Please specify only [yellow bold]one[/yellow bold] motor.[/i]'
+        )
         return
-    motors[0].config_can_bus(new_id)
-    if save:
+    m = motors[0]
+    if not (
+        vel_limit or current_limit or pid or heartbeat_rate or new_id or can_baudrate
+    ):  # if no option is specified, set all options except can bus configuartions.
+        vel_limit = True
+        current_limit = True
+        pid = True
+
+    if vel_limit:
+        vel_limit_now = m.get_vel_limit(0.1)
+        m.set_vel_limit(
+            FloatPrompt.ask(
+                (
+                    f'[green bold]Enter[/] new velocity limit, '
+                    f'now: [green bold]{vel_limit_now:.2f} rad/s[/]'
+                ),
+                console=console,
+                default=m.default_vel_limit,
+            )
+        )
+    if current_limit:
+        current_limit_now = m.get_current_limit(0.1)
+        m.set_current_limit(
+            FloatPrompt.ask(
+                (
+                    f'[green bold]Enter[/] new current limit, '
+                    f'now: [green bold]{current_limit_now:.1f} A[/]'
+                ),
+                console=console,
+                default=m.default_current_limit,
+            )
+        )
+    if pid:
+        pos_kp, vel_kp, vel_ki = m.get_pid(0.1)
+        m.set_pid(
+            FloatPrompt.ask(
+                (
+                    f'[green bold]Enter[/] new position kp, '
+                    f'now: [green bold]{pos_kp:.2f}[/]'
+                ),
+                console=console,
+                default=m.default_pos_kp,
+            ),
+            FloatPrompt.ask(
+                (
+                    f'[green bold]Enter[/] new velocity kp, '
+                    f'now: [green bold]{vel_kp:.2f}[/]'
+                ),
+                console=console,
+                default=m.default_vel_kp,
+            ),
+            FloatPrompt.ask(
+                (
+                    f'[green bold]Enter[/] new velocity ki, '
+                    f'now: [green bold]{vel_ki:.2f}[/]'
+                ),
+                console=console,
+                default=m.default_vel_ki,
+            ),
+        )
+    heartbeat = 1000
+    bitrate = ctx.obj['can_bitrate']
+    if heartbeat_rate:
+        heartbeat = IntPrompt.ask(
+            '[green bold]Enter[/] new heartbeat rate im ms',
+            console=console,
+            default=1000,
+        )
+        m.config_can_bus(heartbeat=heartbeat, bitrate=bitrate)
+    if can_baudrate:
+        console.print(
+            '[magenta][bold]WARNING[/bold] This will change the CAN baudrate '
+            'of the motor [bold]after a reboot[/bold].[/]'
+        )
+        bitrate = int(
+            Prompt.ask(
+                '[green bold]Enter[/] new CAN bitrate',
+                console=console,
+                choices=['1000000', '500000', '250000'],
+                default=str(bitrate),
+            )
+        )
+        m.config_can_bus(
+            heartbeat=heartbeat,
+            bitrate=bitrate,
+        )
+    if new_id:
+        console.print(
+            '[yellow][bold]NOTE[/bold] This will change the device ID of the '
+            'motor [bold]immediately[/bold].[/]'
+        )
+        new_id = BasedIntPrompt.ask(
+            '[green bold]Enter[/] new ID',
+            console=console,
+            default=m.id,
+        )
+        m.config_can_bus(new_id=new_id, heartbeat=heartbeat, bitrate=bitrate)
         m = Motor(ctx.obj['can'], new_id)
+    if Confirm.ask('[cyan bold]Save[/] the new parameters to flash?'):
         m.save()
+
+
+@motor.command(name='calibrate')
+@click.pass_context
+def calibrate(ctx: click.Context) -> None:
+    """Calibrate motor."""
+    console = ctx.obj['console']
+    motors = ctx.obj['motors']
+    if len(motors) != 1:
+        console.print(
+            '[i]Please specify only [yellow bold]one[/yellow bold] motor.[/i]'
+        )
+        return
+    if not Confirm.ask(
+        '[magena][bold]WARNING[/bold] Calibration will move the motor and '
+        'reset the encoders. Make sure the motor is free to move.'
+    ):
+        return
+    m = motors[0]
+    with console.status(f'[bold green]Calibrating motor 0x{m.id:02X}...'):
+        m.calibrate()
+        sleep(1)
+        while m.state != Motor.MotorState.DISABLED:
+            pass
+        if m.error['error'] != Motor.MotorError.NONE:
+            console.print(f'[red bold]Error: {m.error}[/]')
+            return
+        sleep(0.2)
+        console.print('[i green bold]Done![/]')
+    if Confirm.ask('[cyan bold]Save[/] the result to flash?', default=True):
+        m.save()
+
+
+@motor.command(name='clear-errors')
+@click.pass_context
+def clear_errors(ctx: click.Context) -> None:
+    """Clear errors on motors."""
+    motors = ctx.obj['motors']
+    for m in motors:
+        m.clear_errors()
+
+
+@motor.command(name='reboot')
+@click.pass_context
+def reboot(ctx: click.Context) -> None:
+    """Reboot motors."""
+    motors = ctx.obj['motors']
+    for m in motors:
+        m.reboot()
+
+
+@motor.command(name='estop')
+@click.pass_context
+def estop(ctx: click.Context) -> None:
+    """Emergency stop motors."""
+    motors = ctx.obj['motors']
+    for m in motors:
+        m.estop()
 
 
 @motor.command(name='reset')
 @click.pass_context
 def reset(ctx: click.Context) -> None:
+    console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:
-        console.print('[i]Please specify only [yellow bold]one[/] motor.[/i]')
+        console.print(
+            '[i]Please specify only [yellow bold]one[/yellow bold] motor.[/i]'
+        )
+        return
+    if not Confirm.ask(
+        '[magenta][bold]WARNING[/bold] Resetting the motor will reset '
+        '[red bold]ALL[/red bold] parameters to their default values, calibrate '
+        'the motor and reboot it. Continue?'
+    ):
         return
     m = motors[0]
     with console.status(f'[bold green]Resetting motor 0x{m.id:02X}...'):
         m.reset()
         sleep(4)
         m = Motor(ctx.obj['can'], 0x10)
-        console.print(f'[i]Calibrating motor 0x{m.id:02X}...[/i]')
+        console.print(
+            f'[i][green bold]Calibrating[/green bold] motor 0x{m.id:02X}...[/i]'
+        )
         m.calibrate()
         sleep(1)
         while m.state != Motor.MotorState.DISABLED:
@@ -313,7 +500,12 @@ def reset(ctx: click.Context) -> None:
         sleep(0.2)
         m.save()
         sleep(0.2)
-        console.print(f'[i]Rebooting motor 0x{m.id:02X}...[/i]')
+        console.print(
+            f'[i][green bold]Rebooting[/green bold] motor 0x{m.id:02X}...[/i]'
+        )
         m.reboot()
         sleep(3)
-        console.print('[i]Done. The new ID is [yellow bold]0x10[/].[/i]')
+        console.print('[i green bold]Done.[/]')
+        console.print(
+            '[i]The ID of the motor is now [green bold]0x10[/green bold].[/i]'
+        )

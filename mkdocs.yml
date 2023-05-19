@@ -2,11 +2,33 @@ site_name: Robodyno 文档
 nav:
   - 概述: index.md
   - 入门指南:
-    - 安装: installation.md
-    - 准备工作: configuration.md
-    - 使用示例: usage.md
-    - 命令行工具: cli.md
+    - startup/index.md
+    - 安装: startup/installation.md
+    - 准备工作: startup/configuration.md
+    - 使用示例: startup/usage.md
+  - 命令行工具:
+    - commands/index.md
+    - robodyno: commands/robodyno.md
+    - robodyno:
+      - list: commands/robodyno-list.md
+      - monitor: commands/robodyno-monitor.md
+      - motor: commands/robodyno-motor.md
+    - robodyno motor:
+      - info: commands/motor-info.md
+      - enable: commands/motor-enable.md
+      - disable: commands/motor-disable.md
+      - init: commands/motor-init.md
+      - pos: commands/motor-pos.md
+      - vel: commands/motor-vel.md
+      - torque: commands/motor-torque.md
+      - config: commands/motor-config.md
+      - calibrate: commands/motor-calibrate.md
+      - clear-errors: commands/motor-clear-errors.md
+      - reboot: commands/motor-reboot.md
+      - estop: commands/motor-estop.md
+      - reset: commands/motor-reset.md
   - API 参考: 
+    - references/index.md
     - robodyno.interfaces:
       - CanBus: references/interfaces/can_bus.md
     - robodyno.components:
@@ -37,6 +59,9 @@ theme:
   logo: assets/logo.png
   favicon: assets/favicon.png
   features:
+    - navigation.indexes
+    - navigation.instant
+    - navigation.tracking
     - navigation.footer
     - navigation.sections
     - content.code.copy
