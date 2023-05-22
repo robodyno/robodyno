@@ -22,19 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Reads the version from the CHANGELOG.md file."""
+"""Version information for Robodyno package."""
 
-import os
-import re
-
-with open(
-    os.path.join(os.path.dirname(__file__), '..', '..', 'CHANGELOG.md'),
-    mode='r',
-    encoding='utf-8',
-) as f:
-    for line in f:
-        if line.startswith('##'):
-            match = re.search(r'\d+\.\d+\.\d+', line)
-            if match:
-                __version__ = match.group(0)
-                break
+__version__ = '1.6.1-beta1'
