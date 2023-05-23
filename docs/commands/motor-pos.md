@@ -49,7 +49,7 @@ Usage: robodyno motor pos [OPTIONS] POSITION
   * Type: FLOAT 
   * Default: `10.0`
   * Usage: `--traj-acc
--a`
+--acc`
 
   Trajectory acceleration of the position tracking control.
 
@@ -58,7 +58,7 @@ Usage: robodyno motor pos [OPTIONS] POSITION
   * Type: FLOAT 
   * Default: `10.0`
   * Usage: `--traj-dec
--d`
+--dec`
 
   Trajectory deceleration of the position tracking control.
 

@@ -193,14 +193,14 @@ def init_pos(ctx: click.Context, position: float, absolute: bool, save: bool) ->
 )
 @click.option(
     '--traj-acc',
-    '-a',
+    '--acc',
     type=float,
     default=10.0,
     help='Trajectory acceleration of the position tracking control.',
 )
 @click.option(
     '--traj-dec',
-    '-d',
+    '--dec',
     type=float,
     default=10.0,
     help='Trajectory deceleration of the position tracking control.',
