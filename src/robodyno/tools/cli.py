@@ -377,8 +377,8 @@ def config(
         m.config_can_bus(heartbeat=heartbeat, bitrate=bitrate)
     if can_baudrate:
         console.print(
-            '[magenta][bold]WARNING[/bold] This will change the CAN baudrate '
-            'of the motor [bold]after a reboot[/bold].[/]'
+            '[magenta bold]WARNING[/] This will change the CAN baudrate '
+            'of the motor [bold]after a reboot[/bold].'
         )
         bitrate = int(
             Prompt.ask(
@@ -394,8 +394,8 @@ def config(
         )
     if new_id:
         console.print(
-            '[yellow][bold]NOTE[/bold] This will change the device ID of the '
-            'motor [bold]immediately[/bold].[/]'
+            '[yellow bold]NOTE[/] This will change the device ID of the '
+            'motor [bold]immediately[/bold].'
         )
         new_id = BasedIntPrompt.ask(
             '[green bold]Enter[/] new ID',
@@ -420,7 +420,7 @@ def calibrate(ctx: click.Context) -> None:
         )
         return
     if not Confirm.ask(
-        '[magena][bold]WARNING[/bold] Calibration will move the motor and '
+        '[magenta bold]WARNING[/] Calibration will move the motor and '
         'reset the encoders. Make sure the motor is free to move.'
     ):
         return
@@ -431,7 +431,7 @@ def calibrate(ctx: click.Context) -> None:
         while m.state != Motor.MotorState.DISABLED:
             pass
         if m.error['error'] != Motor.MotorError.NONE:
-            console.print(f'[red bold]Error: {m.error}[/]')
+            console.print(f'[red bold]Error:[/] {m.error}')
             return
         sleep(0.2)
         console.print('[green bold]Done![/]')
@@ -477,7 +477,7 @@ def reset(ctx: click.Context) -> None:
         )
         return
     if not Confirm.ask(
-        '[magenta][bold]WARNING[/bold] Resetting the motor will reset '
+        '[magenta bold]WARNING[/] Resetting the motor will reset '
         '[red bold]ALL[/red bold] parameters to their default values, calibrate '
         'the motor and reboot it. Continue?'
     ):
@@ -495,7 +495,7 @@ def reset(ctx: click.Context) -> None:
         while m.state != Motor.MotorState.DISABLED:
             pass
         if m.error['error'] != Motor.MotorError.NONE:
-            console.print(f'[red bold]Error: {m.error}[/]')
+            console.print(f'[red bold]Error:[/] {m.error}')
             return
         sleep(0.2)
         m.save()
