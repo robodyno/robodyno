@@ -153,7 +153,7 @@ def disable(ctx: click.Context) -> None:
     help='Save the absolute initial position.',
 )
 @click.pass_context
-def init_pos(ctx: click.Context, position: float, absolute: bool, save: bool) -> None:
+def init_pos(ctx: click.Context, pos: float, absolute: bool, save: bool) -> None:
     """Initialize motor."""
     console = ctx.obj['console']
     motors = ctx.obj['motors']
@@ -165,11 +165,11 @@ def init_pos(ctx: click.Context, position: float, absolute: bool, save: bool) ->
             )
             return
         if absolute:
-            m.init_abs_pos(position)
+            m.init_abs_pos(pos)
             if save:
                 m.save()
         else:
-            m.init_pos(position)
+            m.init_pos(pos)
 
 
 @motor.command(name='pos')
