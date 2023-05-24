@@ -51,7 +51,7 @@ class CanBusMonitor(object):
 
     def _msg_callback(self, data, us, device_id, command_id) -> None:
         data_list = [f'0x{byte:02X}' for byte in data]
-        ts = f'{us // 1000000}.{((us % 1000000) // 1000):03d}'
+        ts = f'{us // 1000000}.{int((us % 1000000) // 1000):03d}'
         self._msg_queue.put((ts, device_id, command_id, data_list))
 
     def _generate_table(self, data_dict: dict) -> Table:
