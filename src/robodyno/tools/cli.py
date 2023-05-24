@@ -80,7 +80,7 @@ def list_devices(ctx: click.Context) -> None:
     if table.rows:
         console.print(table)
     else:
-        console.print('[i]No device found...[/i]')
+        console.print('No device found...')
 
 
 @robodyno.command()
@@ -109,7 +109,7 @@ def motor(ctx: click.Context, id_set) -> None:
             m = Motor(can, device_id)
             ctx.obj['motors'].append(m)
         except ValueError:
-            console.print(f'[i]Device 0x{device_id:02X} not found.[/i]')
+            console.print(f'Device 0x{device_id:02X} not found.')
             continue
 
 
@@ -160,8 +160,8 @@ def init_pos(ctx: click.Context, pos: float, absolute: bool, save: bool) -> None
     for m in motors:
         if m.fw_ver < 1:
             console.print(
-                f'[i]Absolute position is not supported on '
-                f'firmware version {m.fw_ver}.[/i]'
+                f'Absolute position is not supported on '
+                f'firmware version {m.fw_ver}.'
             )
             return
         if absolute:
@@ -303,7 +303,7 @@ def config(
     motors = ctx.obj['motors']
     if len(motors) != 1:
         console.print(
-            '[i]Please specify only [yellow bold]one[/yellow bold] motor.[/i]'
+            'Please specify only [yellow bold]one[/yellow bold] motor.'
         )
         return
     m = motors[0]
@@ -416,7 +416,7 @@ def calibrate(ctx: click.Context) -> None:
     motors = ctx.obj['motors']
     if len(motors) != 1:
         console.print(
-            '[i]Please specify only [yellow bold]one[/yellow bold] motor.[/i]'
+            'Please specify only [yellow bold]one[/yellow bold] motor.'
         )
         return
     if not Confirm.ask(
@@ -434,7 +434,7 @@ def calibrate(ctx: click.Context) -> None:
             console.print(f'[red bold]Error: {m.error}[/]')
             return
         sleep(0.2)
-        console.print('[i green bold]Done![/]')
+        console.print('[green bold]Done![/]')
     if Confirm.ask('[cyan bold]Save[/] the result to flash?', default=True):
         m.save()
 
@@ -473,7 +473,7 @@ def reset(ctx: click.Context) -> None:
     motors = ctx.obj['motors']
     if len(motors) != 1:
         console.print(
-            '[i]Please specify only [yellow bold]one[/yellow bold] motor.[/i]'
+            'Please specify only [yellow bold]one[/yellow bold] motor.'
         )
         return
     if not Confirm.ask(
@@ -488,7 +488,7 @@ def reset(ctx: click.Context) -> None:
         sleep(4)
         m = Motor(ctx.obj['can'], 0x10)
         console.print(
-            f'[i][green bold]Calibrating[/green bold] motor 0x{m.id:02X}...[/i]'
+            f'[green bold]Calibrating[/green bold] motor 0x{m.id:02X}...'
         )
         m.calibrate()
         sleep(1)
@@ -501,11 +501,11 @@ def reset(ctx: click.Context) -> None:
         m.save()
         sleep(0.2)
         console.print(
-            f'[i][green bold]Rebooting[/green bold] motor 0x{m.id:02X}...[/i]'
+            f'[green bold]Rebooting[/green bold] motor 0x{m.id:02X}...'
         )
         m.reboot()
         sleep(3)
-        console.print('[i green bold]Done.[/]')
+        console.print('[green bold]Done.[/]')
         console.print(
-            '[i]The ID of the motor is now [green bold]0x10[/green bold].[/i]'
+            'The ID of the motor is now [green bold]0x10[/green bold].'
         )

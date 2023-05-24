@@ -28,6 +28,7 @@ from time import time
 from enum import Enum
 
 from rich.table import Table
+from rich.style import Style
 
 from robodyno.components.can_bus.motor import Motor
 
@@ -60,7 +61,8 @@ def motor_info_table(motor: Motor) -> Table:
             f'[cyan][0x{motor.id:02X}][/] '
             f'[green]{motor.type.name}[/] '
             f'[yellow]{motor.fw_ver}[/]'
-        )
+        ),
+        title_style=Style(italic=False, bold=True)
     )
     table.add_column('Property', style='cyan', justify='left', no_wrap=True)
     table.add_column('Value', style='green', justify='right', no_wrap=True)
