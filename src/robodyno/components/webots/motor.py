@@ -171,7 +171,7 @@ class Motor(WebotsDevice):
             self.init_twin_offset()
             self.type = self._twin_motor.type
         elif type:
-            self.type = getattr(Model, type_.upper(), None)
+            self.type = getattr(Model, type.upper(), None)
         else:
             self.type = getattr(Model, self._pos_sensor.getName(), None)
         if self.type not in ROBOTTIME_PARAMS['motor']:
