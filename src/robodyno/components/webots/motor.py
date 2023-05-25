@@ -25,8 +25,10 @@ Robodyno motor webots bridge
 
 from math import pi, fabs, copysign, sqrt
 from enum import Enum
-from robodyno.components import DeviceType, ROBODYNO_MOTOR_SPECS, WebotsDevice
+from robodyno.components import WebotsDevice
 from robodyno.components.can_bus.motor import Motor as CanMotor
+from robodyno.components.config.model import Model
+from robodyno.components.config.robottime_config import ROBOTTIME_PARAMS
 from robodyno.interfaces import InterfaceType, GET_IFACE_TYPE
 
 class MotorPositionTrackController(object):
@@ -157,18 +159,6 @@ class Motor(WebotsDevice):
         """
         iface._mutex.acquire()
         super().__init__(iface, id, auto_register=False)
-        valid_motor_types = [
-            DeviceType.ROBODYNO_PRO_44,
-            DeviceType.ROBODYNO_PRO_12,
-            DeviceType.ROBODYNO_PRO_50 ,
-            DeviceType.ROBODYNO_PRO_100,
-            DeviceType.ROBODYNO_PRO_DIRECT,
-            DeviceType.ROBODYNO_PLUS_50 ,
-            DeviceType.ROBODYNO_PLUS_100,
-            DeviceType.ROBODYNO_PLUS_12 ,
-            DeviceType.ROBODYNO_PLUS_DIRECT,
-            DeviceType.ROBODYNO_NANO_100,
-        ]
         try:
             self.name = '0x{:02X}::motor'.format(id)
         except:
@@ -181,13 +171,13 @@ class Motor(WebotsDevice):
             self.init_twin_offset()
             self.type = self._twin_motor.type
         elif type:
-            self.type = DeviceType[type]
+            self.type = getattr(Model, type_.upper(), None)
         else:
-            self.type = DeviceType[self._pos_sensor.getName()]
-        if self.type not in valid_motor_types:
+            self.type = getattr(Model, self._pos_sensor.getName(), None)
+        if self.type not in ROBOTTIME_PARAMS['motor']:
             raise ValueError('Motor type is invalid')
         self.mode = self.MotorControlMode.UNKNOWN
-        self.__dict__.update(ROBODYNO_MOTOR_SPECS.get(self.type, None))
+        self.__dict__.update(ROBOTTIME_PARAMS['motor'].get(self.type, None))
         self.state = self.MotorState.DISABLED
         self._rot_factor = self.reduction / 2.0 / pi
 
