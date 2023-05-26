@@ -29,4 +29,4 @@ Robodyno 的硬件模组通过CAN总线连接，可以通过 USB 转 CAN 模块�
 
 Robodyno 的软件包和命令行工具可以运行在 Windows、Linux 系统和树莓派上。由于 Robodyno 的软件包是基于 Python 语言开发的，因此在使用 Robodyno 的软件包之前，建议安装 Python 3.7 或更高版本的 [Python](https://www.python.org/downloads/) 以及 [pip](https://pip.pypa.io/en/stable/installation/)。
 
-Robodyno 的软件包是完全开源的，你可以在 [GitHub](https://github.com/robodyno/robodyno) 上找到它的源代码。具体的安装方法请参考 [安装文档](installation/)。
+Robodyno 的软件包是完全开源的，你可以在 [GitHub](https://github.com/robodyno/robodyno) 上找到它的源代码。具体的安装方法请参考 [安装文档](start/installation/)。

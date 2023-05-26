@@ -1,20 +1,22 @@
 site_name: Robodyno 文档
 nav:
   - 开始:
-    - start/index.md
+    - index.md
     - 安装: start/installation.md
     - 快速开始: start/quickstart.md
   - 深入了解:
     - deep-dive/index.md
     - 接口: 
-      - CAN总线: deep-dive/interfaces/can-bus.md
+      - CAN 总线: deep-dive/interfaces/can-bus.md
       - Webots: deep-dive/interfaces/webots.md
     - 组件: 
+      - deep-dive/components/index.md
       - 伺服减速电机: deep-dive/components/motor.md
       - 直线运动模组: deep-dive/components/slider-module.md
-      - PWM扩展模块: deep-dive/components/pwm-driver.md
+      - PWM 扩展模块: deep-dive/components/pwm-driver.md
       - 步进电机驱动模块: deep-dive/components/stepper-driver.md
-      - IMU传感器: deep-dive/components/imu-sensor.md
+      - IMU 传感器: deep-dive/components/imu-sensor.md
+    - 电机运动模式: deep-dive/motor-modes.md
   - Robodyno CLI:
     - commands/index.md
     - list: commands/list.md
@@ -38,6 +40,7 @@ nav:
     - references/index.md
     - robodyno.interfaces:
       - CanBus: references/interfaces/can_bus.md
+      - Webots: references/interfaces/webots.md
     - robodyno.components:
       - can_bus:
         - references/can_bus/index.md
@@ -48,7 +51,6 @@ nav:
         - ImuSensor: references/can_bus/imu_sensor.md
   - 常见问题解答: faq.md
   - 贡献: contributing.md
-  - 开源协议: license.md
   - 免责声明: disclaimer.md
 theme:
   name: material
@@ -83,6 +85,9 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - tables
+  - pymdownx.tabbed:
+      alternate_style: true 
 
 copyright: Copyright &copy; 2007 - 2023 RobotTime
 

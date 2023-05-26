@@ -8,12 +8,23 @@ Robodyno 的硬件模组是基于 CAN 总线的，因此你可以通过 CAN 总�
 
 ## 组件
 
-当前 Robodyno 的硬件模组包含了以下组件：
+Robodyno 会尽可能地保证组件通过不同接口连接时的兼容性，例如，你可以使用几乎相同的代码来通过 CAN 总线和 Webots 仿真环境来控制伺服减速电机：
 
-* [伺服减速电机](components/motor/)
-* [直线运动模组](components/slider-module/)
-* [PWM 扩展模块](components/pwm-driver/)
-* [步进电机驱动模块](components/stepper-driver/)
-* [IMU 传感器](components/imu-sensor/)
+```python
+from robodyno.interfaces import CanBus, Webots
+from robodyno.components import Motor
 
-当前，所有组件都支持 CAN 总线，伺服减速电机和直线运动模组支持 Webots 仿真环境。同时，我们在命令行工具中提供了伺服减速电机的完整控制命令，具体请查看 [电机命令行说明文档](../../commands/motor)，其他组件的控制命令将在后续版本中提供。
+# 通过 CAN 总线连接伺服减速电机
+can_bus = CanBus()
+motor = Motor(can_bus)
+
+# 通过 Webots 仿真环境连接伺服减速电机
+webots = Webots()
+motor = Motor(webots)
+
+# 控制伺服减速电机
+motor.enable()
+motor.set_position(0.5)
+```
+
+当前 Robodyno 的硬件模组清单及相关资料请参考 [硬件模组](components/)。

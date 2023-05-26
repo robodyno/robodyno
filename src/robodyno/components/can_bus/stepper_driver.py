@@ -66,7 +66,7 @@ class StepperDriver(CanBusDevice):
     _CMD_GET_POSITION = 0x0A
     _CMD_GET_VELOCITY = 0x0B
 
-    def __init__(self, can: CanBus, id_: int = 0x22, reduction: float = 10):
+    def __init__(self, can: CanBus, id_: int = 0x22, reduction: float = 1):
         """Initializes the stepper develop board driver.
 
         Args:

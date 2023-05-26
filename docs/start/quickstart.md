@@ -18,20 +18,20 @@ Robodyno 的命令行工具提供了一些简单的命令，可以帮助你快�
 robodyno list
 ```
 
-如果你想要查看某个电机的详细信息，可以通过以下命令查看：
+查看 ID 默认为 0x10 的电机的详细信息：
 
 ```bash
-robodyno motor --id <id> info
+robodyno motor info
 ```
 
-如果你想要控制 ID 为 0x10 的电机转动 1 圈，可以通过以下命令控制：
+控制电机转动 1 圈：
 
 !!! warning
 
     在控制电机转动之前，你需要确保电机所处的环境是安全的，否则可能会造成人身伤害或财产损失。
 
 ```bash
-robodyno motor --id 0x10 pos 6.28
+robodyno motor pos 6.28
 ```
 
 全部可用的命令请查看 [命令行说明文档](../../commands)，你也通过以下命令查看 Robodyno 的命令行工具提供了哪些命令：
@@ -58,15 +58,15 @@ from robodyno.interfaces import CanBus
 can_bus = CanBus()
 ```
 
-如果你想要控制 ID 为 0x10 的电机，可以通过以下代码初始化电机：
+如果你想要控制 ID 默认为 0x10 的电机，可以通过以下代码初始化电机：
 
 ```python
 from robodyno.components import Motor
 
-motor = Motor(can_bus, 0x10)
+motor = Motor(can_bus)
 ```
 
-如果你想要控制 ID 为 0x10 的电机转动 1 圈，可以通过以下代码控制：
+控制这个电机转动 1 圈：
 
 !!! warning
 
@@ -78,4 +78,4 @@ motor.enable()
 motor.set_pos(6.28)
 ```
 
-全部可用的类请查看 [API 文档](../../references) 或 [源代码](https://github.com/robodyno/robodyno)。
+软件包的完整说明请查看 [API 文档](../../references) 或 [源代码](https://github.com/robodyno/robodyno)。
