@@ -72,23 +72,14 @@ Robodyno 的伺服减速电机根据减速比和电机参数的不同，分为�
     print(motor.state)
     ```
 
-### 运动模式
+### 转动
 
-Robodyno 的伺服减速电机支持以下几种运动模式：
-
-- 位置模式（`POSITION`）
-- 位置滤波模式（`POSITION_FILTER`）
-- 位置追踪模式（`POSITION_TRACK`）
-- 速度模式（`VELOCITY`）
-- 速度坡度模式（`VELOCITY_RAMP`）
-- 力矩模式（`TORQUE`）
-
-以位置滤波模式为例，通过以下方式进入位置滤波模式并控制电机转动：
+通过以下方式可以控制电机转动到指定的目标位置：
 
 === "命令行工具"
 
     ``` bash
-    robodyno motor pos 6.28 -m filter -b 3
+    robodyno motor pos 6.28
     ```
 
 === "Python API"
@@ -100,10 +91,41 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
     can_bus = CanBus()
     motor = Motor(can_bus)
 
-    motor.position_filter_mode(bandwidth=3)
+    motor.position_filter_mode(10)
     motor.enable()
     motor.set_pos(6.28)
     ```
+
+通过以下方式可以控制电机按照指定的目标速度转动：
+
+=== "命令行工具"
+
+    ``` bash
+    robodyno motor vel 3.14
+    ```
+
+=== "Python API"
+
+    ``` python
+    from robodyno.interfaces import CanBus
+    from robodyno.components import Motor
+
+    can_bus = CanBus()
+    motor = Motor(can_bus)
+
+    motor.velocity_ramp_mode(10)
+    motor.enable()
+    motor.set_vel(3.14)
+    ```
+
+Robodyno 的伺服减速电机的运动模式分为以下几种：
+
+- 位置模式（`POSITION`）
+- 位置滤波模式（`POSITION_FILTER`）
+- 位置追踪模式（`POSITION_TRACK`）
+- 速度模式（`VELOCITY`）
+- 速度坡度模式（`VELOCITY_RAMP`）
+- 力矩模式（`TORQUE`）
 
 关于运动模式的详细说明请参考 [电机运动模式](../../motor-modes/)。
 
@@ -111,7 +133,7 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
 
 固件版本 1.0 及以上的电机支持绝对位置，电机在断电后仍然可以记录当前的绝对位置，重新上电后可以查询到正确的绝对位置。这个特性可以用于机械臂的关节控制，机械臂的关节可以在断电后重新上电，而不需要重新初始化位置。
 
-通过一下方式设置电机的绝对位置：
+通过以下方式设置电机的绝对位置：
 
 === "命令行工具"
 
@@ -141,7 +163,7 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
     # 初始化当前位置为 3.14
     robodyno motor init -p 3.14
     # 初始化当前绝对位置为 0
-    robodyno motor init -p -a 0
+    robodyno motor init -a -p 0
     ```
 
 === "Python API"

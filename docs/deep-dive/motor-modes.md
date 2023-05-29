@@ -26,7 +26,7 @@ Robodyno 伺服减速电机支持以下 6 种运动模式：
 === "命令行工具"
 
     ``` bash
-    robodyno motor pos 6.28 --vel-ff 0.1 --torque-ff 0.1
+    robodyno motor pos 6.28 -m direct --vel-ff 0.1 --torque-ff 0.1
     ```
 
 === "Python API"
@@ -118,7 +118,7 @@ Robodyno 伺服减速电机支持以下 6 种运动模式：
 === "命令行工具"
 
     ``` bash
-    robodyno motor vel 1.0
+    robodyno motor vel 1.0 -m direct
     ```
 
 === "Python API"
