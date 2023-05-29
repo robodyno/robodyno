@@ -31,14 +31,17 @@ Examples:
 
 ```python
 from robodyno.components import Motor
-from robodyno.interfaces import Webots, CanBus
+from robodyno.interfaces import Webots
 webots = Webots()
-can_bus = CanBus()
-motor = Motor(webots, 0x10, twin = can_bus)
+motor = Motor(webots, 0x10)
+
+motor.position_track_mode(5, 2, 2)
+motor.enable()
+motor.set_pos(31.4)
 
 while True:
-    print(motor.get_pos())
-    if webots.sleep(1) == -1:
+    print(f'pos: {motor.get_pos():.2f}, vel: {motor.get_vel():.2f}')
+    if webots.sleep(0.5) == -1:
         break
 ```
 """

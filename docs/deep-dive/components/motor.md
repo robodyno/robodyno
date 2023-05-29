@@ -299,6 +299,29 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
 
 紧急停止后，电机会进入错误状态，可以清除错误后重新使用电机。
 
+## 数字孪生
+
+Robodyno 电机组件提供了基于 Webots 的仿真模型，可以通过在 Webots 环境中初始化电机时添加 `twin` 参数来启用数字孪生功能。
+
+```python
+from robodyno.components import Motor
+from robodyno.interfaces import Webots, CanBus
+webots = Webots()
+can_bus = CanBus()
+motor = Motor(webots, 0x10, twin = can_bus)
+
+while True:
+    print(motor.get_pos())
+    if webots.sleep(1) == -1:
+        break
+```
+
+!!! note
+
+    使用数字孪生功能时，会占用 CAN 总线实时读取电机的位置信息。因此，在 Windows 系统上，无法同时在 Webots 环境外使用 CAN 总线实时控制电机；在 Linux 系统上，可能会影响其他程序通过 CAN 总线实时控制电机的性能。
+
+仿真模型的下载方式和详细使用方法请参考 [Webots 仿真接口](../../interfaces/webots/)。
+
 ## 硬件参数
 
 | 参数       | `ROBODYNO_PRO_P44` | `ROBODYNO_PRO_P12` |
