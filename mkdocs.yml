@@ -49,6 +49,10 @@ nav:
         - PwmDriver: references/can_bus/pwm_driver.md
         - StepperDriver: references/can_bus/stepper_driver.md
         - ImuSensor: references/can_bus/imu_sensor.md
+      - webots:
+        - references/webots/index.md
+        - Motor: references/webots/motor.md
+        - SliderModule: references/webots/slider_module.md
   - 常见问题解答: faq.md
   - 贡献: contributing.md
   - 免责声明: disclaimer.md

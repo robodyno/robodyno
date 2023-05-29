@@ -24,57 +24,63 @@
 
 """Components of robottime devices.
 
-The components are loaded by entry_points, and the entry_points are defined in
-setup.py.
+Loads components from entry_points and provides a factory function for
+components.
 """
 
 import sys
 
-from robodyno.interfaces import InterfaceType, GET_IFACE_TYPE
+from robodyno.interfaces import InterfaceType, get_interface_type, WEBOTS_AVAILABLE
 from robodyno.components.can_bus.can_bus_device import CanBusDevice
+
+if WEBOTS_AVAILABLE:
+    from robodyno.components.webots.webots_device import WebotsDevice
 
 if sys.version_info < (3, 10):
     from importlib_metadata import entry_points
 else:
     from importlib.metadata import entry_points
-__thismodule = sys.modules[__name__]
 
+__thismodule = sys.modules[__name__]
 __components = {}
 
 
-can_eps = entry_points(group='robodyno.components.can_bus')
-for ep in can_eps:
-    if ep.name in __components:
-        __components[ep.name].update({InterfaceType.CanBus: ep.load()})
-    else:
-        __components.update({ep.name: {InterfaceType.CanBus: ep.load()}})
-
-try:
-    from robodyno.components.webots.webots_device import WebotsDevice
-
-    wb_eps = entry_points(group='robodyno.components.webots')
-    for ep in wb_eps:
+def _load_components(eps: list, interface_type: InterfaceType) -> None:
+    for ep in eps:
         if ep.name in __components:
-            __components[ep.name].update({InterfaceType.Webots: ep.load()})
+            __components[ep.name].update({interface_type: ep.load()})
         else:
-            __components.update({ep.name: {InterfaceType.Webots: ep.load()}})
-except ImportError as e:
-    pass
+            __components.update({ep.name: {interface_type: ep.load()}})
 
 
-def component_factory(cls_name):
-    def constructor(interface, *args, **kwargs):
-        if cls_name not in __components:
-            raise ValueError(f'Component {cls_name} not found.')
-        if GET_IFACE_TYPE(interface) not in __components[cls_name]:
-            raise ValueError(
-                f'Component {cls_name} does not support interface {interface}.'
-            )
-        return __components[cls_name][GET_IFACE_TYPE(interface)](
-            interface, *args, **kwargs
-        )
-    return constructor
+_load_components(
+    entry_points(group='robodyno.components.can_bus'), InterfaceType.CAN_BUS
+)
+
+if WEBOTS_AVAILABLE:
+    _load_components(
+        entry_points(group='robodyno.components.webots'), InterfaceType.WEBOTS
+    )
 
 
-for component in __components:
-    setattr(__thismodule, component, component_factory(component))
+def _component_factory(component_name: str) -> callable:
+    def construct_component(interface: InterfaceType, *args, **kwargs) -> callable:
+        interface_type = get_interface_type(interface)
+        if component_name in __components:
+            if interface_type in __components[component_name]:
+                return __components[component_name][interface_type](
+                    interface, *args, **kwargs
+                )
+            else:
+                raise ValueError(
+                    f'Component {component_name} is not available for interface '
+                    f'type {interface_type}.'
+                )
+        else:
+            raise ValueError(f'Component {component_name} is not available.')
+
+    return construct_component
+
+
+for name in __components:
+    setattr(__thismodule, name, _component_factory(name))

@@ -48,7 +48,7 @@ from robodyno.interfaces import CanBus
 from robodyno.components.can_bus.motor import Motor
 
 
-class SliderModule:
+class SliderModule(object):
     """Slider module.
 
     Attributes:

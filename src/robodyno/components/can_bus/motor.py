@@ -499,7 +499,7 @@ class Motor(CanBusDevice):
         Raises:
             ValueError: If the velocity limit is out of range.
         """
-        if not 0 <= vel_lim <= self.available_velocity:
+        if not 0 < vel_lim <= self.available_velocity:
             raise ValueError(f'Velocity limit {vel_lim} is out of range.')
         self._can.send(
             self.id, self._CMD_SET_LIMITS, 'ff', fabs(vel_lim * self._rot_factor), 0
@@ -514,7 +514,7 @@ class Motor(CanBusDevice):
         Raises:
             ValueError: If the current limit is out of range.
         """
-        if not 0 <= current_lim <= self.available_current:
+        if not 0 < current_lim <= self.available_current:
             raise ValueError(f'Current limit {current_lim} is out of range.')
         self._can.send(self.id, self._CMD_SET_LIMITS, 'ff', 0, current_lim)
 
@@ -727,7 +727,7 @@ class Motor(CanBusDevice):
         return (pos_kp, vel_kp, vel_ki)
 
     def get_vel_limit(self, timeout: Optional[float] = None) -> Optional[float]:
-        """Reads the velocity limit and the current limit of the motor.
+        """Reads the velocity limit of the motor.
 
         Args:
             timeout (float): The timeout in seconds.

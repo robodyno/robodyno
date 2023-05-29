@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Base class for all robodyno devices.
+"""Base class for all robodyno devices which use can bus as communication
 
 All robodyno devices which use can bus as communication interface should
 inherit this class.
@@ -45,7 +45,7 @@ Examples:
 from typing import Optional
 
 from robodyno.components.config.model import Model
-from robodyno.interfaces import CanBus
+from robodyno.interfaces import InterfaceType, get_interface_type
 
 
 class CanBusDevice(object):
@@ -57,9 +57,9 @@ class CanBusDevice(object):
     firmware version and device type.
 
     Attributes:
-        id: Device id.
-        type: Device type.
-        fw_ver: Device firmware version.
+        id (int): Device id.
+        type (Model): Device type.
+        fw_ver (float): Device firmware version.
     """
 
     _CMD_GET_VERSION = 0x01
@@ -77,7 +77,7 @@ class CanBusDevice(object):
         """
         if not 0x01 <= device_id < 0x40:
             raise ValueError('Device id should be in range [0x01, 0x40).')
-        if not isinstance(can, CanBus):
+        if get_interface_type(can) != InterfaceType.CAN_BUS:
             raise TypeError('CanBusDevice can only be initialized with CanBus.')
         self._can = can
         self.id = device_id
