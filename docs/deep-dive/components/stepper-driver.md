@@ -104,4 +104,4 @@ stepper.set_vel_acc_limit(5, 10)
 
 | 组件 | 说明 |
 | ---- | ---- |
-| [can_bus.stepper_driver](../../../references/can_bus/stepper_driver) | CAN 总线步进电机驱动模块类 |
+| [can_bus.stepper_driver](../../../references/components/can_bus/stepper_driver) | CAN 总线步进电机驱动模块类 |

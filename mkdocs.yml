@@ -43,16 +43,16 @@ nav:
       - Webots: references/interfaces/webots.md
     - robodyno.components:
       - can_bus:
-        - references/can_bus/index.md
-        - Motor: references/can_bus/motor.md
-        - SliderModule: references/can_bus/slider_module.md
-        - PwmDriver: references/can_bus/pwm_driver.md
-        - StepperDriver: references/can_bus/stepper_driver.md
-        - ImuSensor: references/can_bus/imu_sensor.md
+        - references/components/can_bus/index.md
+        - Motor: references/components/can_bus/motor.md
+        - SliderModule: references/components/can_bus/slider_module.md
+        - PwmDriver: references/components/can_bus/pwm_driver.md
+        - StepperDriver: references/components/can_bus/stepper_driver.md
+        - ImuSensor: references/components/can_bus/imu_sensor.md
       - webots:
-        - references/webots/index.md
-        - Motor: references/webots/motor.md
-        - SliderModule: references/webots/slider_module.md
+        - references/components/webots/index.md
+        - Motor: references/components/webots/motor.md
+        - SliderModule: references/components/webots/slider_module.md
   - 常见问题解答: faq.md
   - 贡献: contributing.md
   - 免责声明: disclaimer.md

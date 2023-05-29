@@ -57,19 +57,19 @@ can_bus = CanBus()
 imu_sensor = ImuSensor(can_bus)
 
 # 设置角速度量程为 500 deg/s，加速度量程为 8 g
-imu_sensor.set_ranges(1, 2) 
+imu_sensor.set_ranges(1, 2)
 ```
 
 ## 硬件参数
 
-| 参数 | 值 |
-| ---- | ---- |
-| 电源输入 | 5V ~ 29.4V |
+| 参数       | 值                         |
+| ---------- | -------------------------- |
+| 电源输入   | 5V ~ 29.4V                 |
 | 角速度量程 | 250, 500, 1000, 2000 deg/s |
-| 加速度量程 | 2, 4, 8, 16 g |
+| 加速度量程 | 2, 4, 8, 16 g              |
 
 ## API
 
-| 组件 | 说明 |
-| ---- | ---- |
-| [can_bus.imu_sensor](../../../references/can_bus/imu_sensor) | CAN 总线 IMU 传感器模块类 |
+| 组件                                                                    | 说明                      |
+| ----------------------------------------------------------------------- | ------------------------- |
+| [can_bus.imu_sensor](../../../references/components/can_bus/imu_sensor) | CAN 总线 IMU 传感器模块类 |

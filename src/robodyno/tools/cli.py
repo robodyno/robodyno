@@ -469,6 +469,7 @@ def estop(ctx: click.Context) -> None:
 @motor.command(name='reset')
 @click.pass_context
 def reset(ctx: click.Context) -> None:
+    """Reset motors."""
     console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:

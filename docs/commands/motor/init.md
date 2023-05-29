@@ -1,51 +1,44 @@
-
 # motor init
 
-Initialize motor.
+初始化电机位置。
 
-## Usage
+## 使用
 
+```bash
+robodyno motor init [OPTIONS]
 ```
-Usage: robodyno motor init [OPTIONS]
-```
 
-## Options
-* `pos`: 
-  * Type: FLOAT 
-  * Default: `0.0`
-  * Usage: `--pos
--p`
+## Options（选项）
 
-  Initial position.
+### `-p`, `--pos`
 
+设定的新初始位置，单位：弧度。
 
-* `absolute`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--absolute
--a`
+- 类型: FLOAT
+- 默认值: 0.0
 
-  Use absolute position.
+### `-a`, `--absolute`
 
+设定绝对位置的初始位置。
 
-* `save`: 
-  * Type: BOOL 
-  * Default: `true`
-  * Usage: `--save`
+- 类型: BOOL
+- 默认值: `false`
 
-  Save the absolute initial position.
+### `--save / -S`, `--not-save`
 
+保存绝对位置的初始位置。
 
-* `help`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--help`
+- 类型: BOOL
+- 默认值: `true`
 
-  Show this message and exit.
+### `--help`
 
+显示帮助信息。
 
+- 类型: BOOL
+- 默认值: `false`
 
-## CLI Help
+## CLI 帮助信息
 
 ```
 Usage: robodyno motor init [OPTIONS]
@@ -58,4 +51,3 @@ Options:
   --save / -S, --not-save  Save the absolute initial position.
   --help                   Show this message and exit.
 ```
-

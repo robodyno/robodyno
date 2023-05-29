@@ -1,59 +1,56 @@
-
 # motor vel
 
-Set motor velocity.
+控制电机按速度转动。
 
-## Usage
+## 使用
 
+```bash
+robodyno motor vel [OPTIONS] VELOCITY
 ```
-Usage: robodyno motor vel [OPTIONS] VELOCITY
+
+## Options（选项）
+
+### `VELOCITY` （必需）
+
+电机目标速度。
+
+- 类型: FLOAT
+- 用法：
+
+```bash
+robodyno motor vel 3.14
+robodyno motor vel -- -3.14
 ```
 
-## Options
-* `velocity` (REQUIRED): 
-  * Type: FLOAT 
-  * Default: `none`
-  * Usage: `velocity`
+### `-m`, `--mode`
 
-  
+指定速度控制模式。
 
+- 类型: Choice(['direct', 'ramp'])
+- 默认值: `ramp`
 
-* `mode`: 
-  * Type: Choice(['direct', 'ramp']) 
-  * Default: `ramp`
-  * Usage: `--mode
--m`
+### `-r`, `--ramp`
 
-  Velocity control mode. Default is ramp mode.
+速度坡度模式的坡度（加速度及减速度）。
 
+- 类型: FLOAT
+- 默认值: `10.0`
 
-* `ramp`: 
-  * Type: FLOAT 
-  * Default: `10.0`
-  * Usage: `--ramp
--r`
+### `--torque-ff`
 
-  Ramp rate of the velocity ramp control.
+力矩前馈。
 
+- 类型: FLOAT
+- 默认值: `0.0`
 
-* `torque_ff`: 
-  * Type: FLOAT 
-  * Default: `0.0`
-  * Usage: `--torque-ff`
+### `--help`
 
-  Torque feedforward.
+显示帮助信息。
 
+- 类型: BOOL
+- 默认值: `false`
 
-* `help`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--help`
-
-  Show this message and exit.
-
-
-
-## CLI Help
+## CLI 帮助信息
 
 ```
 Usage: robodyno motor vel [OPTIONS] VELOCITY
@@ -66,4 +63,3 @@ Options:
   --torque-ff FLOAT         Torque feedforward.
   --help                    Show this message and exit.
 ```
-

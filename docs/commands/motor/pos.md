@@ -1,103 +1,91 @@
-
 # motor pos
 
-Set motor position.
+控制电机按位置转动。
 
-## Usage
+## 使用
 
+```bash
+robodyno motor pos [OPTIONS] POSITION
 ```
-Usage: robodyno motor pos [OPTIONS] POSITION
+
+## Options（选项）
+
+### `POSITION` （必需）
+
+电机目标位置。
+
+- 类型: FLOAT
+- 用法:
+
+```bash
+robodyno motor pos 3.14
+robodyno motor pos -- -3.14
 ```
 
-## Options
-* `position` (REQUIRED): 
-  * Type: FLOAT 
-  * Default: `none`
-  * Usage: `position`
+### `-m`, `--mode`
 
-  
+指定位置控制模式。
 
+- 类型: Choice(['direct', 'filter', 'track'])
+- 默认值: `filter`
 
-* `mode`: 
-  * Type: Choice(['direct', 'filter', 'track']) 
-  * Default: `filter`
-  * Usage: `--mode
--m`
+### `-b`, `--bandwidth`
 
-  Position control mode. Default is filter mode.
+滤波位置模式中滤波器带宽。
 
+- 类型: FLOAT
+- 默认值: `10.0`
 
-* `bandwidth`: 
-  * Type: FLOAT 
-  * Default: `10.0`
-  * Usage: `--bandwidth
--b`
+### `-v`, `--traj-vel`
 
-  Bandwidth of the filter.
+位置追踪模式的最高轨迹速度。
 
+- 类型: FLOAT
+- 默认值: `5.0`
 
-* `traj_vel`: 
-  * Type: FLOAT 
-  * Default: `5.0`
-  * Usage: `--traj-vel
--v`
+### `--acc`, `--traj-acc`
 
-  Trajectory velocity of the position tracking control.
+位置追踪模式的轨迹加速度。
 
+- 类型: FLOAT
+- 默认值: `10.0`
 
-* `traj_acc`: 
-  * Type: FLOAT 
-  * Default: `10.0`
-  * Usage: `--traj-acc
---acc`
+### `--dec`, `--traj-dec`
 
-  Trajectory acceleration of the position tracking control.
+位置追踪模式的轨迹减速度。
 
+- 类型: FLOAT
+- 默认值: `10.0`
 
-* `traj_dec`: 
-  * Type: FLOAT 
-  * Default: `10.0`
-  * Usage: `--traj-dec
---dec`
+### `--vel-ff`
 
-  Trajectory deceleration of the position tracking control.
+速度前馈。
 
+- 类型: FLOAT
+- 默认值: `0.0`
 
-* `vel_ff`: 
-  * Type: FLOAT 
-  * Default: `0.0`
-  * Usage: `--vel-ff`
+### `--torque-ff`
 
-  Velocity feedforward.
+力矩前馈。
 
+- 类型: FLOAT
+- 默认值: `0.0`
 
-* `torque_ff`: 
-  * Type: FLOAT 
-  * Default: `0.0`
-  * Usage: `--torque-ff`
+### `-a`, `--absolute`
 
-  Torque feedforward.
+使用绝对位置。
 
+- 类型: BOOL
+- 默认值: `false`
 
-* `absolute`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--absolute
--a`
+### `--help`
 
-  Use absolute position.
+显示帮助信息。
 
+- 类型: BOOL
+- 默认值: `false`
 
-* `help`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--help`
-
-  Show this message and exit.
-
-
-
-## CLI Help
+## CLI 帮助信息
 
 ```
 Usage: robodyno motor pos [OPTIONS] POSITION
@@ -111,13 +99,12 @@ Options:
   -b, --bandwidth FLOAT           Bandwidth of the filter.
   -v, --traj-vel FLOAT            Trajectory velocity of the position tracking
                                   control.
-  -a, --traj-acc FLOAT            Trajectory acceleration of the position
+  --acc, --traj-acc FLOAT         Trajectory acceleration of the position
                                   tracking control.
-  -d, --traj-dec FLOAT            Trajectory deceleration of the position
+  --dec, --traj-dec FLOAT         Trajectory deceleration of the position
                                   tracking control.
   --vel-ff FLOAT                  Velocity feedforward.
   --torque-ff FLOAT               Torque feedforward.
   -a, --absolute                  Use absolute position.
   --help                          Show this message and exit.
 ```
-

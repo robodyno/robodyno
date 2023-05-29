@@ -40,5 +40,5 @@ slider_module.set_pos(0.05)
 
 | 组件 | 说明 |
 | ---- | ---- |
-| [can_bus.slider_module](../../../references/can_bus/slider_module) | CAN 总线直线运动模组类 |
-| [webots.slider_module](../../../references/webots/slider_module) | Webots 直线运动模组类 |
+| [can_bus.slider_module](../../../references/components/can_bus/slider_module) | CAN 总线直线运动模组类 |
+| [webots.slider_module](../../../references/components/webots/slider_module) | Webots 直线运动模组类 |

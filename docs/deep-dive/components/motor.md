@@ -76,12 +76,12 @@ Robodyno 的伺服减速电机根据减速比和电机参数的不同，分为�
 
 Robodyno 的伺服减速电机支持以下几种运动模式：
 
-* 位置模式（`POSITION`）
-* 位置滤波模式（`POSITION_FILTER`）
-* 位置追踪模式（`POSITION_TRACK`）
-* 速度模式（`VELOCITY`）
-* 速度坡度模式（`VELOCITY_RAMP`）
-* 力矩模式（`TORQUE`）
+- 位置模式（`POSITION`）
+- 位置滤波模式（`POSITION_FILTER`）
+- 位置追踪模式（`POSITION_TRACK`）
+- 速度模式（`VELOCITY`）
+- 速度坡度模式（`VELOCITY_RAMP`）
+- 力矩模式（`TORQUE`）
 
 以位置滤波模式为例，通过以下方式进入位置滤波模式并控制电机转动：
 
@@ -104,6 +104,7 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
     motor.enable()
     motor.set_pos(6.28)
     ```
+
 关于运动模式的详细说明请参考 [电机运动模式](../../motor-modes/)。
 
 ## 绝对位置及位置初始化
@@ -142,6 +143,7 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
     # 初始化当前绝对位置为 0
     robodyno motor init -p -a 0
     ```
+
 === "Python API"
 
     ``` python
@@ -182,7 +184,7 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
     current_id = 0x10
     new_id = 0x11
 
-    motor = Motor(can_bus, current_id)    
+    motor = Motor(can_bus, current_id)
     motor.config_can_bus(new_id = new_id)
 
     # 保存设置
@@ -247,7 +249,7 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
     print(motor.error)
     ```
 
-完整的错误列表请参考 [电机错误](../../../references/can_bus/motor/#robodyno.components.can_bus.motor.Motor.MotorError)。
+完整的错误列表请参考 [电机错误](../../../references/components/can_bus/motor/#robodyno.components.can_bus.motor.Motor.MotorError)。
 
 在确保电机没有异常的情况下，可以通过以下方式清除错误：
 
@@ -256,6 +258,7 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
     ``` bash
     robodyno motor clear-errors
     ```
+
 === "Python API"
 
     ``` python
@@ -296,29 +299,28 @@ Robodyno 的伺服减速电机支持以下几种运动模式：
 
 紧急停止后，电机会进入错误状态，可以清除错误后重新使用电机。
 
-
 ## 硬件参数
 
-| 参数 | `ROBODYNO_PRO_P44` | `ROBODYNO_PRO_P12` |
-| ---- | ----------------- | ----------------- |
-| 电源输入 | 11.1V ~ 25.2V |
-| 额定功率 | 35W |
-| 最大相电流 | 15A |
-| 减速比 | 44:1 | 12.45:1 |
-| 额定转速 | 55RPM | 190RPM |
-| 额定扭矩 | 7.5Nm | 2Nm |
-| 最大转速 | 80RPM | 280RPM |
-| 最大扭矩 | 10Nm | 2.5Nm |
+| 参数       | `ROBODYNO_PRO_P44` | `ROBODYNO_PRO_P12` |
+| ---------- | ------------------ | ------------------ |
+| 电源输入   | 11.1V ~ 25.2V      |
+| 额定功率   | 35W                |
+| 最大相电流 | 15A                |
+| 减速比     | 44:1               | 12.45:1            |
+| 额定转速   | 55RPM              | 190RPM             |
+| 额定扭矩   | 7.5Nm              | 2Nm                |
+| 最大转速   | 80RPM              | 280RPM             |
+| 最大扭矩   | 10Nm               | 2.5Nm              |
 
 ## API
 
-| 组件 | 说明 |
-| ---- | ---- |
-| [can_bus.motor](../../../references/can_bus/motor) | CAN 总线伺服减速电机类 |
-| [webots.motor](../../../references/webots/motor) | Webots 仿真伺服减速电机类 |
+| 组件                                               | 说明                      |
+| -------------------------------------------------- | ------------------------- |
+| [can_bus.motor](../../../references/components/can_bus/motor) | CAN 总线伺服减速电机类    |
+| [webots.motor](../../../references/components/webots/motor)   | Webots 仿真伺服减速电机类 |
 
 ## 命令行工具
 
-| 命令 | 说明 |
-| ---- | ---- |
+| 命令                                      | 说明                   |
+| ----------------------------------------- | ---------------------- |
 | [robodyno motor](../../../commands/motor) | 伺服减速电机命令行工具 |

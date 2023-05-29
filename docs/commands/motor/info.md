@@ -1,25 +1,23 @@
-
 # motor info
 
-Get motor info.
+显示帮助信息。
 
-## Usage
+## 使用
 
+```bash
+robodyno motor info [OPTIONS]
 ```
-Usage: robodyno motor info [OPTIONS]
-```
 
-## Options
-* `help`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--help`
+## Options（选项）
 
-  Show this message and exit.
+### `--help`
 
+显示帮助信息。
 
+- 类型: BOOL
+- 默认值: `false`
 
-## CLI Help
+## CLI 帮助信息
 
 ```
 Usage: robodyno motor info [OPTIONS]
@@ -29,4 +27,3 @@ Usage: robodyno motor info [OPTIONS]
 Options:
   --help  Show this message and exit.
 ```
-

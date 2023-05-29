@@ -1,79 +1,65 @@
-
 # motor config
 
-Configure motor parameters.
+配置电机参数。没有指定选项时，默认设置电机常规参数。
 
-## Usage
+## 使用
 
+```bash
+robodyno motor config [OPTIONS]
 ```
-Usage: robodyno motor config [OPTIONS]
-```
 
-## Options
-* `vel_limit`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--vel-limit
--v`
+## Options（选项）
 
-  Set velocity limit.
+### `-v`, `--vel-limit`
 
+设置速度限制。
 
-* `current_limit`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--current-limit
--c`
+- 类型: BOOL
+- 默认值: `false`
 
-  Set current limit.
+### `-c`, `--current-limit`
 
+设置电流限制。
 
-* `pid`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--pid
--p`
+- 类型: BOOL
+- 默认值: `false`
 
-  Set PID gains.
+### `-p`, `--pid`
 
+设置 PID 参数。
 
-* `heartbeat_rate`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--heartbeat-rate
--h`
+- 类型: BOOL
+- 默认值: `false`
 
-  Set heartbeat rate.
+### `-h`, `--heartbeat-rate`
 
+设置心跳包发送频率。
 
-* `new_id`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--new-id
--i`
+- 类型: BOOL
+- 默认值: `false`
 
-  Set new ID.
+### `-i`, `--new-id`
 
+设置新的电机 ID。
 
-* `can_baudrate`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--can-baudrate
--b`
+- 类型: BOOL
+- 默认值: `false`
 
-  Set CAN baudrate.
+### `-b`, `--can-baudrate`
 
+设置 CAN 波特率。
 
-* `help`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--help`
+- 类型: BOOL
+- 默认值: `false`
 
-  Show this message and exit.
+### `--help`
 
+显示帮助信息。
 
+- 类型: BOOL
+- 默认值: `false`
 
-## CLI Help
+## CLI 帮助信息
 
 ```
 Usage: robodyno motor config [OPTIONS]
@@ -89,4 +75,3 @@ Options:
   -b, --can-baudrate    Set CAN baudrate.
   --help                Show this message and exit.
 ```
-

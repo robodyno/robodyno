@@ -1,34 +1,84 @@
-
 # robodyno motor
 
-Motor commands.
+电机控制命令。
 
-## Usage
+## 使用
 
+```bash
+robodyno motor [OPTIONS] COMMAND [ARGS]...
 ```
-Usage: robodyno motor [OPTIONS] COMMAND [ARGS]...
-```
 
-## Options
-* `id_set`: 
-  * Type: <robodyno.tools.cli_param_types.DeviceIdListParamType object at 0x00000219F58236D0> 
-  * Default: `16`
-  * Usage: `--id
--i`
+## Options（选项）
 
-  Device ID list.
+### `-i`, `--id`
 
+设备 ID 列表。
 
-* `help`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--help`
+- 类型: 设备 ID 列表，用逗号分隔，可以是单个 ID，ID 范围（`start-end`），比如 `0x10,0x11,0x12-0x15`。
+- 默认值: 0x10
 
-  Show this message and exit.
+### `--help`
 
+显示帮助信息。
 
+- 类型: BOOL
+- 默认值: `false`
 
-## CLI Help
+## Commands（命令）
+
+### [info](info/)
+
+获取电机信息。
+
+### [enable](enable/)
+
+使能电机。
+
+### [disable](disable/)
+
+失能电机。
+
+### [init](init/)
+
+初始化电机位置。
+
+### [pos](pos/)
+
+控制电机按位置转动。
+
+### [vel](vel/)
+
+控制电机按速度转动。
+
+### [torque](torque/)
+
+控制电机按力矩转动。
+
+### [config](config/)
+
+配置电机参数。
+
+### [calibrate](calibrate/)
+
+校准电机。
+
+### [clear-errors](clear-errors/)
+
+清除电机错误。
+
+### [reboot](reboot/)
+
+重启电机。
+
+### [estop](estop/)
+
+急停电机。
+
+### [reset](reset/)
+
+恢复出厂设置。
+
+## CLI 帮助信息
 
 ```
 Usage: robodyno motor [OPTIONS] COMMAND [ARGS]...
@@ -50,8 +100,7 @@ Commands:
   init          Initialize motor.
   pos           Set motor position.
   reboot        Reboot motors.
-  reset
+  reset         Reset motors.
   torque        Set motor torque.
   vel           Set motor velocity.
 ```
-

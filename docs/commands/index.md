@@ -1,51 +1,58 @@
-
 # robodyno
 
-Robodyno command line interface.
+Robodyno 命令行工具
 
-## Usage
+## 使用
 
+```bash
+robodyno [OPTIONS] COMMAND [ARGS]...
 ```
-Usage: robodyno [OPTIONS] COMMAND [ARGS]...
-```
 
-## Options
-* `version`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--version`
+## Options（选项）
 
-  Show the version and exit.
+### `--version`
 
+显示 Robodyno 版本信息。
 
-* `can_bus`: 
-  * Type: STRING 
-  * Default: `can0`
-  * Usage: `--can-bus
--c`
+- 类型: BOOL
+- 默认值: `false`
 
-  CAN bus interface channel.
+### `-c`, `--can-bus`
 
+CAN 总线接口通道选择。
 
-* `baudrate`: 
-  * Type: INT 
-  * Default: `1000000`
-  * Usage: `--baudrate
--b`
+- 类型: STRING
+- 默认值: `can0`
 
-  CAN bus baud rate.
+### `-b`, `--baudrate`
 
+CAN 总线波特率，从 250000，500000，1000000 中选择。
 
-* `help`: 
-  * Type: BOOL 
-  * Default: `false`
-  * Usage: `--help`
+- 类型: INT
+- 默认值: 1000000
 
-  Show this message and exit.
+### `--help`
 
+显示帮助信息。
 
+- 类型: BOOL
+- 默认值: `false`
 
-## CLI Help
+## Commands（命令）
+
+### [list](list/)
+
+列出 CAN 总线上所有设备。
+
+### [monitor](monitor/)
+
+监控 CAN 总线上所有消息。
+
+### [motor](motor/)
+
+电机控制命令。
+
+## CLI 帮助信息
 
 ```
 Usage: robodyno [OPTIONS] COMMAND [ARGS]...
@@ -63,4 +70,3 @@ Commands:
   monitor  Monitor all devices on the CAN bus.
   motor    Motor commands.
 ```
-
