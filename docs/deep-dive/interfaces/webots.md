@@ -10,7 +10,9 @@ Webots 的安装请参考 [Webots 官方文档](https://cyberbotics.com/doc/guid
 
 ### Robodyno 仿真模型
 
-待补充
+Robodyno 仿真模型可以在 [GitHub](https://github.com/robodyno/robodyno_webots_models) 或 [Gitee](https://gitee.com/robodyno/robodyno_webots_models) 上下载。
+
+下载完成后将 `robodyno_webots_models` 文件夹中的 `protos` 放入自己的 Webots 项目文件夹中，即可使用 Robodyno 的仿真模型。同时你也可以在 `robodyno_webots_models` 的 `worlds` 文件夹中找到一些使用 Robodyno 仿真模型的 Webots 项目示例。
 
 ## 使用
 

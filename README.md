@@ -1,9 +1,9 @@
 # robodyno
 
-![pypi](https://img.shields.io/pypi/v/robodyno)
-![Python](https://img.shields.io/pypi/pyversions/robodyno)
-![wheel](https://img.shields.io/pypi/wheel/robodyno)
-![download](https://img.shields.io/pypi/dm/robodyno)
+[![pypi](https://img.shields.io/pypi/v/robodyno)](https://pypi.org/project/robodyno/)
+[![Python](https://img.shields.io/pypi/pyversions/robodyno)](https://www.python.org/downloads/)
+[![wheel](https://img.shields.io/pypi/wheel/robodyno)](https://pypi.org/project/robodyno/#files)
+[![download](https://img.shields.io/pypi/dm/robodyno)](https://pypi.org/project/robodyno/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ## Installation
