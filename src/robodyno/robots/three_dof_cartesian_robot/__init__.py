@@ -22,6 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Components of three dof delta robot devices."""
+"""Components of three dof cartesian robot devices."""
 
-from .three_dof_delta_robot import ThreeDoFDelta
+from .three_dof_cartesian_robot import ThreeDofCartesian

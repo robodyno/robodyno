@@ -37,4 +37,6 @@ print(motor.get_pos())
 motor.disable()
 ```
 
+For more examples, please refer to `examples` directory.
+
 For more documentation, please refer to [docs](http://101.42.250.169/latest/).

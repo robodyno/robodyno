@@ -12,9 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Documentations for Robodyno.
+- Examples written in Jupyter Notebook.
 
 ### Changed
 
+- License from MIT to Apache 2.0.
 - Constructors of `CanBusDevice` now accept `can`, `id_` and `type_` as parameters instead of `iface`, `id` and `type`.
 - Constructors of `WebotsDevice` now accept `webots`, `id_` and `type_` as parameters instead of `iface`, `id` and `type`.
 - Enhance the `CanBus` interface to receive messages more efficiently.
