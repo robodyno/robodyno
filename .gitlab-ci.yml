@@ -89,7 +89,7 @@ push-to-github:
     - git remote set-url origin ${GITHUB_REPO}
     - git push --force origin main
 
-push-to-gitlab:
+push-to-gitee:
   stage: deploy
   tags:
     - docker
