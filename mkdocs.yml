@@ -1,37 +1,73 @@
-site_name: Robodyno 文档
+site_name: Robodyno 开发者文档
 nav:
-  - 概述: index.md
-  - 入门指南:
-    - 安装: installation.md
-    - 准备工作: configuration.md
-    - 使用示例: usage.md
-    - 命令行工具: cli.md
-  - API 参考: 
-    - robodyno.interfaces:
-      - CanBus: references/canbus.md
-    - robodyno.components:
-      - Motor: references/motor.md
+  - 开始:
+    - index.md
+    - 安装: start/installation.md
+    - 快速开始: start/quickstart.md
   - 深入了解:
-    - 电机控制模式: control-mode.md
-    - 电机参数配置: motor-config.md
-    - CAN 总线通信协议: can-interface.md
-  - 常见问题解答: 
-    - API相关问题: api-qa.md
-    - 命令行工具相关问题: cli-qa.md
-  - 贡献: 
-    - 贡献指南: contribution.md
-    - 贡献者名单: contributors.md
-    - 开发计划: roadmap.md
-  - 相关声明:
-    - 开源协议: license.md
-    - 免责声明: disclaimer.md
+    - deep-dive/index.md
+    - 接口: 
+      - CAN 总线: deep-dive/interfaces/can-bus.md
+      - Webots: deep-dive/interfaces/webots.md
+    - 组件: 
+      - deep-dive/components/index.md
+      - 伺服减速电机: deep-dive/components/motor.md
+      - 直线运动模组: deep-dive/components/slider-module.md
+      - PWM 扩展模块: deep-dive/components/pwm-driver.md
+      - 步进电机驱动模块: deep-dive/components/stepper-driver.md
+      - IMU 传感器: deep-dive/components/imu-sensor.md
+    - 电机运动模式: deep-dive/motor-modes.md
+  - Robodyno CLI:
+    - commands/index.md
+    - list: commands/list.md
+    - monitor: commands/monitor.md
+    - motor: 
+      - commands/motor/index.md
+      - info: commands/motor/info.md
+      - enable: commands/motor/enable.md
+      - disable: commands/motor/disable.md
+      - init: commands/motor/init.md
+      - pos: commands/motor/pos.md
+      - vel: commands/motor/vel.md
+      - torque: commands/motor/torque.md
+      - config: commands/motor/config.md
+      - calibrate: commands/motor/calibrate.md
+      - clear-errors: commands/motor/clear-errors.md
+      - reboot: commands/motor/reboot.md
+      - estop: commands/motor/estop.md
+      - reset: commands/motor/reset.md
+  - Robodyno API: 
+    - references/index.md
+    - robodyno.interfaces:
+      - CanBus: references/interfaces/can_bus.md
+      - Webots: references/interfaces/webots.md
+    - robodyno.components:
+      - can_bus:
+        - references/components/can_bus/index.md
+        - Motor: references/components/can_bus/motor.md
+        - SliderModule: references/components/can_bus/slider_module.md
+        - PwmDriver: references/components/can_bus/pwm_driver.md
+        - StepperDriver: references/components/can_bus/stepper_driver.md
+        - ImuSensor: references/components/can_bus/imu_sensor.md
+      - webots:
+        - references/components/webots/index.md
+        - Motor: references/components/webots/motor.md
+        - SliderModule: references/components/webots/slider_module.md
+  - 常见问题解答: faq.md
+  - 贡献: contributing.md
+  - 免责声明: disclaimer.md
 theme:
   name: material
   language: zh
   logo: assets/logo.png
   favicon: assets/favicon.png
   features:
+    - navigation.indexes
+    - navigation.instant
+    - navigation.tracking
+    - navigation.footer
     - navigation.sections
+    - content.code.copy
 extra_css:
   - stylesheets/custom.css
 plugins:
@@ -41,8 +77,21 @@ plugins:
         python:
           options:
             show_source: false
+            show_root_heading: true
+            heading_level: 2
+            members_order: source
+            group_by_category: false
+          paths: [src]
   - search:
       separator: '[\s\u200b\-]'
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - tables
+  - pymdownx.tabbed:
+      alternate_style: true 
 
 copyright: Copyright &copy; 2007 - 2023 RobotTime
 
