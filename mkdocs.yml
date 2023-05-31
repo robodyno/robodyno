@@ -53,9 +53,13 @@ nav:
         - references/components/webots/index.md
         - Motor: references/components/webots/motor.md
         - SliderModule: references/components/webots/slider_module.md
+  - 免责声明与安全须知: 
+    - 开源固件: disclaimer/software.md
+    - 机器人模组（Plus系列）: disclaimer/plus.md
+    - 机器人模组（Pro系列）: disclaimer/pro.md
+    - 机器人模组（Mini系列）: disclaimer/mini.md
   - 常见问题解答: faq.md
   - 贡献: contributing.md
-  - 免责声明: disclaimer.md
 theme:
   name: material
   language: zh
