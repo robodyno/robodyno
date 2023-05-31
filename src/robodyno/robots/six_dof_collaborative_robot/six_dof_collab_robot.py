@@ -1,57 +1,96 @@
-#!/usr/bin/env python
 # -*-coding:utf-8 -*-
-"""six_dof_collab_robot.py
-Time    :   2022/10/08
-Author  :   ryan 
-Version :   1.0
-Contact :   ryanzhang@163.com
-License :   (C)Copyright 2022, robottime / robodyno
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-6DoF Collaborative Robot Driver
+"""This module provides a class for controlling Robodyno Six Dof Collaborative Robot.
 
-  Typical usage example:
+The SixDoFCollabRobot class provided by this module is used to control Robodyno Six Dof Collaborative Robot
+through the CAN bus. It provides methods for setting Six Dof Collaborative Robot parameters, reading Six Dof Collaborative Robot
+states, and controlling the Six Dof Collaborative Robot to run in different space.
 
-  from robodyno.robots.six_dof_collaborative_robot import SixDoFCollabRobot
-  robot = SixDoFCollabRobot(
-      j1 = base_motor,
-      j2 = shoulder_motor,
-      j3 = upperarm_motor,
-      j4 = elbow_motor,
-      j5 = forearm_motor,
-      j6 = hand_motor,
-      l01 = 0.18,
-      l12 = 0.135,
-      l23 = 0.135,
-      l34 = 0.075,
-      l45 = 0.075,
-      l56 = 0.1,
-      end_effector = None
-  )
+Examples:
+
+    >>> from robodyno.components import Motor
+    >>> from robodyno.interfaces import CanBus
+    >>> from robodyno.robots.six_dof_collaborative_robot import SixDoFCollabRobot
+    >>> can = CanBus()
+    >>> class MySixDoFArm(SixDoFCollabRobot):
+    >>>     def __init__(self):
+    >>>         M1 = Motor(can, 0x10, 'ROBODYNO_PRO_44')
+    >>>         M2 = Motor(can, 0x11, 'ROBODYNO_PRO_44')
+    >>>         M3 = Motor(can, 0x12, 'ROBODYNO_PRO_44')
+    >>>         M4 = Motor(can, 0x13, 'ROBODYNO_PRO_44')
+    >>>         M5 = Motor(can, 0x14, 'ROBODYNO_PRO_12')
+    >>>         M6 = Motor(can, 0x15, 'ROBODYNO_PRO_12')
+    >>>     super().__init__(M1, M2, M3, M4, M5, M6, 0.18, 0.135, 0.135, 0.075, 0.075, 0.1)
+    >>> arm = MySixDoFArm()
+    >>> arm.init()
+    >>> arm.get_joints_poses()
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    >>> can.disconnect()
 """
 
 import time
-from math import pi, sqrt, sin, cos, atan2
-from cmath import acos, asin
 import numpy as np
+from cmath import acos, asin
+from math import pi, sqrt, sin, cos, atan2
 from ..utils.transformations import dh_matrix, euler_from_matrix, translation_from_matrix, translation_matrix, euler_matrix
 from ..utils.interpolations import linear_interpolation
 
 class SixDoFCollabRobot(object):
-    """6 DoF collaborarive robot driver
+    """Controls Robodyno Six Dof Collaborative Robot through the CAN bus.
     
     Attributes:
-        joints: list of 6 joint motors
-        l01: link from world to joint 1 (m) 
-        l12: link from joint 1 to joint 2 (m) 
-        l23: link from joint 2 to joint 3 (m) 
-        l34: link from joint 3 to joint 4 (m) 
-        l45: link from joint 4 to joint 5 (m) 
-        l56: link from joint 5 to joint 6 (m) 
-        end_effector: end effector object 
+        joints (list): list of 6 joint motors
+        l01 (float): link from world to joint 1 (m) 
+        l12 (float): link from joint 1 to joint 2 (m) 
+        l23 (float): link from joint 2 to joint 3 (m) 
+        l34 (float): link from joint 3 to joint 4 (m) 
+        l45 (float): link from joint 4 to joint 5 (m) 
+        l56 (float): link from joint 5 to joint 6 (m) 
+        end_effector (object): end effector object 
     """
     
-    def __init__(self, j1, j2, j3, j4, j5, j6, l01, l12, l23, l34, l45, l56, end_effector = None):
-        """init robot with joints and links"""
+    def __init__(self, j1, j2, j3, j4, j5, j6, 
+                 l01: float, l12: float, l23: float, l34: float, 
+                 l45: float, l56: float, end_effector: object = None):
+        """Initializes robot with joints and links
+        
+        Args:
+            j1 (Motor): base_motor.
+            j2 (Motor): shoulder_motor.
+            j3 (Motor): upperarm_motor.
+            j4 (Motor): elbow_motor.
+            j5 (Motor): forearm_motor.
+            j6 (Motor): hand_motor.
+            l01 (float): link from world to joint 1 (m)
+            l12 (float): link from joint 1 to joint 2 (m)
+            l23 (float): link from joint 2 to joint 3 (m)
+            l34 (float): link from joint 3 to joint 4 (m)
+            l45 (float): link from joint 4 to joint 5 (m)
+            l56 (float): link from joint 5 to joint 6 (m)
+            end_effector (object): end effector object.
+        """
         self.joints = [j1, j2, j3, j4, j5, j6]
         self.l01 = l01
         self.l12 = l12
@@ -66,17 +105,20 @@ class SixDoFCollabRobot(object):
         self._axes_poses = [0 for i in range(6)]
         self._axes_zeros = [0 for i in range(6)]
 
-    def get_joints_poses(self):
+    def get_joints_poses(self) -> list:
         """Read joints positions to a list.
         
         Returns:
-            a list of 6 joints positions
+            (list): a list of 6 joints positions
+            
+        Raises:
+            RuntimeError: If the motor Joint is invalid.
         """
         poses = []
         for i in range(6):
             pos = None
             count = 0
-            while not pos:
+            while pos is None:
                 if count > 5:
                     raise RuntimeError('Filed to get position of Joint {}.'.format(i+1))
                 count += 1
@@ -84,21 +126,21 @@ class SixDoFCollabRobot(object):
             poses.append(pos - self._axes_zeros[i])
         return poses
 
-    def enable(self):
+    def enable(self) -> None:
         """enable joints motors"""
         for i in range(6):
             self.joints[i].enable()
     
-    def disable(self):
+    def disable(self) -> None:
         """disable joints motors"""
         for i in range(6):
             self.joints[i].disable()
     
-    def init(self, axes_poses = [0 for i in range(6)]):
+    def init(self, axes_poses: list = [0 for i in range(6)]) -> None:
         """Calibrate robot motors with given axes poses.
         
         Args:
-            axes_poses: list of 6 axes poses(rad)
+            axes_poses (list): list of 6 axes poses(rad)
         """
         self._axes_poses = axes_poses.copy()
         self._axes_zeros = [0 for i in range(6)]
@@ -107,23 +149,25 @@ class SixDoFCollabRobot(object):
             self._axes_zeros[i] = cur_poses[i] - self._axes_poses[i]
             self._axes_poses[i] = 0
 
-    def set_joint_pos(self, id, pos):
+    def set_joint_pos(self, id: int, pos: float) -> None:
         """Set joint angle with joint id and position
         
         Args:
-            id: joint id (0-5)
-            pos: joint target position(rad)
+            id (int): joint id (0-5)
+            pos (float): joint target position(rad)
         """
         self.joints[id].set_pos(pos + self._axes_zeros[id])
         self._axes_poses[id] = pos
     
-    def joint_space_interpolated_motion(self, target, speeds = [None for i in range(6)], duration = 0):
+    def joint_space_interpolated_motion(self, target: list, 
+                                        speeds: list = [None for i in range(6)], 
+                                        duration:float = 0) -> None:
         """Robot interpolated motion in joint space.
         
         Args:
-            target: iterable of 6 joints target angle(rad)
-            speeds: iterable of 6 joints motion speed(rad/s)
-            duration: default motion duration(s)
+            target (list): iterable of 6 joints target angle(rad)
+            speeds (list): iterable of 6 joints motion speed(rad/s)
+            duration (float): default motion duration(s)
         """
         interpolations = []
         joint_poses = self._axes_poses.copy()
@@ -139,34 +183,34 @@ class SixDoFCollabRobot(object):
                     update_flag = True
             time.sleep(0.05)
 
-    def home(self, duration = 5):
+    def home(self, duration: float = 5) -> None:
         """Move back to zero position.
         
         Args:
-            duration: motion duration(s)
+            duration (float): motion duration(s)
         """
         self.joint_space_interpolated_motion((0,0,0,0,0,0), duration = duration)
 
-    def cartesian_space_interpolated_motion(self, x, y, z, roll, pitch, yaw, sol_id = 2, 
-        x_speed = None, y_speed = None, z_speed = None, roll_speed = None, 
-        pitch_speed = None, yaw_speed = None, duration = 0):
+    def cartesian_space_interpolated_motion(self, x: float, y: float, z, roll: float, pitch: float, yaw: float, 
+                                            sol_id: int = 2, x_speed: float = None, y_speed: float = None, z_speed: float = None, 
+                                            roll_speed: float = None, pitch_speed: float = None, yaw_speed: float = None, duration: float = 0) -> None:
         """Robot Interpolated motion in Cartesian space.
         
         Args:
-            x: target robot end x
-            y: target robot end y
-            z: target robot end z
-            roll: target robot end roll
-            pitch: target robot end pitch
-            yaw: target robot end yaw
-            sol_id: inverse kinematics solve id (0-7)
-            x_speed: speed alone X dimension(m/s)
-            y_speed: speed alone Y dimension(m/s)
-            z_speed: speed alone Z dimension(m/s)
-            roll_speed: rotation speed on X axis(rad/s)
-            pitch_speed: rotation speed on Y axis(rad/s)
-            yaw_speed: rotation speed on Z axis(rad/s)
-            duration: default motion duration(s)
+            x (float): target robot end x
+            y (float): target robot end y
+            z (float): target robot end z
+            roll (float): target robot end roll
+            pitch (float): target robot end pitch
+            yaw (float): target robot end yaw
+            sol_id (int): inverse kinematics solve id (0-7)
+            x_speed (float): speed alone X dimension(m/s)
+            y_speed (float): speed alone Y dimension(m/s)
+            z_speed (float): speed alone Z dimension(m/s)
+            roll_speed (float): rotation speed on X axis(rad/s)
+            pitch_speed (float): rotation speed on Y axis(rad/s)
+            yaw_speed (float): rotation speed on Z axis(rad/s)
+            duration (float): default motion duration(s)
         """
         current_x, current_y, current_z, current_roll, current_pitch, current_yaw =  self.forward_kinematics(self._axes_poses.copy())
 
@@ -190,17 +234,15 @@ class SixDoFCollabRobot(object):
                 break
             time.sleep(0.05)
 
-    def forward_kinematics(self, axes):
+    def forward_kinematics(self, axes: list) -> tuple:
         """Forward kinematics algorism
         
         Args:
-            axes: list of 6 joint angles(rad)
+            axes (list): list of 6 joint angles(rad)
         
         Returns:
-            tuples of robot end transform
+            (tuple): (x, y, z, roll, pitch, yaw) tuples of robot end transform
             
-            example:
-                (x, y, z, roll, pitch, yaw)
         """
         T01 = dh_matrix(pi/2 , 0 , self.l01, axes[0])
         T12 = dh_matrix(0    , -self.l12, 0 , axes[1]-pi/2)
@@ -215,20 +257,21 @@ class SixDoFCollabRobot(object):
 
         return (x, y, z, roll, pitch, yaw)
 
-    def inverse_kinematics(self, x, y, z, roll, pitch, yaw, sol_id=2):
+    def inverse_kinematics(self, x: float, y: float, z: float, roll: float, 
+                           pitch: float, yaw: float, sol_id: int =2) -> list:
         """Inverse kinematics algorism
         
         Args:
-            x: robot end x
-            y: robot end y
-            z: robot end z
-            roll: robot end roll
-            pitch: robot end pitch
-            yaw: robot end yaw
-            sol_id: inverse kinematics solve id (0-7)
+            x (float): robot end x
+            y (float): robot end y
+            z (float): robot end z
+            roll (float): robot end roll
+            pitch (float): robot end pitch
+            yaw (float): robot end yaw
+            sol_id (int): inverse kinematics solve id (0-7)
         
         Returns:
-            list of joint angles
+            (list): list of joint angles
         """
         sol = np.zeros((6, 8))
         T06 = translation_matrix([x,y,z]) @ euler_matrix(roll, pitch, yaw)

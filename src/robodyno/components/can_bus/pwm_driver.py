@@ -1,82 +1,140 @@
-#!/usr/bin/env python
 # -*-coding:utf-8 -*-
-"""pwm_driver.py
-Time    :   2023/03/31
-Author  :   song 
-Version :   1.0
-Contact :   zhaosongy@126.com
-License :   (C)Copyright 2022, robottime / robodyno
+#
+# Apache License, Version 2.0
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Robodyno pwm driver can bus driver
+"""Pwm develop board driver.
 
-  Typical usage example:
+The pwm develop board has a 8-bit pwm output or servo output on the signal pin.
+It can be used to control the servo or pwm device.
 
-  from robodyno.interfaces import CanBus
-  from robodyno.components import PwmDriver
+Examples:
 
-  can = CanBus()
-  
-  pwm = PwmDriver(iface = can)
-  pwm.set_servo(255)
-  pwm.set_pwm(127)
-
-  can.disconnect()
+    >>> from robodyno.components import PwmDriver
+    >>> from robodyno.interfaces import CanBus
+    >>> can = CanBus()
+    >>> pwm = PwmDriver(can)
+    >>> pwm.set_pwm(100)
+    >>> pwm.set_servo(100)
+    >>> can.disconnect()
 """
 
 from robodyno.interfaces import CanBus
-from robodyno.components import DeviceType, CanBusDevice
+from robodyno.components import CanBusDevice
+from robodyno.components.config.model import Model
+
 
 class PwmDriver(CanBusDevice):
-    """Robodyno pwm driver
+    """Pwm develop board driver.
 
     Attributes:
-        id: can bus device id.
-        type: device type enum
-        fw_ver: firmware version
+        id (int): Device id.
+        type (Model): Device type.
+        fw_ver (float): Firmware version.
     """
 
-    CMD_SET_NODE_ID = 0x02
-    CMD_SET_SERVO = 0x03
-    CMD_SET_PWM = 0x04
+    _CMD_SET_NODE_ID = 0x02
+    _CMD_SET_SERVO = 0x03
+    _CMD_SET_PWM = 0x04
 
-    def __init__(self, iface, id = 0x21, type = None):
-        """Init pwm driver from interface, id and type
-        
-        Args:
-            iface: robodyno interface
-            id: range from 0x01 to 0x40, default 0x21
-            type: pwm driver type(ROBODYNO_PWM_DRIVER)
-        """
-        super().__init__(iface, id)
-        self.get_version(timeout=0.15)
-        if type:
-            self.type = DeviceType[type]
-        if self.type != DeviceType.ROBODYNO_PWM_DRIVER:
-            raise ValueError('Pwm Driver type is invalid and can not distinguish automatically.')
+    def __init__(self, can: CanBus, id_: int = 0x21):
+        """Initializes the pwm develop board.
 
-    @CanBus.send_to_bus(CMD_SET_NODE_ID, '<B')
-    def config_can_bus(self, new_id):
-        """Change driver device id.
-        
         Args:
-            new_id: node new device id
-        """
-        return (new_id,)
+            can (CanBus): Can bus instance.
+            id_ (int): Device id.
 
-    @CanBus.send_to_bus(CMD_SET_SERVO, '<B')
-    def set_servo(self, pos):
-        """Set servo pos
-        
-        Args:
-            pos: range from 0 to 255
+        Raises:
+            ValueError: If the device is not a pwm develop board.
         """
-        return (pos,)
+        super().__init__(can, id_)
+        self.get_version(timeout=0.015)
+        if self.type is None or self.type != Model.ROBODYNO_D_VAC01:
+            raise ValueError('The device is not a pwm develop board.')
+        self.off()
+        self._pwm = 0
+        self._servo = None
 
-    @CanBus.send_to_bus(CMD_SET_PWM, '<B')
-    def set_pwm(self, pwm):
-        """Set pwm
-        
-        Args:
-            pwm: range from 0 to 255
+    @property
+    def pwm(self) -> int:
+        """Gets the pwm value.
+
+        Returns:
+            (int): 8-bit pwm value. The range is 0-255. None if the device is in
+                servo mode.
         """
-        return (pwm,)
+        return self._pwm
+
+    @property
+    def servo_pos(self) -> int:
+        """Gets the servo position.
+
+        Returns:
+            (int): Position value. The range is 0-255 (0-180 degree). None if the
+                device is in pwm mode.
+        """
+        return self._servo
+
+    def config_can_bus(self, new_id: int) -> None:
+        """Configures the can bus.
+
+        Args:
+            new_id (int): New device id.
+
+        Raises:
+            ValueError: If the new id is not in the range of 0x01-0x3f.
+        """
+        if not 0x01 <= new_id <= 0x3F:
+            raise ValueError('New CAN id must be in the range of 0x01-0x3f.')
+        self._can.send(self.id, self._CMD_SET_NODE_ID, 'B', new_id)
+
+    def on(self) -> None:
+        """Turns on the pwm output."""
+        self.set_pwm(255)
+
+    def off(self) -> None:
+        """Turns off the pwm output."""
+        self.set_pwm(0)
+
+    def set_servo(self, pos: int) -> None:
+        """Sets the servo position.
+
+        Args:
+            pos (int): Position value. The range is 0-255 (0-180 degree).
+
+        Raises:
+            ValueError: If the position is not in the range of 0-255.
+        """
+        if not 0 <= pos <= 255:
+            raise ValueError('Servo position must be in the range of 0-255.')
+        self._servo = pos
+        self._pwm = None
+        self._can.send(self.id, self._CMD_SET_SERVO, 'B', pos)
+
+    def set_pwm(self, pwm: int) -> None:
+        """Sets the pwm value.
+
+        Args:
+            pwm (int): 8-bit pwm value. The range is 0-255.
+
+        Raises:
+            ValueError: If the pwm value is not in the range of 0-255.
+        """
+        if not 0 <= pwm <= 255:
+            raise ValueError('PWM value must be in the range of 0-255.')
+        self._pwm = pwm
+        self._servo = None
+        self._can.send(self.id, self._CMD_SET_PWM, 'B', pwm)

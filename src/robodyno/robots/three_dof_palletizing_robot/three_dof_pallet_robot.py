@@ -1,44 +1,81 @@
-#!/usr/bin/env python
 # -*-coding:utf-8 -*-
-"""three_dof_pallet_robot.py
-Time    :   2022/10/17
-Author  :   ryan 
-Version :   1.0
-Contact :   ryanzhang@163.com
-License :   (C)Copyright 2022, robottime / robodyno
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-3DoF Pallet Robot Drive
+"""This module provides a class for controlling Robodyno Three DoF Palletizing Robot.
 
-  Typical usage example:
+The ThreeDoFPallet class provided by this module is used to control Robodyno Three DoF Palletizing Robot
+through the CAN bus. It provides methods for setting Three DoF Palletizing Robot parameters, reading Three DoF Palletizing Robot
+states, and controlling the Three DoF Palletizing Robot to run in different space.
 
-  from robodyno.robots.three_dof_pallet_robot import ThreeDoFPallet
-  robot = ThreeDoFPallet(
-    j1 = base_motor,
-    j2 = upperarm_motor,
-    j3 = forearm_motor,
-    l01 = 0.0794,
-    l23 = 0.190,
-    l34 = 0.190,
-    l45 = 0.010,
-    end_effector = None
-  )
+Examples:
+
+    >>> from robodyno.components import Motor
+    >>> from robodyno.interfaces import CanBus
+    >>> from robodyno.robots.three_dof_pallet_robot import ThreeDoFPallet
+    >>> can = CanBus()
+    >>> class MyPallet(ThreeDoFPallet):
+    >>>     def __init__(self):
+    >>>         M1 = Motor(can, 0x10, 'ROBODYNO_PRO_44')
+    >>>         M2 = Motor(can, 0x11, 'ROBODYNO_PRO_44')
+    >>>         M3 = Motor(can, 0x12, 'ROBODYNO_PRO_12')
+    >>>     super().__init__((M1, M2, M3, 0.180, 0.190, 0.190, 0.010)
+    >>> arm = MyPallet()
+    >>> arm.init()
+    >>> arm.get_joints_poses()
+    [0.0, 0.0, 0.0]
+    >>> can.disconnect()
 """
+
 import time
 from math import pi, cos, sin, sqrt, atan2, acos
 from ..utils.interpolations import linear_interpolation
 
 class ThreeDoFPallet(object):
-    """3 DoF pallet robot driver
+    """Controls Robodyno Three DoF Palletizing Robot through the CAN bus.
     
     Attributes:
-        joints: list of 3 joint motors
-        l01: link from world to joint 1 (m)
-        l23: link from joint 2 to joint 3 transverse distance (m)
-        l34: link from joint 3 to joint 4 longitudinal distance (m)
-        l45: link from joint 4 to joint 5 transverse distance (m)
-        end_effector: end effector object
+        joints (list): list of 3 joint motors
+        l01 (float): link from world to joint 1 (m)
+        l23 (float): link from joint 2 to joint 3 transverse distance (m)
+        l34 (float): link from joint 3 to joint 4 longitudinal distance (m)
+        l45 (float): link from joint 4 to joint 5 transverse distance (m)
+        end_effector (object): end effector object
     """
-    def __init__(self, j1, j2, j3, l01, l23, l34, l45, end_effector = None):
+    def __init__(self, j1, j2, j3, l01: float, l23: float, 
+                 l34: float, l45: float, end_effector: object = None):
+        """Initializes robot with joints and links
+        
+        Args:
+            j1 (Motor): base_motor.
+            j2 (Motor): upperarm_motor.
+            j3 (Motor): forearm_motor.
+            l01 (float): link from world to joint 1 (m)
+            l23 (float): link from joint 2 to joint 3 transverse distance (m)
+            l34 (float): link from joint 3 to joint 4 longitudinal distance (m)
+            l45 (float): link from joint 4 to joint 5 transverse distance (m)
+            end_effector (object): end effector object
+        """
         self.joints = [j1, j2, j3]
         self.l01 = l01
         self.l23 = l23
@@ -51,39 +88,39 @@ class ThreeDoFPallet(object):
         self._axes_poses = [0 for i in range(3)]
         self._axes_zeros = [0 for i in range(3)]
 
-    def get_joints_pose(self):
+    def get_joints_pose(self) -> list:
         """Read joints position to a list.
         
         Returns:
-            a list of 3 joint positions
+            (list): a list of 3 joint positions
         """
         poses = []
         for i in range(3):
             pos = None
             count = 0
-            while not pos:
-                if count > 5:
+            while pos is None:
+                if count > 3:
                     raise RuntimeError('Filed to get position of Joint {}'.format(i+1))
                 count += 1
                 pos = self.joints[i].get_pos(0.2)
             poses.append(pos - self._axes_zeros[i])
         return poses
 
-    def enable(self):
+    def enable(self) -> None:
         """enable joints motors"""
         for i in range(3):
             self.joints[i].enable()
 
-    def disable(self):
+    def disable(self) -> None:
         """disable joints motors"""
         for i in range(3):
             self.joints[i].disable()
 
-    def init (self, axes_poses = [0 for i in range(3)]):
+    def init (self, axes_poses: list = [0 for i in range(3)]) -> None:
         """Calibrate robot motors with given axes poses.
         
         Args:
-            axes_poses: list of 3 axes poses(rad)
+            axes_poses (list): list of 3 axes poses(rad)
         """
         self._axes_poses = axes_poses.copy()
         self._axes_zeros = [0 for i in range(3)]
@@ -92,23 +129,25 @@ class ThreeDoFPallet(object):
             self._axes_zeros[i] = cur_poses[i] - self._axes_poses[i]
             self._axes_poses[i] = 0
 
-    def set_joint_pos(self, id, pos):
+    def set_joint_pos(self, id: int, pos: float) -> None:
         """Set joint angle with joint and position.
         
         Args:
-            id: joint id (0-2)
-            pos: joint target position(red)
+            id (int): joint id (0-2)
+            pos (float): joint target position(red)
         """
         self.joints[id].set_pos(pos + self._axes_zeros[id])
         self._axes_poses[id] = pos        
         
-    def joint_space_interpolated_motion(self, target, speeds = [0 for i in range(3)], duration = 0):
+    def joint_space_interpolated_motion(self, target: list, 
+                                        speeds: list = [0 for i in range(3)], 
+                                        duration: float = 0) -> None:
         """Robot interpolated motion in joint space.
         
         Args:
-            target: iterable of 3 joints target angle(rad)
-            speeds: iterable of 3 joints motion speed(rad/s)
-            duration: default motion duration(s)
+            target (list): iterable of 3 joints target angle(rad)
+            speeds (list): iterable of 3 joints motion speed(rad/s)
+            duration (float): default motion duration(s)
         """
         interpolation = []
         joint_poses = self._axes_poses.copy()
@@ -124,25 +163,26 @@ class ThreeDoFPallet(object):
                     update_flag = True
             time.sleep(0.05)
 
-    def home(self, duration = 5):
+    def home(self, duration: float = 5) -> None:
         """Move back to zero position.
         
         Args:
-            duration: motion duration(s)
+            duration (float): motion duration(s)
         """
         self.joint_space_interpolated_motion((0,0,0), duration = duration)
 
-    def cartesian_space_interpolated_motion(self, x, y, z, x_speed = None, y_speed = None, z_speed = None, duration = 0):
+    def cartesian_space_interpolated_motion(self, x: float, y: float, z: float, x_speed: float = None, 
+                                            y_speed: float = None, z_speed: float = None, duration: float = 0) -> None:
         """Robot Interpolated motion in cartesian space.
         
         Args:
-            x: target robot end x
-            y: target robot end y
-            z: target robot end z
-            x_speed: speed alone X dimension(m/s)
-            y_speed: speed alone Y dimension(m/s)
-            z_speed: speed alone Z dimension(m/s)
-            duration: default motion duration(s)
+            x (float): target robot end x
+            y (float): target robot end y
+            z (float): target robot end z
+            x_speed (float): speed alone X dimension(m/s)
+            y_speed (float): speed alone Y dimension(m/s)
+            z_speed (float): speed alone Z dimension(m/s)
+            duration (float): default motion duration(s)
         """
         current_pose = self.forward_kinematics(self._axes_poses.copy())
         current_x = current_pose[0]
@@ -165,14 +205,14 @@ class ThreeDoFPallet(object):
                 break
             time.sleep(0.05)
 
-    def forward_kinematics(self, angles):
+    def forward_kinematics(self, angles: list) -> tuple:
         """Forward kinematics algorism
         
         Args:
-            angles: list of 3 joint angles(rad)
+            angles (list): list of 3 joint angles(rad)
         
         Returns:
-            (x, y, z): tuples of 3 axis position
+            (tuple): (x, y, z) tuples of 3 axis position
         """
         a_2 = self.l23 * self.l23 + self.l34 * self.l34 - 2 * self.l23 * self.l34 * cos(pi/2 + angles[2])
         a = sqrt(a_2)
@@ -189,16 +229,19 @@ class ThreeDoFPallet(object):
         return (x, y, z)
         
 
-    def inverse_kinematics(self, x, y, z):
+    def inverse_kinematics(self, x: float, y: float, z: float) -> list:
         """inverse kinematics algorism
         
         Args:
-            x: robot end x
-            y: robot end y
-            z: robot end z
+            x (float): robot end x
+            y (float): robot end y
+            z (float): robot end z
         
         Returns:
-            list of joint angles
+            (list): list of joint angles
+            
+        Raises:
+            ValueError: If the palletizing robot Pose not in range.
         """
         cf = z - self.l01 + self.l45
         angle = [0, 0, 0]
