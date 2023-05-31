@@ -1,0 +1,1 @@
+::: robodyno.components.webots.slider_module
