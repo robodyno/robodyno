@@ -16,7 +16,7 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
-stages:          # List of stages for jobs, and their order of execution
+stages: # List of stages for jobs, and their order of execution
   - deploy
 
 deploy-python:
@@ -66,3 +66,94 @@ deploy-doc:
     - VERSION=$(grep -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -n 1)
     - mike deploy --push --update-aliases $VERSION latest
 
+push-to-github:
+  stage: deploy
+  tags:
+    - docker
+  only:
+    - main
+  image: ubuntu:latest
+  before_script:
+    - apt-get clean
+    - apt-get update -y && apt-get install -y openssh-client git
+    - mkdir -p /root/.ssh && chmod 700 /root/.ssh
+    - echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
+    - chmod 600 /root/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-keyscan github.com >> /root/.ssh/known_hosts
+    - ssh-add /root/.ssh/id_rsa
+  script:
+    - git config --global user.email "${CI_EMAIL}"
+    - git config --global user.name "${CI_USERNAME}"
+    - git checkout -b main || git checkout main
+    - git remote set-url origin ${GITHUB_REPO}
+    - git push --force -u origin main
+
+push-to-gitee:
+  stage: deploy
+  tags:
+    - docker
+  only:
+    - main
+  image: ubuntu:latest
+  before_script:
+    - apt-get clean
+    - apt-get update -y && apt-get install -y openssh-client git
+    - mkdir -p /root/.ssh && chmod 700 /root/.ssh
+    - echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
+    - chmod 600 /root/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-keyscan gitee.com >> /root/.ssh/known_hosts
+    - ssh-add /root/.ssh/id_rsa
+  script:
+    - git config --global user.email "${CI_EMAIL}"
+    - git config --global user.name "${CI_USERNAME}"
+    - git checkout -b main || git checkout main
+    - git remote set-url origin ${GITEE_REPO}
+    - git push --force -u origin main
+
+push-to-github-devel:
+  stage: deploy
+  tags:
+    - docker
+  only:
+    - devel
+  image: ubuntu:latest
+  before_script:
+    - apt-get clean
+    - apt-get update -y && apt-get install -y openssh-client git
+    - mkdir -p /root/.ssh && chmod 700 /root/.ssh
+    - echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
+    - chmod 600 /root/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-keyscan github.com >> /root/.ssh/known_hosts
+    - ssh-add /root/.ssh/id_rsa
+  script:
+    - git config --global user.email "${CI_EMAIL}"
+    - git config --global user.name "${CI_USERNAME}"
+    - git checkout -b devel || git checkout devel
+    - git remote set-url origin ${GITHUB_REPO}
+    - git push --force -u origin devel
+
+push-to-gitee-devel:
+  stage: deploy
+  tags:
+    - docker
+  only:
+    - devel
+  image: ubuntu:latest
+  before_script:
+    - apt-get clean
+    - apt-get update -y && apt-get install -y openssh-client git
+    - mkdir -p /root/.ssh && chmod 700 /root/.ssh
+    - echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
+    - chmod 600 /root/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-keyscan gitee.com >> /root/.ssh/known_hosts
+    - ssh-add /root/.ssh/id_rsa
+  script:
+    - git config --global user.email "${CI_EMAIL}"
+    - git config --global user.name "${CI_USERNAME}"
+    - git checkout -b devel || git checkout devel
+    - git remote set-url origin ${GITEE_REPO}
+    - git push --force -u origin devel
