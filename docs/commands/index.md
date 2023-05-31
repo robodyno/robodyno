@@ -1,6 +1,4 @@
-# robodyno
-
-Robodyno 命令行工具
+# Robodyno CLI 命令行工具
 
 ## 使用
 
