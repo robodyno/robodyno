@@ -107,6 +107,7 @@ setup(
             'SixDoFCollabRobot = robodyno.robots.six_dof_collaborative_robot.six_dof_collab_robot:SixDoFCollabRobot',
             'ThreeDoFDelta = robodyno.robots.three_dof_delta_robot.three_dof_delta_robot:ThreeDoFDelta',
             'ThreeDoFPallet = robodyno.robots.three_dof_palletizing_robot.three_dof_pallet_robot:ThreeDoFPallet',
+            'ThreeDofCartesian = robodyno.robots.three_dof_cartesian_robot.three_dof_cartesian_robot:ThreeDofCartesian',
         ],
         'console_scripts': [
             'robodyno = robodyno.tools.cli:robodyno',

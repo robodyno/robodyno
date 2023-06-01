@@ -16,3 +16,6 @@
 
 ### 5. 三自由度Delta机械臂
 - [使用方法](./three_dof_delta_robot/README.md)
+
+### 6. 三自由度笛卡尔机械臂
+- [使用方法](./three_dof_cartesian_robot/README.md)
