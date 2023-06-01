@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Modify the cartesian class name in `robots` and Modify the `three_dof_cartesian_robot` of packages in `setup.py`
+
 ## [1.6.1] - 2023-05-29
 
 ### Added

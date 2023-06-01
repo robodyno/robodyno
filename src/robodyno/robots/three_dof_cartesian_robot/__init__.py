@@ -24,4 +24,4 @@
 
 """Components of three dof cartesian robot devices."""
 
-from .three_dof_cartesian_robot import ThreeDofCartesian
+from .three_dof_cartesian_robot import ThreeDoFCartesian
