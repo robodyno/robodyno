@@ -24,8 +24,8 @@ License :   (C)Copyright 2022, robottime / robodyno
 
   Typical usage example:
 
-  from robodyno.robots.three_dof_cartesian_robot import ThreeDofCartesian
-  robot = ThreeDofCartesian(
+  from robodyno.robots.three_dof_cartesian_robot import ThreeDoFCartesian
+  robot = ThreeDoFCartesian(
     j1 = cartesian_motor1,
     j2 = cartesian_motor2,
     j3 = cartesian_motor3,
@@ -39,7 +39,7 @@ License :   (C)Copyright 2022, robottime / robodyno
 #### 1.2 3-DoF-Cartesian-API
 ##### 1.2.0 导入三自由度笛卡尔机械臂的类
 ```python
-from robodyno.robots.three_dof_cartesian_robot import ThreeDofCartesian
+from robodyno.robots.three_dof_cartesian_robot import ThreeDoFCartesian
 ```
 
 ##### 1.2.1 获取关节当前位置
@@ -50,7 +50,7 @@ from robodyno.robots.three_dof_cartesian_robot import ThreeDofCartesian
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.get_joints_pose.__doc__)
+print(ThreeDoFCartesian.get_joints_pose.__doc__)
 ```
 ```
 Read joints position to a list.
@@ -65,7 +65,7 @@ Read joints position to a list.
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.enable.__doc__)
+print(ThreeDoFCartesian.enable.__doc__)
 ```
 ```
 enable joints motors
@@ -77,7 +77,7 @@ enable joints motors
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.disable.__doc__)
+print(ThreeDoFCartesian.disable.__doc__)
 ```
 ```
 disable joints motors
@@ -91,7 +91,7 @@ disable joints motors
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.init.__doc__)
+print(ThreeDoFCartesian.init.__doc__)
 ```
 ```
 Calibrate robot motors with given axes poses.
@@ -109,7 +109,7 @@ Calibrate robot motors with given axes poses.
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.set_joint_pos.__doc__)
+print(ThreeDoFCartesian.set_joint_pos.__doc__)
 ```
 ```
 Set joint angle with joint and position.
@@ -129,7 +129,7 @@ Set joint angle with joint and position.
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.joint_space_interpolated_motion.__doc__)
+print(ThreeDoFCartesian.joint_space_interpolated_motion.__doc__)
 ```
 ```
 Robot interpolated motion in joint space.
@@ -154,7 +154,7 @@ Robot interpolated motion in joint space.
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.cartesian_space_interpolated_motion.__doc__)
+print(ThreeDoFCartesian.cartesian_space_interpolated_motion.__doc__)
 
 ```
 ```
@@ -178,7 +178,7 @@ Robot Interpolated motion in cartesian space.
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.home.__doc__)
+print(ThreeDoFCartesian.home.__doc__)
 ```
 ```
 Move back to zero position.
@@ -197,7 +197,7 @@ Move back to zero position.
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.forward_kinematics.__doc__)
+print(ThreeDoFCartesian.forward_kinematics.__doc__)
 ```
 ```
 Forward kinematics algorism
@@ -221,7 +221,7 @@ Forward kinematics algorism
 
 ```python
 #  查看使用方法
-print(ThreeDofCartesian.inverse_kinematics.__doc__)
+print(ThreeDoFCartesian.inverse_kinematics.__doc__)
 ```
 ```
 inverse kinematics algorism
@@ -246,10 +246,10 @@ can = CanBus()
 ```
 ##### 1.3.2 导入三自由度笛卡尔机械臂的类
 ```python
-from robodyno_robots_python.three_dof_cartesian_robot import ThreeDofCartesian
+from robodyno_robots_python.three_dof_cartesian_robot import ThreeDoFCartesian
 ```
 
-##### 1.3.3 查看ThreeDofCartesian类需要的参数
+##### 1.3.3 查看ThreeDoFCartesian类需要的参数
 - 使用下面方法可以查看`three_dof_cartesian_robot`使用实例
 ```python
 print(three_dof_cartesian_robot.__doc__)
@@ -259,8 +259,8 @@ print(three_dof_cartesian_robot.__doc__)
 
   Typical usage example:
 
-  from robodyno.robots.three_dof_cartesian_robot import ThreeDofCartesian
-  robot = ThreeDofCartesian(
+  from robodyno.robots.three_dof_cartesian_robot import ThreeDoFCartesian
+  robot = ThreeDoFCartesian(
     j1 = cartesian_motor1,
     j2 = cartesian_motor2,
     j3 = cartesian_motor3,
@@ -270,11 +270,11 @@ print(three_dof_cartesian_robot.__doc__)
     end_effector = None
   )
 ```
-- 在上面实例中，可以了解到`ThreeDofCartesian`类需要我们传入3个关节电机，以及运动学计算的具体尺寸(m)。
+- 在上面实例中，可以了解到`ThreeDoFCartesian`类需要我们传入3个关节电机，以及运动学计算的具体尺寸(m)。
 
 - 也可以使用下面的方法，查看类的具体属性
 ```python
-print(ThreeDofCartesian.__doc__)
+print(ThreeDoFCartesian.__doc__)
 ```
 ```
 3 DoF Cartesian robot driver
@@ -290,13 +290,13 @@ print(ThreeDofCartesian.__doc__)
 ![1](../../robodyno_motor/)
 
 ##### 1.3.4 构建机械臂的类
-- 构建一个自己的类，并继承ThreeDofCartesian，使用Motor创建3个关节电机，并将关节电机及运动学计算尺寸传给父类。
+- 构建一个自己的类，并继承ThreeDoFCartesian，使用Motor创建3个关节电机，并将关节电机及运动学计算尺寸传给父类。
 - 也可以在类中编写自己的方法，如下面例子中的获取机械臂参数。
 
 ***Typical usage example:***
 
 ```python
-class MyCartesian(ThreeDofCartesian):
+class MyCartesian(ThreeDoFCartesian):
     def __init__(self):
         M1 = Motor(can, 0x10, 'ROBODYNO_PRO_44')
         M2 = Motor(can, 0x11, 'ROBODYNO_PRO_44')

@@ -22,19 +22,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""This module provides a class for controlling Robodyno Three Dof Cartesian Robot.
+"""This module provides a class for controlling Robodyno Three DoF Cartesian Robot.
 
-The ThreeDofCartesian class provided by this module is used to control Robodyno Three Dof Cartesian Robot
-through the CAN bus. It provides methods for setting Three Dof Cartesian Robot parameters, reading Three Dof Cartesian Robot
-states, and controlling the Three Dof Cartesian Robot to run in different space.
+The ThreeDoFCartesian class provided by this module is used to control Robodyno Three DoF Cartesian Robot
+through the CAN bus. It provides methods for setting Three DoF Cartesian Robot parameters, reading Three DoF Cartesian Robot
+states, and controlling the Three DoF Cartesian Robot to run in different space.
 
 Examples:
 
     >>> from robodyno.components import Motor
     >>> from robodyno.interfaces import CanBus
-    >>> from robodyno.robots.three_dof_cartesian_robot import ThreeDofCartesian
+    >>> from robodyno.robots.three_dof_cartesian_robot import ThreeDoFCartesian
     >>> can = CanBus()
-    >>> class MyCartesian(ThreeDofCartesian):
+    >>> class MyCartesian(ThreeDoFCartesian):
     >>>     def __init__(self):
     >>>         M1 = Motor(can, 0x10, 'ROBODYNO_PRO_44')
     >>>         M2 = Motor(can, 0x11, 'ROBODYNO_PRO_44')
@@ -51,7 +51,7 @@ import time
 from math import pi
 from ..utils.interpolations import linear_interpolation
 
-class ThreeDofCartesian(object):
+class ThreeDoFCartesian(object):
     """Controls Robodyno Three Dof Cartesian Robot through the CAN bus.
     
     Attributes:
