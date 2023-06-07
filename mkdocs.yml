@@ -16,6 +16,7 @@ nav:
       - PWM 扩展模块: deep-dive/components/pwm-driver.md
       - 步进电机驱动模块: deep-dive/components/stepper-driver.md
       - IMU 传感器: deep-dive/components/imu-sensor.md
+      - LED 灯条驱动模块: deep-dive/components/led-driver.md
     - 电机运动模式: deep-dive/motor-modes.md
   - Robodyno CLI:
     - commands/index.md
@@ -49,6 +50,7 @@ nav:
         - PwmDriver: references/components/can_bus/pwm_driver.md
         - StepperDriver: references/components/can_bus/stepper_driver.md
         - ImuSensor: references/components/can_bus/imu_sensor.md
+        - LedDriver: references/components/can_bus/led_driver.md
       - webots:
         - references/components/webots/index.md
         - Motor: references/components/webots/motor.md
