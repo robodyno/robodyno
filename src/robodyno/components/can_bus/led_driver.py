@@ -82,7 +82,7 @@ class LedDriver(CanBusDevice):
         """
         if new_id is None:
             new_id = self.id
-        if not 0x10 <= new_id <= 0x3F:
+        if not 0x01 <= new_id <= 0x3F:
             raise ValueError('New CAN id must be in the range of 0x01-0x3f.')
         bitrate_id = {
             250000: 0,
