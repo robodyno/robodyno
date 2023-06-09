@@ -16,6 +16,7 @@ can_bus = CanBus()
 strip = LedDriver(can_bus)
 strip.set_color(0, (0, 255, 0)) # 设置第 0 个灯珠为绿色
 strip.set_color((1, 3), (255, 0, 0)) # 设置第 1 ~ 3 个灯珠为红色
+strip.set_color(1, (0, 0, 0)) # 关闭第 1 个灯珠
 ```
 
 ### 设置 LED 闪烁模式
