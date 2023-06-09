@@ -85,11 +85,14 @@ class ImuSensor(CanBusDevice):
         )
 
     def __del__(self):
-        self._can.unsubscribe(
-            callback=self._heartbeat_callback,
-            device_id=self.id,
-            cmd_id=self._FC_HEARTBEAT,
-        )
+        try:
+            self._can.unsubscribe(
+                callback=self._heartbeat_callback,
+                device_id=self.id,
+                cmd_id=self._FC_HEARTBEAT,
+            )
+        except KeyError:
+            pass
 
     @property
     def quaternion(self) -> tuple:

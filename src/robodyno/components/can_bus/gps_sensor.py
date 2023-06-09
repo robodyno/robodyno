@@ -66,8 +66,7 @@ class GpsSensor(CanBusDevice):
             ValueError: If the device type is not GPS sensor.
         """
         super().__init__(can, id_)
-        print(self.get_version(timeout=0.15))
-        print(self.type)
+        self.get_version(timeout=0.015)
         if self.type is None or self.type != Model.ROBODYNO_GPS_SENSOR:
             raise ValueError(f'GPS sensor init failed, id: {id_}')
         self.timestamp = None
@@ -78,11 +77,14 @@ class GpsSensor(CanBusDevice):
         )
 
     def __del__(self):
-        self._can.unsubscribe(
-            callback=self._on_receive_timestamp,
-            device_id=self.id,
-            cmd=self._CMD_HEARTBEAT,
-        )
+        try:
+            self._can.unsubscribe(
+                callback=self._on_receive_timestamp,
+                device_id=self.id,
+                cmd_id=self._CMD_HEARTBEAT,
+            )
+        except KeyError:
+            pass
 
     def _on_receive_timestamp(
         self, data: bytes, timestamp: float, device_id: int, cmd_id: int
@@ -101,14 +103,14 @@ class GpsSensor(CanBusDevice):
             hour, minute, int(second), int(second * 1000) % 1000
         )
 
-    def get_position(self, timeout: Optional[float] = None) -> Optional[tuple]:
+    def get_position(self, timeout: Optional[float] = None) -> Optional[dict]:
         """Get the position of the GPS sensor.
 
         Args:
             timeout (float, optional): Timeout. Defaults to None.
 
         Returns:
-            Optional[tuple]: Position (longitude, latitude) in degrees.
+            Optional[dict]: Timestamp, longitude and latitude.
         """
         try:
             latitude, longitude = self._can.get(
@@ -120,7 +122,11 @@ class GpsSensor(CanBusDevice):
         except TimeoutError:
             return None
 
-        return longitude, latitude
+        return {
+            'timestamp': self.timestamp,
+            'longitude': longitude,
+            'latitude': latitude,
+        }
 
     def get_position_str(self, timeout: Optional[float] = None) -> Optional[str]:
         """Get the position of the GPS sensor in string format.
@@ -134,11 +140,11 @@ class GpsSensor(CanBusDevice):
         position = self.get_position(timeout)
         if position is None:
             return None
-        longitude_str = 'E' if position[0] >= 0 else 'W'
-        latitude_str = 'N' if position[1] >= 0 else 'S'
+        longitude_str = 'E' if position['longitude'] >= 0 else 'W'
+        latitude_str = 'N' if position['latitude'] >= 0 else 'S'
         return (
-            f'{self.timestamp} {abs(position[0])}°{longitude_str} '
-            f'{abs(position[1])}°{latitude_str}'
+            f'{self.timestamp} {abs(position.get("longitude"))}°{longitude_str} '
+            f'{abs(position.get("latitude"))}°{latitude_str}'
         )
 
     def config_can_bus(self, new_id: int = None, bitrate: int = 1000000) -> None:
