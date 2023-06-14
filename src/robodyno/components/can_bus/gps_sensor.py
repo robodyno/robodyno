@@ -60,7 +60,7 @@ class GpsSensor(CanBusDevice):
 
         Args:
             can (CanBus): CanBus object.
-            id (int, optional): Device id. Defaults to 0x32.
+            id_ (int, optional): Device id. Defaults to 0x32.
 
         Raises:
             ValueError: If the device type is not GPS sensor.
