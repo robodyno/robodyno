@@ -28,7 +28,7 @@ Examples:
     >>> can = CanBus()
     >>> gps = GpsSensor(can)
     >>> gps.get_position()
-    (116.28720092773438, 40.058292388916016)
+    {'timestamp': datetime.time(0, 0, 0, 0), 'longitude': 0.0, 'latitude': 0.0}
     >>> can.disconnect()
 """
 
