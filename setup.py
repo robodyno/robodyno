@@ -98,6 +98,7 @@ setup(
             'SliderModule = robodyno.components.can_bus.slider_module:SliderModule',
             'ImuSensor = robodyno.components.can_bus.imu_sensor:ImuSensor',
             'LedDriver = robodyno.components.can_bus.led_driver:LedDriver',
+            'Battery = robodyno.components.can_bus.battery:Battery',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',

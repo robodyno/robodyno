@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `Battery` component.
+
 ### Fixed
 - Module `robodyno.robots` was missing the `ThreeDofCartesian` class.
 

@@ -51,6 +51,7 @@ nav:
         - StepperDriver: references/components/can_bus/stepper_driver.md
         - ImuSensor: references/components/can_bus/imu_sensor.md
         - LedDriver: references/components/can_bus/led_driver.md
+        - Battery: references/components/can_bus/battery.md
       - webots:
         - references/components/webots/index.md
         - Motor: references/components/webots/motor.md
