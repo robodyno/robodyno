@@ -117,7 +117,7 @@ deploy-doc-fix:
   tags:
     - docker
   only:
-    - main
+    - song/fix-ci-update-docs
   image: python:latest
   before_script:
     - mkdir -p /root/.ssh && chmod 700 /root/.ssh
