@@ -63,6 +63,7 @@ deploy-doc:
     - git remote set-url origin git@101.42.250.169:robodyno/robodyno.git
     - git config --global user.email "${CI_EMAIL}"
     - git config --global user.name "${CI_USERNAME}"
+    - git checkout -b main || git checkout main
     - VERSION=$(grep -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -n 1)
     - mike deploy --push --update-aliases $VERSION latest
 
@@ -111,27 +112,3 @@ push-to-gitee:
     - git checkout -b main || git checkout main
     - git remote set-url origin ${GITEE_REPO}
     - git push --force origin main
-
-deploy-doc-fix:
-  stage: deploy
-  tags:
-    - docker
-  only:
-    - song/fix-ci-update-docs
-  image: python:latest
-  before_script:
-    - mkdir -p /root/.ssh && chmod 700 /root/.ssh
-    - echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa
-    - chmod 600 /root/.ssh/id_rsa
-    - eval "$(ssh-agent -s)"
-    - ssh-keyscan $SSH_HOST >> /root/.ssh/known_hosts
-    - ssh-add /root/.ssh/id_rsa
-    - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r docs/requirements.txt
-    - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple .
-  script:
-    - git remote set-url origin git@101.42.250.169:robodyno/robodyno.git
-    - git config --global user.email "${CI_EMAIL}"
-    - git config --global user.name "${CI_USERNAME}"
-    - git checkout -b song/fix-ci-update-docs || git checkout song/fix-ci-update-docs
-    - VERSION=$(grep -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -n 1)
-    - mike deploy --push --update-aliases $VERSION latest
