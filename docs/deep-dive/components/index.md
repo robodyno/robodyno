@@ -14,6 +14,7 @@ Robodyno 的所有硬件模组都可以通过 CAN 总线来控制，同时，部
 | `ROBODYNO_IMU_SENSOR`     | [IMU 传感器](imu-sersor/)           | 0x23        | [支持](../../../references/components/can_bus/imu_sensor/)     |                                                   |                               |
 | `ROBODYNO_LED_DRIVER`     | [LED 驱动模块](led-driver/)         | 0x33        | [支持](../../../references/components/can_bus/led_driver/)     |                                                   |                               |
 | `ROBODYNO_BATTERY`        | [电池模块](battery/)               | 0x0F        | [支持](../../../references/components/can_bus/battery/)        |                                                   |                               |
+| `ROBODYNO_GPS_SENSOR`     | [GPS 传感器](gps-sensor/)           | 0x31        | [支持](../../../references/components/can_bus/gps_sensor/)     |                                                   |                               |
 
 ## API
 

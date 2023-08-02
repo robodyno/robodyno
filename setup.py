@@ -97,6 +97,7 @@ setup(
             'StepperDriver = robodyno.components.can_bus.stepper_driver:StepperDriver',
             'SliderModule = robodyno.components.can_bus.slider_module:SliderModule',
             'ImuSensor = robodyno.components.can_bus.imu_sensor:ImuSensor',
+            'GpsSensor = robodyno.components.can_bus.gps_sensor:GpsSensor',
             'LedDriver = robodyno.components.can_bus.led_driver:LedDriver',
             'Battery = robodyno.components.can_bus.battery:Battery',
         ],
