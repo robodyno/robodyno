@@ -99,6 +99,7 @@ setup(
             'ImuSensor = robodyno.components.can_bus.imu_sensor:ImuSensor',
             'GpsSensor = robodyno.components.can_bus.gps_sensor:GpsSensor',
             'LedDriver = robodyno.components.can_bus.led_driver:LedDriver',
+            'Battery = robodyno.components.can_bus.battery:Battery',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',

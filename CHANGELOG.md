@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `LedDriver` component([!10](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/10)).
 - `GpsSensor` component([!11](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/11)).
+- `Battery` component([!13](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/13)).
 
 ### Fixed
 - Module `robodyno.robots` was missing the `ThreeDofCartesian` class([!9](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/9)).
