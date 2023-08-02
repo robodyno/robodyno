@@ -340,5 +340,4 @@ class Battery(CanBusDevice):
             )
         except TimeoutError:
             return None
-        print(temp1, temp2)
         return ((temp1 - 2731) / 10.0, (temp2 - 2731) / 10.0)
