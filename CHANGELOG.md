@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Module `robodyno.robots` was missing the `ThreeDofCartesian` class([!9](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/9)).
+- Component `robodyno.components.can_bus.motor` could not recognize the state of the motor when rebooting.
 
 ## [1.6.1] - 2023-05-29
 

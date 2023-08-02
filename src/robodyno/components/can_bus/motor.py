@@ -759,6 +759,8 @@ class Motor(CanBusDevice):
 
         UNKNOWN = -1
         """The state of the motor is unknown."""
+        BOOTING = 0
+        """The motor is booting."""
         DISABLED = 1
         """The motor is disabled."""
         CALIBRATE = 3
