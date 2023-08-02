@@ -141,9 +141,9 @@ ROBOTTIME_PARAMS = {
         },
         Model.ROBODYNO_NANO_P100: {
             'reduction': 100,
-            'available_velocity': 16.23,
-            'available_torque': 0.15,
-            'available_current': 0.6,
+            'available_velocity': 500, # for develop 
+            'available_torque': 100, # for develop
+            'available_current': 100, # for develop
             'torque_constant': 0.25,
             'with_brake': False,
             'default_vel_limit': 10.0,
