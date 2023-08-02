@@ -59,9 +59,9 @@ class Battery(CanBusDevice):
     _CMD_GET_CURRENT = 0x05
     _CMD_GET_CAPACITY = 0x06
     _CMD_GET_CYTLE_COUNT = 0x07
-    _CMD_GET_MANUFACTURE_DATE = 0x08
-    _CMD_GET_EQUILIZATION_STATUS = 0x09
-    _CMD_GET_PROTECT_STATUS = 0x0A
+    _CMD_GET_PRODUCTION_DATE = 0x08
+    _CMD_GET_BALANCE_STATUS = 0x09
+    _CMD_GET_PROTECTION_STATUS = 0x0A
     _CMD_GET_HARDWARE_VERSION = 0x0B
     _CMD_GET_RSOC = 0x0C
     _CMD_GET_FET = 0x0D
@@ -207,18 +207,18 @@ class Battery(CanBusDevice):
             return None
         return cycle_count
 
-    def get_manufacture_date(self, timeout: Optional[float] = None) -> datetime:
-        """Reads the manufacture date of the battery.
+    def get_production_date(self, timeout: Optional[float] = None) -> datetime:
+        """Reads the production date of the battery.
 
         Args:
             timeout (float): The timeout in seconds.
 
         Returns:
-            (datetime | None): the manufacture date. Returns None if times out.
+            (datetime | None): the production date. Returns None if times out.
         """
         try:
             (time_data,) = self._can.get(
-                self.id, self._CMD_GET_MANUFACTURE_DATE, 'H', timeout
+                self.id, self._CMD_GET_PRODUCTION_DATE, 'H', timeout
             )
         except TimeoutError:
             return None
@@ -227,35 +227,35 @@ class Battery(CanBusDevice):
         day = time_data & 0x1F
         return datetime(year, month, day)
 
-    def get_equalization_status(self, timeout: Optional[float] = None) -> int:
-        """Reads the equalization status of the battery.
+    def get_balance_status(self, timeout: Optional[float] = None) -> int:
+        """Reads the balance status of the battery.
 
         Args:
             timeout (float): The timeout in seconds.
 
         Returns:
-            (int | None): the equalization status. Returns None if times out.
+            (int | None): the balance status. Returns None if times out.
         """
         try:
             (status,) = self._can.get(
-                self.id, self._CMD_GET_EQUILIZATION_STATUS, 'I', timeout
+                self.id, self._CMD_GET_BALANCE_STATUS, 'I', timeout
             )
         except TimeoutError:
             return None
         return status
 
-    def get_protect_status(self, timeout: Optional[float] = None) -> int:
-        """Reads the protect status of the battery.
+    def get_protection_status(self, timeout: Optional[float] = None) -> int:
+        """Reads the protection status of the battery.
 
         Args:
             timeout (float): The timeout in seconds.
 
         Returns:
-            (int | None): the protect status. Returns None if times out.
+            (int | None): the protection status. Returns None if times out.
         """
         try:
             (status,) = self._can.get(
-                self.id, self._CMD_GET_PROTECT_STATUS, 'H', timeout
+                self.id, self._CMD_GET_PROTECTION_STATUS, 'H', timeout
             )
         except TimeoutError:
             return None
