@@ -73,12 +73,16 @@ class CanBusMonitor(object):
             vertical_overflow='visible',
         ) as live:
             while True:
+                if self._msg_queue.empty():
+                    continue
                 ts, device_id, command_id, data_list = self._msg_queue.get()
                 data_dict[(device_id, command_id)] = (ts, data_list)
                 live.update(self._generate_table(data_dict), refresh=True)
 
     def _monitor(self) -> None:
         while True:
+            if self._msg_queue.empty():
+                continue
             ts, device_id, command_id, data_list = self._msg_queue.get()
             self._console.print(
                 f'[green not bold][{ts}][/] '
