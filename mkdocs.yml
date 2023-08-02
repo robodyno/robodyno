@@ -17,6 +17,7 @@ nav:
       - 步进电机驱动模块: deep-dive/components/stepper-driver.md
       - IMU 传感器: deep-dive/components/imu-sensor.md
       - LED 灯条驱动模块: deep-dive/components/led-driver.md
+      - GPS 传感器: deep-dive/components/gps-sensor.md
     - 电机运动模式: deep-dive/motor-modes.md
   - Robodyno CLI:
     - commands/index.md
@@ -51,6 +52,7 @@ nav:
         - StepperDriver: references/components/can_bus/stepper_driver.md
         - ImuSensor: references/components/can_bus/imu_sensor.md
         - LedDriver: references/components/can_bus/led_driver.md
+        - GpsSensor: references/components/can_bus/gps_sensor.md
       - webots:
         - references/components/webots/index.md
         - Motor: references/components/webots/motor.md
