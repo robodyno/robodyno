@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.formatting.provider": "none",
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.black-formatter",
+			"editor.formatOnSave": true,
+		},
+		"black-formatter.args": ["-S"],
+	}
+}

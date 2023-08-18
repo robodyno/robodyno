@@ -1,125 +1,160 @@
-#!/usr/bin/env python
 # -*-coding:utf-8 -*-
-"""slider_module.py
-Time    :   2023/01/30
-Author  :   song 
-Version :   1.0
-Contact :   zhaosongy@126.com
-License :   (C)Copyright 2022, robottime / robodyno
+#
+# Apache License, Version 2.0
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Robodyno slider module can bus driver
+"""Slider module.
 
-  Typical usage example:
+This module provides functions to control slider module. The slider module is a
+lead screw driven linear module with a robodyno motor.
 
-  from robodyno.interfaces import CanBus
-  from robodyno.components import SliderModule
+Examples:
 
-  can = CanBus()
-  
-  slider = SliderModule(can, id = 0x10, type = 'ROBODYNO_PRO_44', max_vel = 0.02)
-
-  can.disconnect()
+    >>> from robodyno.components import SliderModule
+    >>> from robodyno.interfaces import CanBus
+    >>> can_bus = CanBus()
+    >>> slider = SliderModule(can_bus, 0x10)
+    >>> slider.enable()
+    >>> slider.set_pos(0.1)
+    >>> slider.get_pos()
+    0.1
+    >>> slider.disable()
+    >>> can_bus.disconnect()
 """
 
-import time
 from math import fabs, pi
+from typing import Optional
+
+from robodyno.interfaces import CanBus
 from robodyno.components.can_bus.motor import Motor
 
-class SliderModule():
-    """Robodyno slider module driver.
-    
+
+class SliderModule(object):
+    """Slider module.
+
     Attributes:
-        motor: robodyno motor integrated in module
-        max_vel: slider's max velocity (m/s)
-        LEAD: linear travel the nut makes per one screw revolution (m)
+        motor (Motor): Motor object of the slider module.
     """
 
-    def __init__(self, iface, id = 0x10, type = None, max_vel = 0.02, *args, **kwargs):
-        """Init slider module from interface, motor id, motor type, slider's max vel
-        
+    def __init__(
+        self,
+        can: CanBus,
+        id_: int = 0x10,
+        type_: Optional[str] = None,
+        max_vel: float = 0.02,
+        lead: float = 0.01,
+    ):
+        """Inits SliderModule with can bus object and device id.
+
+        This function initializes the slider module by creating a motor object
+        and configuring the motor to position track mode with max velocity.
+
         Args:
-            iface: robodyno interface
-            id: robodyno motor id
-            type: robodyno motor type
-            max_vel: slider
+            can (CanBus): CanBus object.
+            id_ (int): Motor id of the slider module.
+            type_ (string): Motor type of the slider module.
+            max_vel (float): Max velocity of the slider module in m/s.
+            lead (float): Lead of the slider module in m/round.
         """
-        self.LEAD = 0.01
-        self.motor = Motor(iface, id, type)
-        self._reduction = self.LEAD / 2 / pi # mm/rad
+        self._lead = lead
+        self.motor = Motor(can, id_, type_)
+        self._reduction = self._lead / 2 / pi  # in m/rad
         self.set_max_vel(max_vel)
-    
-    def set_max_vel(self, max_vel):
-        """Change slider's max velocity.
-        
+
+    def set_max_vel(self, max_vel: float) -> None:
+        """Sets max velocity of the slider module.
+
+        This function configures the motor to position track mode with max
+        velocity.
+
         Args:
-            max_vel: slider's max velocity, should be always positive (m/s)
+            max_vel (float): Max velocity of the slider module in m/s.
         """
-        self.max_vel = fabs(max_vel)
-        self.motor.position_track_mode(self.max_vel / self._reduction, 40, 40)
-    
-    def enable(self):
-        """Enable slider module."""
+        self._max_vel = fabs(max_vel)
+        self.motor.position_track_mode(self._max_vel / self._reduction, 40, 40)
+
+    def enable(self) -> None:
+        """Enables the slider module."""
         self.motor.enable()
 
-    def disable(self):
-        """Disable slider module."""
+    def disable(self) -> None:
+        """Disables the slider module."""
         self.motor.disable()
 
-    def set_pos(self, pos):
-        """Set slider's position.
-        
+    def init_pos(self, initial_pos: float = 0) -> None:
+        """Initializes position of the slider module.
+
         Args:
-            pos: slider's position (m)
+            initial_pos (float): Initial position of the slider module in m.
+        """
+        self.motor.init_pos(initial_pos / self._reduction)
+
+    def init_abs_pos(self, initial_pos: float = 0, save: bool = True) -> None:
+        """Initializes absolute position of the slider module.
+
+        Args:
+            initial_pos (float): Initial absolute position of the slider module in m.
+            save (bool): Whether to save the configuration.
+        """
+        self.motor.init_abs_pos(initial_pos / self._reduction)
+        if save:
+            self.motor.save()
+
+    def set_pos(self, pos: float) -> None:
+        """Sets position of the slider module.
+
+        Args:
+            pos (float): Position of the slider module in m.
         """
         self.motor.set_pos(pos / self._reduction)
-        
-    def set_abs_pos(self, pos):
-        """Set slider's absolute position.
-        
+
+    def set_abs_pos(self, pos: float) -> None:
+        """Sets absolute position of the slider module.
+
         Args:
-            pos: slider's absolute position (m)
+            pos (float): Absolute position of the slider module in m.
         """
         self.motor.set_abs_pos(pos / self._reduction)
 
-    def get_pos(self, timeout = 0):
-        """Read slider's position.
-        
+    def get_pos(self, timeout: Optional[float] = None) -> Optional[float]:
+        """Reads position of the slider module.
+
         Args:
-            timeout: 0 indicates unlimited timeout (s)
-        
+            timeout (float): Timeout in seconds.
+
         Returns:
-            position (m) / None if timeout
+            (float | None): Position of the slider module in m. Returns None if
+                the read times out.
         """
         pos = self.motor.get_pos(timeout)
-        return None if pos is None else pos * self._reduction
+        if pos is None:
+            return None
+        return pos * self._reduction
 
-    def get_abs_pos(self, timeout = 0):
-        """Read slider's absolute position.
-        
+    def get_abs_pos(self, timeout: Optional[float] = None) -> Optional[float]:
+        """Reads absolute position of the slider module.
+
         Args:
-            timeout: 0 indicates unlimited timeout (s)
-        
+            timeout (float): Timeout in seconds.
+
         Returns:
-            absolute position (m) / None if timeout
+            (float | None): Absolute position of the slider module in m. Returns
+                None if the read times out.
         """
         pos = self.motor.get_abs_pos(timeout)
-        return None if pos is None else pos * self._reduction
-
-    def init_pos(self, offset = 0):
-        """Init slider pos with current position
-        
-        Args:
-            offset: current position (m)
-        """
-        self.motor.init_pos(offset / self._reduction)
-
-    def init_abs_pos(self, offset = 0, save = True):
-        """Init slider absolute pos with current position
-        
-        Args:
-            offset: current absolute position (m)
-        """
-        self.motor.init_abs_pos(offset / self._reduction)
-        if save:
-            self.motor.save_configuration()
-            time.sleep(0.1)
+        if pos is None:
+            return None
+        return pos * self._reduction

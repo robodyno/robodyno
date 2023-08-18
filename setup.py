@@ -1,22 +1,38 @@
+# -*-coding:utf-8 -*-
+#
+# Apache License, Version 2.0
+#
+# Copyright (c) 2023 Robottime(Beijing) Technology Co., Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Setup script for robodyno."""
+
 import os
-import re
 from setuptools import setup
 
-with open(os.path.join(os.path.dirname(__file__), 'src', 'robodyno', 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+from src.robodyno import __version__
 
-# 从changelog文件中获取最新版本的版本号
-with open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.md'), 'r') as f:
-    for line in f:
-        if line.startswith('##'):
-            match = re.search(r'\d+\.\d+\.\d+', line)
-            if match:
-                version = match.group(0)
-                break
+with open(
+    os.path.join(os.path.dirname(__file__), 'README.md'),
+    mode='r',
+    encoding='utf-8',
+) as f:
+    long_description = f.read()
 
 setup(
     name='robodyno',
-    version=version,
+    version=__version__,
     maintainer='robottime',
     maintainer_email='lab@robottime.cn',
     author='song',
@@ -26,9 +42,9 @@ setup(
     long_description_content_type='text/markdown',
     url='http://101.42.250.169/',
     keywords=['robodyno', 'robot', 'robot module'],
-    license='MIT License',
+    license='Apache License, Version 2.0',
     classifiers=[
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',
         'Framework :: Robot Framework',
@@ -49,7 +65,7 @@ setup(
     packages=[
         'robodyno',
         'robodyno.components',
-        'robodyno.components.brands',
+        'robodyno.components.config',
         'robodyno.components.can_bus',
         'robodyno.components.webots',
         'robodyno.interfaces',
@@ -60,28 +76,30 @@ setup(
         'robodyno.robots.six_dof_collaborative_robot',
         'robodyno.robots.three_dof_delta_robot',
         'robodyno.robots.three_dof_palletizing_robot',
+        'robodyno.robots.three_dof_cartesian_robot',
         'robodyno.robots.utils',
     ],
     python_requires='>=3.6',
     install_requires=[
-        'numpy>=1.10.0', 
-        'colorama>=0.4.5',
+        'numpy>=1.10.0',
+        'rich >= 12.6.0',
+        'click >= 7.1.2',
         'python-can>=3.2.0, <4.0',
         'importlib-metadata',
     ],
     extras_require={
-        ':sys_platform == "win32"': [
-            'candle-bus'
-        ],
+        ':sys_platform == "win32"': ['candle-bus'],
     },
     entry_points={
         'robodyno.components.can_bus': [
             'Motor = robodyno.components.can_bus.motor:Motor',
             'PwmDriver = robodyno.components.can_bus.pwm_driver:PwmDriver',
             'StepperDriver = robodyno.components.can_bus.stepper_driver:StepperDriver',
-            'VGripper = robodyno.components.can_bus.vacuum_gripper:VGripper',
             'SliderModule = robodyno.components.can_bus.slider_module:SliderModule',
             'ImuSensor = robodyno.components.can_bus.imu_sensor:ImuSensor',
+            'GpsSensor = robodyno.components.can_bus.gps_sensor:GpsSensor',
+            'LedDriver = robodyno.components.can_bus.led_driver:LedDriver',
+            'Battery = robodyno.components.can_bus.battery:Battery',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',
@@ -93,10 +111,10 @@ setup(
             'SixDoFCollabRobot = robodyno.robots.six_dof_collaborative_robot.six_dof_collab_robot:SixDoFCollabRobot',
             'ThreeDoFDelta = robodyno.robots.three_dof_delta_robot.three_dof_delta_robot:ThreeDoFDelta',
             'ThreeDoFPallet = robodyno.robots.three_dof_palletizing_robot.three_dof_pallet_robot:ThreeDoFPallet',
+            'ThreeDoFCartesian = robodyno.robots.three_dof_cartesian_robot.three_dof_cartesian_robot:ThreeDoFCartesian',
         ],
         'console_scripts': [
-            'robodyno = robodyno:robodyno',
-            'robodyno-motor = robodyno:robodyno_motor'
+            'robodyno = robodyno.tools.cli:robodyno',
         ],
-    }
+    },
 )

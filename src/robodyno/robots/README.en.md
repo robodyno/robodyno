@@ -16,3 +16,6 @@
 
 ### 5. three dof delta robot
 - [Readme](./three_dof_delta_robot/README.md)
+
+### 6. three dof cartesian robot
+- [Readme](./three_dof_cartesian_robot/README.md)
