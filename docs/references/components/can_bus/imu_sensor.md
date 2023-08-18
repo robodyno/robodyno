@@ -1,1 +1,0 @@
-::: robodyno.components.can_bus.imu_sensor

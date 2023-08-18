@@ -1,0 +1,29 @@
+from enum import Enum
+
+class DeviceType(Enum):
+    """Robodyno device type and uuid pairs."""
+    ROBODYNO_PRO_44 = 0x00
+    ROBODYNO_PRO_12 = 0x01
+    ROBODYNO_PRO_50  = 0x02
+    ROBODYNO_PRO_100 = 0x03
+    ROBODYNO_PRO_DIRECT = 0x0F
+    ROBODYNO_PLUS_50  = 0x10
+    ROBODYNO_PLUS_100 = 0x11
+    ROBODYNO_PLUS_12  = 0x12
+    ROBODYNO_PLUS_DIRECT = 0x1F
+    ROBODYNO_NANO_100 = 0x20
+    ROBODYNO_PWM_DRIVER = 0x61
+    ROBODYNO_STEPPER_DRIVER = 0x62
+    ROBODYNO_VACUUM_GRIPPER = 0x63
+    ROBODYNO_ADAPTIVE_GRIPPER = 0x64
+    ROBODYNO_FLEXIBLE_GRIPPER = 0x65
+    ROBODYNO_EXB_FCTY = 0x80
+    ROBODYNO_IMU_SENSOR = 0xA1
+    ROBODYNO_GPS_SENSOR = 0xA2
+    ROBODYNO_LED_DRIVER = 0xA3
+
+    ROBODYNO_THIRD_PARTY = 0xFF
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.ROBODYNO_THIRD_PARTY
