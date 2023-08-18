@@ -81,6 +81,7 @@ class CanBus(object):
         self._recv_callbacks = defaultdict(lambda: defaultdict(set))
         self._recv_lock = Lock()
         self._send_lock = Lock()
+        self._get_lock = Lock()
 
         self._recv_event = Event()
         self._listening_event = Event()
@@ -190,23 +191,24 @@ class CanBus(object):
         Raises:
             TimeoutError: If timeout.
         """
-        start_time = time()
-        with self._rx_queue.mutex:
-            self._rx_queue.queue.clear()
-        self._listening_event.set()
-        self._send_remote(device_id, cmd_id)
-        arbitration_id = self._combine_ids(device_id, cmd_id)
-        while True:
-            if timeout is not None and time() - start_time > timeout:
-                self._listening_event.clear()
-                raise TimeoutError('Timeout when receiving data.')
-            try:
-                msg = self._rx_queue.get(timeout=0.001)
-            except Empty:
-                continue
-            if msg.arbitration_id == arbitration_id:
-                self._listening_event.clear()
-                return struct.unpack('<' + fmt, msg.data)
+        with self._get_lock:
+            start_time = time()
+            arbitration_id = self._combine_ids(device_id, cmd_id)
+            with self._rx_queue.mutex:
+                self._rx_queue.queue.clear()
+            self._listening_event.set()
+            self._send_remote(device_id, cmd_id)
+            while True:
+                if timeout is not None and time() - start_time > timeout:
+                    self._listening_event.clear()
+                    raise TimeoutError('Timeout when receiving data.')
+                try:
+                    msg = self._rx_queue.get(timeout=0.001)
+                except Empty:
+                    continue
+                if msg.arbitration_id == arbitration_id:
+                    self._listening_event.clear()
+                    return struct.unpack('<' + fmt, msg.data)
 
     def subscribe(
         self, callback: Callable, device_id: int = -1, cmd_id: int = -1
