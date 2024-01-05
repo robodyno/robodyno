@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `LedDriver` example([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
+- `GpsSensor` example([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
+- `Battery` example([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
+
 ## [1.6.2]
 
 ### Added
