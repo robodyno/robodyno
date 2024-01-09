@@ -25,10 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI `robodyno monitor` occasionally could not be interrupted by `Ctrl+C`([!14](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/14)).
 - Interface `robodyno.interfaces.can_bus` was unstable when getting messages in multi-threading([!17](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/17)).
 
-### Added
-
-- Examples written in Jupyter Notebook.
-
 ## [1.6.1] - 2023-05-29
 
 ### Added
