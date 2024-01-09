@@ -63,9 +63,9 @@ deploy-doc:
     - git remote set-url origin git@101.42.250.169:robodyno/robodyno.git
     - git config --global user.email "${CI_EMAIL}"
     - git config --global user.name "${CI_USERNAME}"
-    - git checkout -b main || git checkout main
+    - git branch
     - VERSION=$(grep -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -n 1)
-    - mike deploy --push --update-aliases $VERSION latest
+    - mike deploy --push -f --update-aliases $VERSION latest
 
 push-to-github:
   stage: deploy
@@ -86,7 +86,7 @@ push-to-github:
   script:
     - git config --global user.email "${CI_EMAIL}"
     - git config --global user.name "${CI_USERNAME}"
-    - git checkout -b main || git checkout main
+    - git branch
     - git remote set-url origin ${GITHUB_REPO}
     - git push --force origin main
 
@@ -109,6 +109,6 @@ push-to-gitee:
   script:
     - git config --global user.email "${CI_EMAIL}"
     - git config --global user.name "${CI_USERNAME}"
-    - git checkout -b main || git checkout main
+    - git branch
     - git remote set-url origin ${GITEE_REPO}
     - git push --force origin main
