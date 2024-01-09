@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Examples written in Jupyter Notebook.
+
 ## [1.6.2]
 
 ### Added
