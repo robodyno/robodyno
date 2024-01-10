@@ -21,17 +21,15 @@
 The impact sensor can be used to get the trigger status. 
 
 Examples:
-    >>> from robodyno.components import Impact
+    >>> from robodyno.components import ImpactSensor
     >>> from robodyno.interfaces import CanBus
     >>> can = CanBus()
-    >>> impact_sensor = Impact(can)
+    >>> impact_sensor = ImpactSensor(can)
     >>> print(impact_sensor.get_status())
     1
 
     >>> print(impact_sensor.get_status())
     0
-
-    notes: After multiple tests,we need to wait for at least 0.0016 seconds
 """
 from struct import unpack
 from typing import Optional
@@ -41,7 +39,7 @@ from robodyno.interfaces import CanBus
 from robodyno.components import CanBusDevice
 from robodyno.components.config.model import Model
 
-class Impact(CanBusDevice):
+class ImpactSensor(CanBusDevice):
   """Impact sensor driver
 
   Attributes:
@@ -50,11 +48,11 @@ class Impact(CanBusDevice):
     fw_ver(float):Firmware version.
   """
 
-  _CMD_HEARTBEAT    = 0x01
-  _CMD_CONFIG_CAN   = 0x02
-  _CMD_GET_DISTANCE = 0x03
+  _CMD_GET_API_VER  = 0x01
+  _CMD_GET_DISTANCE = 0x02
+  _CMD_CONFIG_CAN   = 0x03
 
-  def __init__(self, can: CanBus, id_: int = 0x37):
+  def __init__(self, can: CanBus, id_: int = 0x34):
     """Initializes the impact driver.
     Args:
         can(CanBus):Can bus instance.
@@ -90,7 +88,7 @@ class Impact(CanBusDevice):
     }.get(bitrate, 2)
     self._can.send(self.id, self._CMD_CONFIG_CAN, 'HH', new_id, bitrate_id)
 
-  def get_status(self, timeout: Optional[float] = 0.0016) -> Optional[float]:
+  def get_status(self, timeout: Optional[float] = 0.02) -> Optional[float]:
     """Reads the distance.
 
     Args:

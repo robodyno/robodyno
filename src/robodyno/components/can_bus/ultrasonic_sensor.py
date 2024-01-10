@@ -18,20 +18,19 @@
 
 """Ultrasonic sensor driver
 
-The Ultrasonic sensor can be used to get the distance. Unit: centimeters
+The Ultrasonic sensor can be used to get the distance.
 
 Examples:
-    >>> from robodyno.components import Ultrasonic
+    >>> from robodyno.components import UltrasonicSensor
     >>> from robodyno.interfaces import CanBus
     >>> can = CanBus()
-    >>> ultrasonic = Ultrasonic(can)
-    >>> print(ultrasonic.get_distance())
+    >>> ultrasonic_sensor = UltrasonicSensor(can)
+    >>> print(ultrasonic_sensor.get_distance())
     57.646400451660156
 
-    >>> print(ultrasonic.get_distance())
+    >>> print(ultrasonic_sensor.get_distance())
     20.172000885009766
 
-    notes: After multiple tests,we need to wait for at least 0.126 seconds
 """
 from struct import unpack
 from typing import Optional
@@ -41,7 +40,7 @@ from robodyno.interfaces import CanBus
 from robodyno.components import CanBusDevice
 from robodyno.components.config.model import Model
 
-class Ultrasonic(CanBusDevice):
+class UltrasonicSensor(CanBusDevice):
   """Ultrasonic sensor driver
 
   Attributes:
@@ -55,7 +54,7 @@ class Ultrasonic(CanBusDevice):
   _CMD_CONFIG_CAN   = 0x03
 
   def __init__(self, can: CanBus, id_: int = 0x35):
-    """Initializes the ultrasonic driver.
+    """Initializes the ultrasonic sensor driver.
     Args:
         can(CanBus):Can bus instance.
         id_(int):Device id.
@@ -66,8 +65,7 @@ class Ultrasonic(CanBusDevice):
     super().__init__(can, id_)
     self.get_version(timeout=0.015)
     if self.type is None or self.type != Model.ROBODYNO_ULTRASONIC:
-        # print("self.type:", self.type)
-        raise ValueError(f'Device of id {id_} is not a ultrasonic driver.')
+        raise ValueError(f'Device of id {id_} is not a ultrasonic sensor driver.')
 
     
   def config_can_bus(self, new_id: int = None, bitrate: int = 1000000) -> None:
@@ -91,7 +89,7 @@ class Ultrasonic(CanBusDevice):
     }.get(bitrate, 2)
     self._can.send(self.id, self._CMD_CONFIG_CAN, 'HH', new_id, bitrate_id)
 
-  def get_distance(self, timeout: Optional[float] = 0.126) -> Optional[float]:
+  def get_distance(self, timeout: Optional[float] = 0.15) -> Optional[float]:
     """Reads the distance.
 
     Args:
@@ -99,11 +97,10 @@ class Ultrasonic(CanBusDevice):
 
     Returns:
         (float | None): The distance value read by the ultrasonic sensor. Returns
-            None if the read times out. Unit: centimeters.
+            250.0 if the read times out. Unit: centimeters.
     """
     try:
         pos = self._can.get(self.id, self._CMD_GET_DISTANCE, 'f', timeout)[0]
-        # print("timeout:", timeout)
     except TimeoutError:
-        return None
+        return 250.0
     return pos

@@ -18,22 +18,20 @@
 
 """Cliff sensor driver
 
-The cliff sensor can be used to get the distance. Unit: Millimeters
+The cliff sensor can be used to get the distance.
 
 Examples:
-    >>> from robodyno.components import Cliff
+    >>> from robodyno.components import CliffSensor
     >>> from robodyno.interfaces import CanBus
     >>> can = CanBus()
-    >>> cliff = Cliff(can)
-    >>> print(cliff.get_distance())
+    >>> cliff_sensor = CliffSensor(can)
+    >>> print(cliff_sensor.get_distance())
     32
 
-    >>> print(cliff.get_distance())
+    >>> print(cliff_sensor.get_distance())
     63
-
-    notes: After multiple tests,we need to wait for at least 0.0016 seconds
 """
-from struct import unpack
+import struct
 from typing import Optional
 from datetime import datetime
 
@@ -41,7 +39,7 @@ from robodyno.interfaces import CanBus
 from robodyno.components import CanBusDevice
 from robodyno.components.config.model import Model
 
-class Cliff(CanBusDevice):
+class CliffSensor(CanBusDevice):
   """Cliff sensor driver
 
   Attributes:
@@ -54,7 +52,7 @@ class Cliff(CanBusDevice):
   _CMD_CONFIG_CAN   = 0x02
   _CMD_GET_DISTANCE = 0x03
 
-  def __init__(self, can: CanBus, id_: int = 0x38):
+  def __init__(self, can: CanBus, id_: int = 0x30):
     """Initializes the cliff driver.
     Args:
         can(CanBus):Can bus instance.
@@ -66,7 +64,7 @@ class Cliff(CanBusDevice):
     super().__init__(can, id_)
     self.get_version(timeout=0.015)
     if self.type is None or self.type != Model.ROBODYNO_CLIFF_SENSOR:
-        raise ValueError(f'Device of id {id_} is not a cliff driver.')
+        raise ValueError(f'Device of id {id_} is not a cliff sensor driver.')
 
     
   def config_can_bus(self, new_id: int = None, bitrate: int = 1000000) -> None:
@@ -90,15 +88,15 @@ class Cliff(CanBusDevice):
     }.get(bitrate, 2)
     self._can.send(self.id, self._CMD_CONFIG_CAN, 'HH', new_id, bitrate_id)
 
-  def get_distance(self, timeout: Optional[float] = 0.0016) -> Optional[float]:
+  def get_distance(self, timeout: Optional[float] = 0.02) -> Optional[float]:
     """Reads the distance.
 
     Args:
         timeout (float): Timeout in seconds.
 
     Returns:
-        (float | None):The distance value read by the ultrasonic sensor. Returns
-            None if the read times out. Unit: Millimeters.
+        (float | None):The distance value read by the cliff sensor. Returns
+            None if the read times out. Unit: centimeters.
     """
     try:
         pos = self._can.get(self.id, self._CMD_GET_DISTANCE, 'b', timeout)[0]
