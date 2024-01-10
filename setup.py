@@ -100,9 +100,9 @@ setup(
             'GpsSensor = robodyno.components.can_bus.gps_sensor:GpsSensor',
             'LedDriver = robodyno.components.can_bus.led_driver:LedDriver',
             'Battery = robodyno.components.can_bus.battery:Battery',
-            'Ultrasonic = robodyno.components.can_bus.ultrasonic_sensor:Ultrasonic',
-            'Cliff = robodyno.components.can_bus.cliff_sensor:Cliff',
-            'Impact = robodyno.components.can_bus.impact_sensor:Impact',
+            'UltrasonicSensor = robodyno.components.can_bus.ultrasonic_sensor:UltrasonicSensor',
+            'CliffSensor = robodyno.components.can_bus.cliff_sensor:CliffSensor',
+            'ImpactSensor = robodyno.components.can_bus.impact_sensor:ImpactSensor',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',
