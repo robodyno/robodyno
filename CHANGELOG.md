@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CliffSensor`  Add cliff sensor library，and add its usage instructions.
 - `ImpactSensor`   Add impact sensor library，and add its usage instructions.
 - `UltrasonicSensor`  Add ultrasonic sensor library，and add its usage instructions.
-
+- Examples written in Jupyter Notebook(including:CliffSensor、ImpactSensor、UltrasonicSensor).
 
 ## [1.6.2]
 

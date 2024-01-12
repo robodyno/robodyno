@@ -64,7 +64,7 @@ class UltrasonicSensor(CanBusDevice):
     """
     super().__init__(can, id_)
     self.get_version(timeout=0.015)
-    if self.type is None or self.type != Model.ROBODYNO_ULTRASONIC:
+    if self.type is None or self.type != Model.ROBODYNO_ULTRASONIC_SENSOR:
         raise ValueError(f'Device of id {id_} is not a ultrasonic sensor driver.')
 
     
