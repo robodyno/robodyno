@@ -41,10 +41,10 @@ ultrasonic_sensor.config_can_bus(0x32)
 | ---------- | --------------------------|
 | 电源输入    | 5V ~ 29.4V                 |
 | 模块量程    | 20cm ~ 250cm               |
-| 频率       | 6.6667HZ                    |
+| 处理频率    | 6.6667HZ                   |
 
 ## API
 
 | 组件                                                                    | 说明                      |
 | ----------------------------------------------------------------------- | ------------------------- |
-| [can_bus.imu_sensor](../../../references/components/can_bus/ultrasonic_sensor) | CAN 总线 UltrasonicSensor 传感器模块类 |
+| [can_bus.ultrasonic_sensor](../../../references/components/can_bus/ultrasonic_sensor) | CAN 总线 UltrasonicSensor 传感器模块类 |

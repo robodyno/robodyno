@@ -48,4 +48,4 @@ cliff_sensor.config_can_bus(0x32)
 
 | 组件                                                                    | 说明                      |
 | ----------------------------------------------------------------------- | ------------------------- |
-| [can_bus.imu_sensor](../../../references/components/can_bus/cliff_sensor) | CAN 总线 CliffSensor 传感器模块类 |
+| [can_bus.cliff_sensor](../../../references/components/can_bus/cliff_sensor) | CAN 总线 CliffSensor 传感器模块类 |

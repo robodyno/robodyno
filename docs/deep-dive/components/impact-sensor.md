@@ -41,10 +41,10 @@ impact_sensor.config_can_bus(0x32)
 | ---------- | -------------------------- |
 | 电源输入    | 5V ~ 29.4V                 |
 | 模块数值范围 | 高电平：1  低电平：0          |
-| 频率        | 50HZ                      |
+| 处理频率     | 50HZ                      |
 
 ## API
 
 | 组件                                                                    | 说明                      |
 | ----------------------------------------------------------------------- | ------------------------- |
-| [can_bus.imu_sensor](../../../references/components/can_bus/impact_sensor) | CAN 总线 ImpactSensor 传感器模块类 |
+| [can_bus.impact_sensor](../../../references/components/can_bus/impact_sensor) | CAN 总线 ImpactSensor 传感器模块类 |

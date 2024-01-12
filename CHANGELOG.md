@@ -6,9 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- `Ultrasonic` add Ultrasonic_sensor.py  ultrasonic-sensor.md
-- `Cliff` add Cliff_sensor.py  cliff-sensor.md
-- `Impact` add Impact_sensor.py  impact-sensor.md
+### Added
+- `CliffSensor`  Add cliff sensor library，and add its usage instructions.
+- `ImpactSensor`   Add impact sensor library，and add its usage instructions.
+- `UltrasonicSensor`  Add ultrasonic sensor library，and add its usage instructions.
 
 
 ## [1.6.2]
