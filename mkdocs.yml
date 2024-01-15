@@ -18,6 +18,9 @@ nav:
       - IMU 传感器: deep-dive/components/imu-sensor.md
       - LED 灯条驱动模块: deep-dive/components/led-driver.md
       - GPS 传感器: deep-dive/components/gps-sensor.md
+      - 超声波 传感器: deep-dive/components/ultrasonic-sensor.md
+      - 悬崖 传感器: deep-dive/components/cliff-sensor.md
+      - 防撞条 传感器: deep-dive/components/impact-sensor.md
     - 电机运动模式: deep-dive/motor-modes.md
   - Robodyno CLI:
     - commands/index.md
