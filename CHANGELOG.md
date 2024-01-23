@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.3]
+
 ### Added
 
 - `CliffSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
