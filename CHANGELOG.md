@@ -6,21 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ### Added
-- `CliffSensor`  Add cliff sensor library，and add its usage instructions.
-- `ImpactSensor`   Add impact sensor library，and add its usage instructions.
-- `UltrasonicSensor`  Add ultrasonic sensor library，and add its usage instructions.
-- Examples written in Jupyter Notebook(including:CliffSensor、ImpactSensor、UltrasonicSensor).
+
+- `CliffSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
+- `ImpactSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
+- `UltrasonicSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
+- Examples of Battery([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
+- Examples of GpsSensor([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
+- Examples of LedDriver([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
 
 ## [1.6.2]
 
 ### Added
+
 - `LedDriver` component([!10](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/10)).
 - `GpsSensor` component([!11](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/11)).
 - `Battery` component([!13](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/13)).
 - Robodyno Pro absolute motor models([!16](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/16/commits)).
 
 ### Fixed
+
 - Module `robodyno.robots` was missing the `ThreeDofCartesian` class([!9](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/9)).
 - Component `robodyno.components.can_bus.motor` could not recognize the state of the motor when rebooting([!14](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/14)).
 - CLI `robodyno monitor` occasionally could not be interrupted by `Ctrl+C`([!14](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/14)).

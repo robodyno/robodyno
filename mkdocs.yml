@@ -1,71 +1,75 @@
 site_name: Robodyno 开发者文档
 nav:
   - 开始:
-    - index.md
-    - 安装: start/installation.md
-    - 快速开始: start/quickstart.md
+      - index.md
+      - 安装: start/installation.md
+      - 快速开始: start/quickstart.md
   - 深入了解:
-    - deep-dive/index.md
-    - 接口: 
-      - CAN 总线: deep-dive/interfaces/can-bus.md
-      - Webots: deep-dive/interfaces/webots.md
-    - 组件: 
-      - deep-dive/components/index.md
-      - 伺服减速电机: deep-dive/components/motor.md
-      - 直线运动模组: deep-dive/components/slider-module.md
-      - PWM 扩展模块: deep-dive/components/pwm-driver.md
-      - 步进电机驱动模块: deep-dive/components/stepper-driver.md
-      - IMU 传感器: deep-dive/components/imu-sensor.md
-      - LED 灯条驱动模块: deep-dive/components/led-driver.md
-      - GPS 传感器: deep-dive/components/gps-sensor.md
-      - 超声波 传感器: deep-dive/components/ultrasonic-sensor.md
-      - 悬崖 传感器: deep-dive/components/cliff-sensor.md
-      - 防撞条 传感器: deep-dive/components/impact-sensor.md
-    - 电机运动模式: deep-dive/motor-modes.md
+      - deep-dive/index.md
+      - 接口:
+          - CAN 总线: deep-dive/interfaces/can-bus.md
+          - Webots: deep-dive/interfaces/webots.md
+      - 组件:
+          - deep-dive/components/index.md
+          - 伺服减速电机: deep-dive/components/motor.md
+          - 直线运动模组: deep-dive/components/slider-module.md
+          - PWM 扩展模块: deep-dive/components/pwm-driver.md
+          - 步进电机驱动模块: deep-dive/components/stepper-driver.md
+          - IMU 传感器: deep-dive/components/imu-sensor.md
+          - LED 灯条驱动模块: deep-dive/components/led-driver.md
+          - 电池模块: deep-dive/components/battery.md
+          - GPS 传感器: deep-dive/components/gps-sensor.md
+          - 超声波传感器: deep-dive/components/ultrasonic-sensor.md
+          - 悬崖传感器: deep-dive/components/cliff-sensor.md
+          - 防撞条传感器: deep-dive/components/impact-sensor.md
+      - 电机运动模式: deep-dive/motor-modes.md
   - Robodyno CLI:
-    - commands/index.md
-    - list: commands/list.md
-    - monitor: commands/monitor.md
-    - motor: 
-      - commands/motor/index.md
-      - info: commands/motor/info.md
-      - enable: commands/motor/enable.md
-      - disable: commands/motor/disable.md
-      - init: commands/motor/init.md
-      - pos: commands/motor/pos.md
-      - vel: commands/motor/vel.md
-      - torque: commands/motor/torque.md
-      - config: commands/motor/config.md
-      - calibrate: commands/motor/calibrate.md
-      - clear-errors: commands/motor/clear-errors.md
-      - reboot: commands/motor/reboot.md
-      - estop: commands/motor/estop.md
-      - reset: commands/motor/reset.md
-  - Robodyno API: 
-    - references/index.md
-    - robodyno.interfaces:
-      - CanBus: references/interfaces/can_bus.md
-      - Webots: references/interfaces/webots.md
-    - robodyno.components:
-      - can_bus:
-        - references/components/can_bus/index.md
-        - Motor: references/components/can_bus/motor.md
-        - SliderModule: references/components/can_bus/slider_module.md
-        - PwmDriver: references/components/can_bus/pwm_driver.md
-        - StepperDriver: references/components/can_bus/stepper_driver.md
-        - ImuSensor: references/components/can_bus/imu_sensor.md
-        - LedDriver: references/components/can_bus/led_driver.md
-        - Battery: references/components/can_bus/battery.md
-        - GpsSensor: references/components/can_bus/gps_sensor.md
-      - webots:
-        - references/components/webots/index.md
-        - Motor: references/components/webots/motor.md
-        - SliderModule: references/components/webots/slider_module.md
-  - 免责声明与安全须知: 
-    - 开源固件: disclaimer/software.md
-    - 机器人模组（Plus系列）: disclaimer/plus.md
-    - 机器人模组（Pro系列）: disclaimer/pro.md
-    - 机器人模组（Mini系列）: disclaimer/mini.md
+      - commands/index.md
+      - list: commands/list.md
+      - monitor: commands/monitor.md
+      - motor:
+          - commands/motor/index.md
+          - info: commands/motor/info.md
+          - enable: commands/motor/enable.md
+          - disable: commands/motor/disable.md
+          - init: commands/motor/init.md
+          - pos: commands/motor/pos.md
+          - vel: commands/motor/vel.md
+          - torque: commands/motor/torque.md
+          - config: commands/motor/config.md
+          - calibrate: commands/motor/calibrate.md
+          - clear-errors: commands/motor/clear-errors.md
+          - reboot: commands/motor/reboot.md
+          - estop: commands/motor/estop.md
+          - reset: commands/motor/reset.md
+  - Robodyno API:
+      - references/index.md
+      - robodyno.interfaces:
+          - CanBus: references/interfaces/can_bus.md
+          - Webots: references/interfaces/webots.md
+      - robodyno.components:
+          - can_bus:
+              - references/components/can_bus/index.md
+              - Motor: references/components/can_bus/motor.md
+              - SliderModule: references/components/can_bus/slider_module.md
+              - PwmDriver: references/components/can_bus/pwm_driver.md
+              - StepperDriver: references/components/can_bus/stepper_driver.md
+              - ImuSensor: references/components/can_bus/imu_sensor.md
+              - LedDriver: references/components/can_bus/led_driver.md
+              - Battery: references/components/can_bus/battery.md
+              - GpsSensor: references/components/can_bus/gps_sensor.md
+              - UltrasonicSensor: references/components/can_bus/ultrasonic_sensor.md
+              - CliffSensor: references/components/can_bus/cliff_sensor.md
+              - ImpactSensor: references/components/can_bus/impact_sensor.md
+          - webots:
+              - references/components/webots/index.md
+              - Motor: references/components/webots/motor.md
+              - SliderModule: references/components/webots/slider_module.md
+  - 免责声明与安全须知:
+      - 开源固件: disclaimer/software.md
+      - 机器人模组（Plus系列）: disclaimer/plus.md
+      - 机器人模组（Pro系列）: disclaimer/pro.md
+      - 机器人模组（Mini系列）: disclaimer/mini.md
   - 常见问题解答: faq.md
   - 贡献: contributing.md
 theme:
@@ -103,7 +107,7 @@ markdown_extensions:
   - pymdownx.superfences
   - tables
   - pymdownx.tabbed:
-      alternate_style: true 
+      alternate_style: true
 
 copyright: Copyright &copy; 2007 - 2023 RobotTime
 

@@ -28,78 +28,74 @@ Examples:
     >>> print(cliff_sensor.get_distance())
     32
 
-    >>> print(cliff_sensor.get_distance())
-    63
 """
-import struct
 from typing import Optional
-from datetime import datetime
 
 from robodyno.interfaces import CanBus
 from robodyno.components import CanBusDevice
 from robodyno.components.config.model import Model
 
+
 class CliffSensor(CanBusDevice):
-  """Cliff sensor driver
+    """Cliff sensor driver
 
-  Attributes:
-    id(int):Device id.
-    type(Model):Device type.
-    fw_ver(float):Firmware version.
-  """
-
-  _CMD_HEARTBEAT    = 0x01
-  _CMD_CONFIG_CAN   = 0x02
-  _CMD_GET_DISTANCE = 0x03
-
-  def __init__(self, can: CanBus, id_: int = 0x30):
-    """Initializes the cliff driver.
-    Args:
-        can(CanBus):Can bus instance.
-        id_(int):Device id.
-
-    Raises:
-        ValueError:If the device id is invalid.
+    Attributes:
+      id(int):Device id.
+      type(Model):Device type.
+      fw_ver(float):Firmware version.
     """
-    super().__init__(can, id_)
-    self.get_version(timeout=0.015)
-    if self.type is None or self.type != Model.ROBODYNO_CLIFF_SENSOR:
-        raise ValueError(f'Device of id {id_} is not a cliff sensor driver.')
 
-    
-  def config_can_bus(self, new_id: int = None, bitrate: int = 1000000) -> None:
-    """Configures the can bus.
+    _CMD_HEARTBEAT = 0x01
+    _CMD_CONFIG_CAN = 0x02
+    _CMD_GET_DISTANCE = 0x03
 
-    Args:
-        new_id (int): New device id.
-        bitrate (int): Can bus bitrate.
+    def __init__(self, can: CanBus, id_: int = 0x30):
+        """Initializes the cliff driver.
+        Args:
+            can(CanBus):Can bus instance.
+            id_(int):Device id.
 
-    Raises:
-        ValueError: If the new id is invalid.
-    """
-    if new_id is None:
-        new_id = self.id
-    if not 0x01 <= new_id <= 0x3F:
-        raise ValueError('New CAN id must be in the range of 0x01-0x3f.')
-    bitrate_id = {
-        250000: 0,
-        500000: 1,
-        1000000: 2,
-    }.get(bitrate, 2)
-    self._can.send(self.id, self._CMD_CONFIG_CAN, 'HH', new_id, bitrate_id)
+        Raises:
+            ValueError:If the device id is invalid.
+        """
+        super().__init__(can, id_)
+        self.get_version(timeout=0.015)
+        if self.type is None or self.type != Model.ROBODYNO_CLIFF_SENSOR:
+            raise ValueError(f'Device of id {id_} is not a cliff sensor driver.')
 
-  def get_distance(self, timeout: Optional[float] = 0.02) -> Optional[float]:
-    """Reads the distance.
+    def config_can_bus(self, new_id: int = None, bitrate: int = 1000000) -> None:
+        """Configures the can bus.
 
-    Args:
-        timeout (float): Timeout in seconds.
+        Args:
+            new_id (int): New device id.
+            bitrate (int): Can bus bitrate.
 
-    Returns:
-        (float | None):The distance value read by the cliff sensor. Returns
-            None if the read times out. Unit: centimeters.
-    """
-    try:
-        pos = self._can.get(self.id, self._CMD_GET_DISTANCE, 'b', timeout)[0]
-    except TimeoutError:
-        return None
-    return pos
+        Raises:
+            ValueError: If the new id is invalid.
+        """
+        if new_id is None:
+            new_id = self.id
+        if not 0x01 <= new_id <= 0x3F:
+            raise ValueError('New CAN id must be in the range of 0x01-0x3f.')
+        bitrate_id = {
+            250000: 0,
+            500000: 1,
+            1000000: 2,
+        }.get(bitrate, 2)
+        self._can.send(self.id, self._CMD_CONFIG_CAN, 'HH', new_id, bitrate_id)
+
+    def get_distance(self, timeout: Optional[float] = 0.02) -> Optional[float]:
+        """Reads the distance.
+
+        Args:
+            timeout (float): Timeout in seconds.
+
+        Returns:
+            (float | None):The distance value read by the cliff sensor. Returns
+                None if the read times out. Unit: centimeters.
+        """
+        try:
+            pos = self._can.get(self.id, self._CMD_GET_DISTANCE, 'b', timeout)[0]
+        except TimeoutError:
+            return None
+        return pos
