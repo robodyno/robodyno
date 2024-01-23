@@ -24,6 +24,7 @@ Examples:
     >>> from robodyno.components import CliffSensor
     >>> from robodyno.interfaces import CanBus
     >>> can = CanBus()
+    >>> cliff_sensor = CliffSensor(can)
     >>> print(cliff_sensor.get_distance())
     32
 
