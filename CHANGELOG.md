@@ -10,10 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `MagneticSensor` component
-- Examples of MagneticSensor
-- Examples of CliffSensor
-- Examples of ImpactSensor
-- Examples of UltrasonicSensor
+- Examples of MagneticSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
+- Examples of CliffSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
+- Examples of ImpactSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
+- Examples of UltrasonicSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
 - `CliffSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
 - `ImpactSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
 - `UltrasonicSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
