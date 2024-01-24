@@ -22,6 +22,7 @@ nav:
           - 超声波传感器: deep-dive/components/ultrasonic-sensor.md
           - 悬崖传感器: deep-dive/components/cliff-sensor.md
           - 防撞条传感器: deep-dive/components/impact-sensor.md
+          - 磁导航传感器: deep-dive/components/magnetic-sensor.md
       - 电机运动模式: deep-dive/motor-modes.md
   - Robodyno CLI:
       - commands/index.md
@@ -61,6 +62,7 @@ nav:
               - UltrasonicSensor: references/components/can_bus/ultrasonic_sensor.md
               - CliffSensor: references/components/can_bus/cliff_sensor.md
               - ImpactSensor: references/components/can_bus/impact_sensor.md
+              - MagneticSensor: references/components/can_bus/magnetic_sensor.md
           - webots:
               - references/components/webots/index.md
               - Motor: references/components/webots/motor.md
