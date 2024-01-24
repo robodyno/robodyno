@@ -7,15 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.3]
+
+### Added
+
+- `MagneticSensor` component([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
+- Examples of MagneticSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
+- Examples of CliffSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
+- Examples of ImpactSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
+- Examples of UltrasonicSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
+- `CliffSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
+- `ImpactSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
+- `UltrasonicSensor` component([!24](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/24)).
+- Examples of Battery([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
+- Examples of GpsSensor([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
+- Examples of LedDriver([!22](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/22)).
+
+### Fixed
+
+- APIs associated with the Motor's torque were incorrectly directed in motors versions newer than v1.0([!26](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/26)).
+
 ## [1.6.2]
 
 ### Added
+
 - `LedDriver` component([!10](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/10)).
 - `GpsSensor` component([!11](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/11)).
 - `Battery` component([!13](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/13)).
 - Robodyno Pro absolute motor models([!16](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/16/commits)).
 
 ### Fixed
+
 - Module `robodyno.robots` was missing the `ThreeDofCartesian` class([!9](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/9)).
 - Component `robodyno.components.can_bus.motor` could not recognize the state of the motor when rebooting([!14](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/14)).
 - CLI `robodyno monitor` occasionally could not be interrupted by `Ctrl+C`([!14](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/14)).

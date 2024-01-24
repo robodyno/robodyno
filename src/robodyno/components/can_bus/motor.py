@@ -130,8 +130,10 @@ class Motor(CanBusDevice):
             self.get_state(1.5)
 
         self._rot_factor = -self.reduction / 2.0 / pi
+        self._torque_factor = -self.reduction
         if self.fw_ver <= 0.3:
             self._rot_factor = -self._rot_factor
+            self._torque_factor = -self._torque_factor
         self._can.subscribe(
             self._heartbeat_callback,
             device_id=self.id,
@@ -424,7 +426,7 @@ class Motor(CanBusDevice):
             'fee',
             pos * self._rot_factor,
             vel_ff * self._rot_factor,
-            torque_ff / self.reduction,
+            torque_ff / self._torque_factor,
         )
 
     def set_abs_pos(self, pos: float, vel_ff: float = 0, torque_ff: float = 0) -> None:
@@ -448,7 +450,7 @@ class Motor(CanBusDevice):
             'fee',
             pos * self._rot_factor,
             vel_ff * self._rot_factor,
-            torque_ff / self.reduction,
+            torque_ff / self._torque_factor,
         )
 
     def set_vel(self, vel: float, torque_ff: float = 0) -> None:
@@ -463,7 +465,7 @@ class Motor(CanBusDevice):
             self._CMD_SET_VEL,
             'ff',
             vel * self._rot_factor,
-            torque_ff / self.reduction,
+            torque_ff / self._torque_factor,
         )
 
     def set_torque(self, torque: float) -> None:
@@ -472,7 +474,7 @@ class Motor(CanBusDevice):
         Args:
             torque (float): The target torque in Nm.
         """
-        self._can.send(self.id, self._CMD_SET_TORQUE, 'f', torque / self.reduction)
+        self._can.send(self.id, self._CMD_SET_TORQUE, 'f', torque / self._torque_factor)
 
     def set_pid(self, pos_kp: float, vel_kp: float, vel_ki: float) -> None:
         """Sets the PID parameters of the motor.
@@ -633,7 +635,11 @@ class Motor(CanBusDevice):
             )
         except TimeoutError:
             return None
-        return pos / self._rot_factor, vel / self._rot_factor, torque * self.reduction
+        return (
+            pos / self._rot_factor,
+            vel / self._rot_factor,
+            torque * self._torque_factor,
+        )
 
     def get_pos(self, timeout: Optional[float] = None) -> Optional[float]:
         """Reads the position of the motor.
