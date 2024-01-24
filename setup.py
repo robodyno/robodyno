@@ -103,6 +103,7 @@ setup(
             'UltrasonicSensor = robodyno.components.can_bus.ultrasonic_sensor:UltrasonicSensor',
             'CliffSensor = robodyno.components.can_bus.cliff_sensor:CliffSensor',
             'ImpactSensor = robodyno.components.can_bus.impact_sensor:ImpactSensor',
+            'MagneticSensor = robodyno.components.can_bus.magnetic_sensor:MagneticSensor',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',

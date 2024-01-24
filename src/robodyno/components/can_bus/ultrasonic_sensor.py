@@ -91,7 +91,7 @@ class UltrasonicSensor(CanBusDevice):
             timeout (float): Timeout in seconds.
 
         Returns:
-            (float | None): The distance value read by the ultrasonic sensor. Returns
+            (float | 250.0): The distance value read by the ultrasonic sensor. Returns
                 250.0 if the read times out. Unit: centimeters.
         """
         try:
