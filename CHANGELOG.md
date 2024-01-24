@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `MagneticSensor` component
+- `MagneticSensor` component([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
 - Examples of MagneticSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
 - Examples of CliffSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
 - Examples of ImpactSensor([!27](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/27)).
