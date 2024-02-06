@@ -65,7 +65,7 @@ deploy-doc:
     - git config --global user.name "${CI_USERNAME}"
     - git branch
     - VERSION=$(grep -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md | head -n 1)
-    - mike deploy --push -f --update-aliases $VERSION latest
+    - mike deploy --push -f --ignore --update-aliases $VERSION latest
 
 push-to-github:
   stage: deploy
@@ -88,7 +88,7 @@ push-to-github:
     - git config --global user.name "${CI_USERNAME}"
     - git branch
     - git remote set-url origin ${GITHUB_REPO}
-    - git push --force origin main
+    - git push --force origin HEAD:main
 
 push-to-gitee:
   stage: deploy
@@ -111,4 +111,4 @@ push-to-gitee:
     - git config --global user.name "${CI_USERNAME}"
     - git branch
     - git remote set-url origin ${GITEE_REPO}
-    - git push --force origin main
+    - git push --force origin HEAD:main
