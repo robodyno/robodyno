@@ -56,7 +56,7 @@ class Model(Enum):
     ROBODYNO_GPS_SENSOR = 0xA2
     ROBODYNO_LED_DRIVER = 0xA3
     ROBODYNO_ULTRASONIC_SENSOR = 0xA4
-    ROBODYNO_CLIFF_SENSOR  = 0xA0
+    ROBODYNO_CLIFF_SENSOR = 0xA0
     ROBODYNO_IMPACT_SENSOR = 0xA5
 
     THIRD_PARTY = 0xFF
@@ -64,3 +64,28 @@ class Model(Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.THIRD_PARTY
+
+    @classmethod
+    def is_pro(cls, model):
+        """Check if the model is a pro model."""
+        return model in [
+            cls.ROBODYNO_PRO_P44,
+            cls.ROBODYNO_PRO_P12,
+            cls.ROBODYNO_PRO_P44A,
+            cls.ROBODYNO_PRO_P12A,
+            cls.ROBODYNO_PRO_H100,
+            cls.ROBODYNO_PRO_H50,
+            cls.ROBODYNO_PRO_B100,
+            cls.ROBODYNO_PRO_DIRECT,
+        ]
+
+    @classmethod
+    def is_plus(cls, model):
+        """Check if the model is a plus model."""
+        return model in [
+            cls.ROBODYNO_PLUS_H50,
+            cls.ROBODYNO_PLUS_H100,
+            cls.ROBODYNO_PLUS_P12,
+            cls.ROBODYNO_PLUS_P12A,
+            cls.ROBODYNO_PLUS_DIRECT,
+        ]

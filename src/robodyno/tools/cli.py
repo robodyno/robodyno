@@ -63,8 +63,8 @@ def list_devices(ctx: click.Context) -> None:
 
     for device_id in range(0x3F):
         try:
-            main_ver, sub_ver, type_ = ctx.obj['can'].get(
-                device_id, 0x01, 'HHI', timeout=0.015
+            main_ver, sub_ver, _, type_ = ctx.obj['can'].get(
+                device_id, 0x01, 'HHeH', timeout=0.015
             )
             table.add_row(
                 f'0x{device_id:02X}', Model(type_).name, f'{main_ver}.{sub_ver}'
@@ -296,9 +296,7 @@ def config(
     console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:
-        console.print(
-            'Please specify only [yellow bold]one[/yellow bold] motor.'
-        )
+        console.print('Please specify only [yellow bold]one[/yellow bold] motor.')
         return
     m = motors[0]
     if not (
@@ -310,28 +308,34 @@ def config(
 
     if vel_limit:
         vel_limit_now = m.get_vel_limit(0.1)
-        m.set_vel_limit(
-            FloatPrompt.ask(
-                (
-                    f'[green bold]Enter[/] new velocity limit, '
-                    f'now: [green bold]{vel_limit_now:.2f} rad/s[/]'
-                ),
-                console=console,
-                default=m.default_vel_limit,
+        try:
+            m.set_vel_limit(
+                FloatPrompt.ask(
+                    (
+                        f'[green bold]Enter[/] new velocity limit, '
+                        f'now: [green bold]{vel_limit_now:.2f} rad/s[/]'
+                    ),
+                    console=console,
+                    default=m.default_vel_limit,
+                )
             )
-        )
+        except ValueError as e:
+            console.print(f'[red bold]Error:[/] failed to set velocity limit: {e}')
     if current_limit:
         current_limit_now = m.get_current_limit(0.1)
-        m.set_current_limit(
-            FloatPrompt.ask(
-                (
-                    f'[green bold]Enter[/] new current limit, '
-                    f'now: [green bold]{current_limit_now:.1f} A[/]'
-                ),
-                console=console,
-                default=m.default_current_limit,
+        try:
+            m.set_current_limit(
+                FloatPrompt.ask(
+                    (
+                        f'[green bold]Enter[/] new current limit, '
+                        f'now: [green bold]{current_limit_now:.1f} A[/]'
+                    ),
+                    console=console,
+                    default=m.default_current_limit,
+                )
             )
-        )
+        except ValueError as e:
+            console.print(f'[red bold]Error:[/] failed to set current limit: {e}')
     if pid:
         pos_kp, vel_kp, vel_ki = m.get_pid(0.1)
         m.set_pid(
@@ -409,9 +413,7 @@ def calibrate(ctx: click.Context) -> None:
     console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:
-        console.print(
-            'Please specify only [yellow bold]one[/yellow bold] motor.'
-        )
+        console.print('Please specify only [yellow bold]one[/yellow bold] motor.')
         return
     if not Confirm.ask(
         '[magenta bold]WARNING[/] Calibration will move the motor and '
@@ -467,9 +469,7 @@ def reset(ctx: click.Context) -> None:
     console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:
-        console.print(
-            'Please specify only [yellow bold]one[/yellow bold] motor.'
-        )
+        console.print('Please specify only [yellow bold]one[/yellow bold] motor.')
         return
     if not Confirm.ask(
         '[magenta bold]WARNING[/] Resetting the motor will reset '
@@ -482,9 +482,7 @@ def reset(ctx: click.Context) -> None:
         m.reset()
         sleep(4)
         m = Motor(ctx.obj['can'], 0x10)
-        console.print(
-            f'[green bold]Calibrating[/green bold] motor 0x{m.id:02X}...'
-        )
+        console.print(f'[green bold]Calibrating[/green bold] motor 0x{m.id:02X}...')
         m.calibrate()
         sleep(1)
         while m.state != Motor.MotorState.DISABLED:
@@ -495,12 +493,8 @@ def reset(ctx: click.Context) -> None:
         sleep(0.2)
         m.save()
         sleep(0.2)
-        console.print(
-            f'[green bold]Rebooting[/green bold] motor 0x{m.id:02X}...'
-        )
+        console.print(f'[green bold]Rebooting[/green bold] motor 0x{m.id:02X}...')
         m.reboot()
         sleep(3)
         console.print('[green bold]Done.[/]')
-        console.print(
-            'The ID of the motor is now [green bold]0x10[/green bold].'
-        )
+        console.print('The ID of the motor is now [green bold]0x10[/green bold].')

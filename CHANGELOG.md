@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0]
+
+### Added
+
+- Support for version 2.0 motor firmware([!30](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/30)).
+
 ## [1.6.3]
 
 ### Added

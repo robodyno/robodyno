@@ -104,7 +104,7 @@ class Motor(CanBusDevice):
             ValueError: If the motor type is invalid.
         """
         super().__init__(can, id_)
-        self.get_version(timeout=0.015)
+        version = self.get_version(timeout=0.015)
         if type_:
             self.type = getattr(Model, type_.upper(), None)
         if self.type not in ROBOTTIME_PARAMS['motor']:
@@ -116,6 +116,23 @@ class Motor(CanBusDevice):
             )
 
         self.__dict__.update(ROBOTTIME_PARAMS['motor'].get(self.type, None))
+
+        if self.fw_ver >= 2.0:
+            self.reduction = version['data']
+            if Model.is_pro(self.type):
+                self.__dict__.update(ROBOTTIME_PARAMS['pro_motor_common'])
+            elif Model.is_plus(self.type):
+                self.__dict__.update(ROBOTTIME_PARAMS['plus_motor_common'])
+            self.available_velocity = fabs(
+                self.hw_max_vel_limit / self.reduction * 2.0 * pi
+            )
+            self.available_torque = fabs(
+                self.available_current * self.hw_torque_constant * self.reduction
+            )
+            self.torque_constant = fabs(self.hw_torque_constant * self.reduction)
+            self.default_vel_limit = fabs(
+                self.hw_default_vel_limit / self.reduction * 2.0 * pi
+            )
 
         self.state = self.MotorState.UNKNOWN
         self.error = {
@@ -129,11 +146,15 @@ class Motor(CanBusDevice):
         if self.fw_ver >= 1:
             self.get_state(1.5)
 
-        self._rot_factor = -self.reduction / 2.0 / pi
-        self._torque_factor = -self.reduction
-        if self.fw_ver <= 0.3:
-            self._rot_factor = -self._rot_factor
-            self._torque_factor = -self._torque_factor
+        if self.fw_ver >= 2.0:
+            self._rot_factor = 1
+            self._torque_factor = 1
+        elif self.fw_ver >= 1.0:
+            self._rot_factor = -self.reduction / 2.0 / pi
+            self._torque_factor = -self.reduction
+        elif self.fw_ver <= 0.3:
+            self._rot_factor = self.reduction / 2.0 / pi
+            self._torque_factor = self.reduction
         self._can.subscribe(
             self._heartbeat_callback,
             device_id=self.id,
