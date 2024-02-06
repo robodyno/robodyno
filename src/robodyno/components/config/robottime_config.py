@@ -43,14 +43,14 @@ ROBOTTIME_PARAMS = {
     },
     'motor': {
         Model.ROBODYNO_PRO_P44: {
-            'reduction': -44,  # deprecated
-            'available_velocity': 27,  # deprecated
-            'available_torque': 13,  # deprecated
+            'reduction': -44,  # will be deprecated in 2.0
+            'available_velocity': 27,  # will be deprecated in 2.0
+            'available_torque': 13,  # will be deprecated in 2.0
             'available_current': 15,
-            'torque_constant': 0.7742,  # deprecated
+            'torque_constant': 0.7742,  # will be deprecated in 2.0
             'with_brake': False,
             'absolution_encoder': False,
-            'default_vel_limit': 5.71,  # deprecated
+            'default_vel_limit': 5.71,  # will be deprecated in 2.0
             'default_current_limit': 13.0,
             'default_pos_kp': 100.0,
             'default_vel_kp': 0.02,
