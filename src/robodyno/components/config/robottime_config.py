@@ -21,16 +21,36 @@
 from robodyno.components.config.model import Model
 
 ROBOTTIME_PARAMS = {
+    'pro_motor_common': {
+        'available_current': 15,
+        'hw_torque_constant': 8.27 / 470.0,
+        'hw_default_vel_limit': 40,
+        'hw_max_vel_limit': 170,
+        'default_current_limit': 13.0,
+        'default_pos_kp': 100.0,
+        'default_vel_kp': 0.02,
+        'default_vel_ki': 0.1,
+    },
+    'plus_motor_common': {
+        'available_current': 25,
+        'hw_torque_constant': 8.27 / 240.0,
+        'hw_default_vel_limit': 40,
+        'hw_max_vel_limit': 60,
+        'default_current_limit': 25.0,
+        'default_pos_kp': 100.0,
+        'default_vel_kp': 0.1,
+        'default_vel_ki': 0.5,
+    },
     'motor': {
         Model.ROBODYNO_PRO_P44: {
-            'reduction': -44,
-            'available_velocity': 27,
-            'available_torque': 13,
+            'reduction': -44,  # deprecated
+            'available_velocity': 27,  # deprecated
+            'available_torque': 13,  # deprecated
             'available_current': 15,
-            'torque_constant': 0.7742,
+            'torque_constant': 0.7742,  # deprecated
             'with_brake': False,
             'absolution_encoder': False,
-            'default_vel_limit': 5.71,
+            'default_vel_limit': 5.71,  # deprecated
             'default_current_limit': 13.0,
             'default_pos_kp': 100.0,
             'default_vel_kp': 0.02,
@@ -218,5 +238,5 @@ ROBOTTIME_PARAMS = {
             'default_vel_kp': 200.0,
             'default_vel_ki': 5.0,
         },
-    }
+    },
 }

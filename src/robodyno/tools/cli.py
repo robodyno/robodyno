@@ -63,8 +63,8 @@ def list_devices(ctx: click.Context) -> None:
 
     for device_id in range(0x3F):
         try:
-            main_ver, sub_ver, type_ = ctx.obj['can'].get(
-                device_id, 0x01, 'HHI', timeout=0.015
+            main_ver, sub_ver, _, type_ = ctx.obj['can'].get(
+                device_id, 0x01, 'HHeH', timeout=0.015
             )
             table.add_row(
                 f'0x{device_id:02X}', Model(type_).name, f'{main_ver}.{sub_ver}'
@@ -296,9 +296,7 @@ def config(
     console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:
-        console.print(
-            'Please specify only [yellow bold]one[/yellow bold] motor.'
-        )
+        console.print('Please specify only [yellow bold]one[/yellow bold] motor.')
         return
     m = motors[0]
     if not (
@@ -409,9 +407,7 @@ def calibrate(ctx: click.Context) -> None:
     console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:
-        console.print(
-            'Please specify only [yellow bold]one[/yellow bold] motor.'
-        )
+        console.print('Please specify only [yellow bold]one[/yellow bold] motor.')
         return
     if not Confirm.ask(
         '[magenta bold]WARNING[/] Calibration will move the motor and '
@@ -467,9 +463,7 @@ def reset(ctx: click.Context) -> None:
     console = ctx.obj['console']
     motors = ctx.obj['motors']
     if len(motors) != 1:
-        console.print(
-            'Please specify only [yellow bold]one[/yellow bold] motor.'
-        )
+        console.print('Please specify only [yellow bold]one[/yellow bold] motor.')
         return
     if not Confirm.ask(
         '[magenta bold]WARNING[/] Resetting the motor will reset '
@@ -482,9 +476,7 @@ def reset(ctx: click.Context) -> None:
         m.reset()
         sleep(4)
         m = Motor(ctx.obj['can'], 0x10)
-        console.print(
-            f'[green bold]Calibrating[/green bold] motor 0x{m.id:02X}...'
-        )
+        console.print(f'[green bold]Calibrating[/green bold] motor 0x{m.id:02X}...')
         m.calibrate()
         sleep(1)
         while m.state != Motor.MotorState.DISABLED:
@@ -495,12 +487,8 @@ def reset(ctx: click.Context) -> None:
         sleep(0.2)
         m.save()
         sleep(0.2)
-        console.print(
-            f'[green bold]Rebooting[/green bold] motor 0x{m.id:02X}...'
-        )
+        console.print(f'[green bold]Rebooting[/green bold] motor 0x{m.id:02X}...')
         m.reboot()
         sleep(3)
         console.print('[green bold]Done.[/]')
-        console.print(
-            'The ID of the motor is now [green bold]0x10[/green bold].'
-        )
+        console.print('The ID of the motor is now [green bold]0x10[/green bold].')
