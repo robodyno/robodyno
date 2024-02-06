@@ -308,28 +308,34 @@ def config(
 
     if vel_limit:
         vel_limit_now = m.get_vel_limit(0.1)
-        m.set_vel_limit(
-            FloatPrompt.ask(
-                (
-                    f'[green bold]Enter[/] new velocity limit, '
-                    f'now: [green bold]{vel_limit_now:.2f} rad/s[/]'
-                ),
-                console=console,
-                default=m.default_vel_limit,
+        try:
+            m.set_vel_limit(
+                FloatPrompt.ask(
+                    (
+                        f'[green bold]Enter[/] new velocity limit, '
+                        f'now: [green bold]{vel_limit_now:.2f} rad/s[/]'
+                    ),
+                    console=console,
+                    default=m.default_vel_limit,
+                )
             )
-        )
+        except ValueError as e:
+            console.print(f'[red bold]Error:[/] failed to set velocity limit: {e}')
     if current_limit:
         current_limit_now = m.get_current_limit(0.1)
-        m.set_current_limit(
-            FloatPrompt.ask(
-                (
-                    f'[green bold]Enter[/] new current limit, '
-                    f'now: [green bold]{current_limit_now:.1f} A[/]'
-                ),
-                console=console,
-                default=m.default_current_limit,
+        try:
+            m.set_current_limit(
+                FloatPrompt.ask(
+                    (
+                        f'[green bold]Enter[/] new current limit, '
+                        f'now: [green bold]{current_limit_now:.1f} A[/]'
+                    ),
+                    console=console,
+                    default=m.default_current_limit,
+                )
             )
-        )
+        except ValueError as e:
+            console.print(f'[red bold]Error:[/] failed to set current limit: {e}')
     if pid:
         pos_kp, vel_kp, vel_ki = m.get_pid(0.1)
         m.set_pid(
