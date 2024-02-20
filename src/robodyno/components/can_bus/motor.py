@@ -29,7 +29,7 @@ Examples:
     >>> can_bus = CanBus()
     >>> motor = Motor(can_bus)
     >>> print(motor)
-    Motor(id=0x10, type=ROBODYNO_PRO_P44, state=DISABLED, error=NONE)
+    Motor(id=0x10, type=ROBODYNO_PRO_01A, state=DISABLED, error=NONE)
     >>> can_bus.disconnect()
 """
 

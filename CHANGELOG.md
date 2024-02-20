@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Robodyno motor model name from 'ROBODYNO_PRO_P12' to 'ROBODYNO_PRO_01A'
+- Robodyno motor model name from 'ROBODYNO_PRO_P44' to 'ROBODYNO_PRO_01B'
+- Robodyno motor model name from 'ROBODYNO_PRO_P12A' to 'ROBODYNO_PRO_02A'
+- Robodyno motor model name from 'ROBODYNO_PRO_P44A' to 'ROBODYNO_PRO_02B'
+
 ## [1.7.0]
 
 ### Added
