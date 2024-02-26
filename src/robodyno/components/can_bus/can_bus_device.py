@@ -88,8 +88,8 @@ class CanBusDevice(object):
             (dict | None): Device firmware version and type.
         """
         try:
-            main_ver, sub_ver, data, type_ = self._can.get(
-                self.id, self._CMD_GET_VERSION, 'HHeH', timeout
+            main_ver, sub_ver, type_, data = self._can.get(
+                self.id, self._CMD_GET_VERSION, 'HHHe', timeout
             )
         except TimeoutError:
             return None

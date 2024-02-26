@@ -36,10 +36,10 @@ Examples:
     >>> can = CanBus()
     >>> class MyPallet(FourDoFPallet):
     >>>     def __init__(self):
-    >>>         M1 = Motor(can, 0x10, 'ROBODYNO_PRO_44')
-    >>>         M2 = Motor(can, 0x11, 'ROBODYNO_PRO_44')
-    >>>         M3 = Motor(can, 0x12, 'ROBODYNO_PRO_12')
-    >>>         M4 = Motor(can, 0x13, 'ROBODYNO_PRO_12')
+    >>>         M1 = Motor(can, 0x10)
+    >>>         M2 = Motor(can, 0x11)
+    >>>         M3 = Motor(can, 0x12)
+    >>>         M4 = Motor(can, 0x13)
     >>>     super().__init__(M1, M2, M3, M4, 0.18, 0.19, 0.19, 0.01)
     >>> arm = MyPallet()
     >>> arm.init()

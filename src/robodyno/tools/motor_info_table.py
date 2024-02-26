@@ -20,11 +20,13 @@
 
 from time import time
 from enum import Enum
+from math import fabs
 
 from rich.table import Table
 from rich.style import Style
 
 from robodyno.components.can_bus.motor import Motor
+
 
 def error_text(error: Enum) -> str:
     """Returns a rich text object for an error.
@@ -53,10 +55,10 @@ def motor_info_table(motor: Motor) -> Table:
     table = Table(
         title=(
             f'[cyan][0x{motor.id:02X}][/] '
-            f'[green]{motor.type.name}[/] '
+            f'[green]{motor.type.name}({fabs(motor.reduction):.0f})[/] '
             f'[yellow]{motor.fw_ver}[/]'
         ),
-        title_style=Style(italic=False, bold=True)
+        title_style=Style(italic=False, bold=True),
     )
     table.add_column('Property', style='cyan', justify='left', no_wrap=True)
     table.add_column('Value', style='green', justify='right', no_wrap=True)
@@ -72,7 +74,7 @@ def motor_info_table(motor: Motor) -> Table:
         error = motor.error
         mode = motor.mode
     else:
-        state, error, mode = motor.get_state(timeout = 0.1)
+        state, error, mode = motor.get_state(timeout=0.1)
     error_detail = None
     if error['error'] == motor.MotorError.MOTOR_FAILED:
         error_detail = error['motor_err']
@@ -84,18 +86,18 @@ def motor_info_table(motor: Motor) -> Table:
     table.add_row('Error', error_text(error['error']), error_text(error_detail))
     table.add_row('Mode', f'{mode.name}', '')
 
-    voltage = motor.get_voltage(timeout = 0.1)
+    voltage = motor.get_voltage(timeout=0.1)
     table.add_row('Voltage', f'{voltage:.2f}', 'V')
-    temperature = motor.get_temperature(timeout = 0.1)
+    temperature = motor.get_temperature(timeout=0.1)
     table.add_row('Temperature', f'{temperature:.2f}', '℃')
 
-    position = motor.get_pos(timeout = 0.1)
+    position = motor.get_pos(timeout=0.1)
     table.add_row('Position', f'{position:.4f}', 'rad')
     if motor.fw_ver >= 1:
-        absolute_position = motor.get_abs_pos(timeout = 0.1)
+        absolute_position = motor.get_abs_pos(timeout=0.1)
         table.add_row('Absolute Position', f'{absolute_position:.4f}', 'rad')
-    velocity = motor.get_vel(timeout = 0.1)
+    velocity = motor.get_vel(timeout=0.1)
     table.add_row('Velocity', f'{velocity:.4f}', 'rad/s')
-    torque = motor.get_torque(timeout = 0.1)
+    torque = motor.get_torque(timeout=0.1)
     table.add_row('Torque', f'{torque:.4f}', 'N*m')
     return table

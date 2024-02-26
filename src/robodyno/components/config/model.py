@@ -24,13 +24,13 @@ from enum import Enum
 class Model(Enum):
     """Enumerates the supported Robodyno device models."""
 
-    ROBODYNO_PRO_P44 = 0x00
-    ROBODYNO_PRO_P12 = 0x01
-    ROBODYNO_PRO_P44A = 0x02
-    ROBODYNO_PRO_P12A = 0x03
-    ROBODYNO_PRO_H100 = 0x04
-    ROBODYNO_PRO_H50 = 0x05
-    ROBODYNO_PRO_B100 = 0x06
+    ROBODYNO_PRO_01B = 0x00
+    ROBODYNO_PRO_01A = 0x01
+    ROBODYNO_PRO_02B = 0x02
+    ROBODYNO_PRO_02A = 0x03
+    ROBODYNO_PRO_03B = 0x04
+    ROBODYNO_PRO_03A = 0x05
+    ROBODYNO_PRO_04A = 0x06
     ROBODYNO_PRO_DIRECT = 0x0F
     ROBODYNO_PLUS_H50 = 0x14
     ROBODYNO_PLUS_H100 = 0x15
@@ -69,13 +69,13 @@ class Model(Enum):
     def is_pro(cls, model):
         """Check if the model is a pro model."""
         return model in [
-            cls.ROBODYNO_PRO_P44,
-            cls.ROBODYNO_PRO_P12,
-            cls.ROBODYNO_PRO_P44A,
-            cls.ROBODYNO_PRO_P12A,
-            cls.ROBODYNO_PRO_H100,
-            cls.ROBODYNO_PRO_H50,
-            cls.ROBODYNO_PRO_B100,
+            cls.ROBODYNO_PRO_01B,
+            cls.ROBODYNO_PRO_01A,
+            cls.ROBODYNO_PRO_02B,
+            cls.ROBODYNO_PRO_02A,
+            cls.ROBODYNO_PRO_03B,
+            cls.ROBODYNO_PRO_03A,
+            cls.ROBODYNO_PRO_04A,
             cls.ROBODYNO_PRO_DIRECT,
         ]
 

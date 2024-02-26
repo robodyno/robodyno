@@ -42,7 +42,7 @@ ROBOTTIME_PARAMS = {
         'default_vel_ki': 0.5,
     },
     'motor': {
-        Model.ROBODYNO_PRO_P44: {
+        Model.ROBODYNO_PRO_01B: {
             'reduction': -44,  # will be deprecated in 2.0
             'available_velocity': 27,  # will be deprecated in 2.0
             'available_torque': 13,  # will be deprecated in 2.0
@@ -56,7 +56,7 @@ ROBOTTIME_PARAMS = {
             'default_vel_kp': 0.02,
             'default_vel_ki': 0.1,
         },
-        Model.ROBODYNO_PRO_P12: {
+        Model.ROBODYNO_PRO_01A: {
             'reduction': -12.45,
             'available_velocity': 95,
             'available_torque': 4,
@@ -70,7 +70,7 @@ ROBOTTIME_PARAMS = {
             'default_vel_kp': 0.02,
             'default_vel_ki': 0.1,
         },
-        Model.ROBODYNO_PRO_P44A: {
+        Model.ROBODYNO_PRO_02B: {
             'reduction': -44,
             'available_velocity': 27,
             'available_torque': 13,
@@ -84,7 +84,7 @@ ROBOTTIME_PARAMS = {
             'default_vel_kp': 0.02,
             'default_vel_ki': 0.1,
         },
-        Model.ROBODYNO_PRO_P12A: {
+        Model.ROBODYNO_PRO_02A: {
             'reduction': -12.45,
             'available_velocity': 95,
             'available_torque': 4,
@@ -98,7 +98,7 @@ ROBOTTIME_PARAMS = {
             'default_vel_kp': 0.02,
             'default_vel_ki': 0.1,
         },
-        Model.ROBODYNO_PRO_H50: {
+        Model.ROBODYNO_PRO_03A: {
             'reduction': 50,
             'available_velocity': 23.6,
             'available_torque': 15,
@@ -112,7 +112,7 @@ ROBOTTIME_PARAMS = {
             'default_vel_kp': 0.02,
             'default_vel_ki': 0.1,
         },
-        Model.ROBODYNO_PRO_H100: {
+        Model.ROBODYNO_PRO_03B: {
             'reduction': 100,
             'available_velocity': 11.8,
             'available_torque': 30,
@@ -126,7 +126,7 @@ ROBOTTIME_PARAMS = {
             'default_vel_kp': 0.02,
             'default_vel_ki': 0.1,
         },
-        Model.ROBODYNO_PRO_B100: {
+        Model.ROBODYNO_PRO_04A: {
             'reduction': 100,
             'available_velocity': 11.8,
             'available_torque': 30,

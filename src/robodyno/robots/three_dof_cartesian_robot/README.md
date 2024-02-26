@@ -298,9 +298,9 @@ print(ThreeDoFCartesian.__doc__)
 ```python
 class MyCartesian(ThreeDoFCartesian):
     def __init__(self):
-        M1 = Motor(can, 0x10, 'ROBODYNO_PRO_44')
-        M2 = Motor(can, 0x11, 'ROBODYNO_PRO_44')
-        M3 = Motor(can, 0x12, 'ROBODYNO_PRO_44')
+        M1 = Motor(can, 0x10)
+        M2 = Motor(can, 0x11)
+        M3 = Motor(can, 0x12)
         
         super().__init__(M1, M2, M3, 0.0102, 0.0102, 0.0102)
 
