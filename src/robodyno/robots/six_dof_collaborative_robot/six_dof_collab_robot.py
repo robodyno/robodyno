@@ -36,12 +36,12 @@ Examples:
     >>> can = CanBus()
     >>> class MySixDoFArm(SixDoFCollabRobot):
     >>>     def __init__(self):
-    >>>         M1 = Motor(can, 0x10, 'ROBODYNO_PRO_44')
-    >>>         M2 = Motor(can, 0x11, 'ROBODYNO_PRO_44')
-    >>>         M3 = Motor(can, 0x12, 'ROBODYNO_PRO_44')
-    >>>         M4 = Motor(can, 0x13, 'ROBODYNO_PRO_44')
-    >>>         M5 = Motor(can, 0x14, 'ROBODYNO_PRO_12')
-    >>>         M6 = Motor(can, 0x15, 'ROBODYNO_PRO_12')
+    >>>         M1 = Motor(can, 0x10)
+    >>>         M2 = Motor(can, 0x11)
+    >>>         M3 = Motor(can, 0x12)
+    >>>         M4 = Motor(can, 0x13)
+    >>>         M5 = Motor(can, 0x14)
+    >>>         M6 = Motor(can, 0x15)
     >>>     super().__init__(M1, M2, M3, M4, M5, M6, 0.18, 0.135, 0.135, 0.075, 0.075, 0.1)
     >>> arm = MySixDoFArm()
     >>> arm.init()
