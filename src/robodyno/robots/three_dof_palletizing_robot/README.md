@@ -301,9 +301,9 @@ print(ThreeDoFPallet.__doc__)
 ```python
 class MyPallet(ThreeDoFPallet):
     def __init__(self):
-        M1 = Motor(can, 0x10, 'ROBODYNO_PRO_44')
-        M2 = Motor(can, 0x11, 'ROBODYNO_PRO_44')
-        M3 = Motor(can, 0x12, 'ROBODYNO_PRO_12')
+        M1 = Motor(can, 0x10)
+        M2 = Motor(can, 0x11)
+        M3 = Motor(can, 0x12)
         
         super().__init__(M1, M2, M3, 0.180, 0.190, 0.190, 0.010)
 
