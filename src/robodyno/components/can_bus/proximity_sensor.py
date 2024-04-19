@@ -90,7 +90,7 @@ class ProximitySensor(CanBusDevice):
             timeout (float): Timeout in seconds.
 
         Returns:
-            (uint8_t | None): Value of proximity switch
+            (unsigned int | None): Value of proximity switch
         """
         try:
             val = self._can.get(self.id, self._CMD_GET_COSWSRNSOR_DATA, 'I', timeout)[0]
