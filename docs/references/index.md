@@ -29,6 +29,7 @@ Robodyno 的源代码遵循 [Apache License 2.0](https://www.apache.org/licenses
     - [CliffSensor（悬崖传感器）](components/can_bus/cliff_sensor/)
     - [ImpactSensor（防撞条传感器）](components/can_bus/impact_sensor/)
     - [MagneticSensor（磁导航传感器）](components/can_bus/magnetic_sensor/)
+    - [proximity_sensor（接近开关传感器）](components/can_bus/proximity_sensor/)
 
 - [WebotsDevice（Webots 设备）](components/webots/)
 
