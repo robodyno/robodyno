@@ -105,6 +105,7 @@ setup(
             'CliffSensor = robodyno.components.can_bus.cliff_sensor:CliffSensor',
             'ImpactSensor = robodyno.components.can_bus.impact_sensor:ImpactSensor',
             'MagneticSensor = robodyno.components.can_bus.magnetic_sensor:MagneticSensor',
+            'ProximitySensor = robodyno.components.can_bus.proximity_sensor:ProximitySensor',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',
