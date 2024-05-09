@@ -23,6 +23,7 @@ nav:
           - 悬崖传感器: deep-dive/components/cliff-sensor.md
           - 防撞条传感器: deep-dive/components/impact-sensor.md
           - 磁导航传感器: deep-dive/components/magnetic-sensor.md
+          - 接近开关传感器: deep-dive/components/proximity-sensor.md
       - 电机运动模式: deep-dive/motor-modes.md
   - Robodyno CLI:
       - commands/index.md
