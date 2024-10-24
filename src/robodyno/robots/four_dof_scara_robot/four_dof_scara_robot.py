@@ -100,7 +100,7 @@ class FourDoFScara(object):
         """Read joints positions to a list.
         
         Returns:
-            (list): a list of 4 joint positions
+            (list): list of 1 slider distance(m) and 3 joint angles(rad)
             
         Raises:
             RuntimeError: If the motor Joint is invalid.

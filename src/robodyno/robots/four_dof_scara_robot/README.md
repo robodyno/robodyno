@@ -12,7 +12,7 @@ from robodyno.robots.four_dof_scara_robot import four_dof_scara_robot
 #  打印整体库的介绍及例子
 print(four_dof_scara_robot.__doc__)
 ```
-```
+```python
 This module provides a class for controlling Robodyno Four DoF Scara Robot.
 
 The FourDoFScara class provided by this module is used to control Robodyno Four DoF Scara Robot
@@ -49,7 +49,7 @@ from robodyno.robots.four_dof_scara_robot import FourDoFScara
 `get_joints_poses()`
 - 读取机械臂关节的位置
     - 返回值：
-        - `poses`: 包含四个关节位置的列表
+        - `poses`: 包含1个直线模块距离(m)和3个关节位置(rad)的列表
 
 ```python
 #  查看使用方法
@@ -59,7 +59,7 @@ print(FourDoFScara.get_joints_poses.__doc__)
 Read joints positions to a list.
         
         Returns:
-            (list): a list of 4 joint positions
+            (list): list of 1 slider distance(m) and 3 joint angles(rad)
             
         Raises:
             RuntimeError: If the motor Joint is invalid.
@@ -73,7 +73,7 @@ Read joints positions to a list.
 #  查看使用方法
 print(FourDoFScara.enable.__doc__)
 ```
-```
+```python
 enable joints motors
 ```
 
@@ -85,7 +85,7 @@ enable joints motors
 #  查看使用方法
 print(FourDoFScara.disable.__doc__)
 ```
-```
+```python
 disable joints motors
 ```
 
@@ -99,7 +99,7 @@ disable joints motors
 #  查看使用方法
 print(FourDoFScara.init.__doc__)
 ```
-```
+```python
 Calibrate robot motors with given axes poses.
         
         Args:
@@ -117,7 +117,7 @@ Calibrate robot motors with given axes poses.
 #  查看使用方法
 print(FourDoFScara.set_joint_pos.__doc__)
 ```
-```
+```python
 Set joint angle with joint id and position
         
         Args:
@@ -137,7 +137,7 @@ Set joint angle with joint id and position
 #  查看使用方法
 print(FourDoFScara.joint_space_interpolated_motion.__doc__)
 ```
-```
+```python
 Robot interpolated motion in joint space.
         
         Args:
@@ -158,14 +158,14 @@ Robot interpolated motion in joint space.
         - `y_speed`: 机械臂y方向的插值运动速度(m/s),默认为None 。
         - `z_speed`: 机械臂z方向的插值运动速度(m/s),默认为None 。
         - `yaw_speed`: 机械臂z轴的插值旋转速度(rad/s),默认为None 。
-        - `hand_coordinate`: 机械臂运动学的手系(0 or 1),默认右手系(1) 。
+        - `hand_coordinate`: 机械臂运动学的手系(False or True),默认右手系(True) 。
         - `duration`: 笛卡尔空间的插值运动持续时间(s)，默认为0,其优先级低于速度插值。
 
 ```python
 #  查看使用方法
 print(FourDoFScara.cartesian_space_interpolated_motion.__doc__)
 ```
-```
+```python
 Robot Interpolated motion in cartesian space.
         
         Args:
@@ -192,7 +192,7 @@ Robot Interpolated motion in cartesian space.
 #  查看使用方法
 print(FourDoFScara.home.__doc__)
 ```
-```
+```python
 Move back to zero position.
         
         Args:
@@ -200,12 +200,15 @@ Move back to zero position.
 ```
 
 ##### 1.2.9 机械臂正向运动学
-`forward_kinematics(angles)`
+`forward_kinematics(d, theta2, theta3, theta4)`
 - 机械臂回的初始位姿
     - 参数： 
-        - `angles`: 包含机械臂4个关节角度的列表(rad) 。
+        - `d`: 直线模块的移动距离(m) 。
+        - `theta2`: 机械臂关节2的角度(rad) 。
+        - `theta3`: 机械臂关节3的角度(rad) 。
+        - `theta4`: 机械臂关节4的角度(rad) 。
     - 返回值：
-        - `(x, y, z, yaw)`: 机械臂末端位姿的元组 。
+        - `(x, y, z, yaw)`: 机械臂末端位姿的元组，包含三个位置和一个姿态。
 
 ```python
 #  查看使用方法
@@ -225,16 +228,16 @@ Forward kinematics algorism
 ```
 
 ##### 1.2.10 机械臂逆向运动学
-`inverse_kinematics(x, y, z, yaw, hand_coordinate)`
+`inverse_kinematics(x, y, z, yaw, hand_coordinate=True)`
 - 机械臂回的初始位姿
     - 参数： 
         - `x`: 机械臂的目标位置的x值(m) 。
         - `y`: 机械臂的目标位置的y值(m) 。 
         - `z`: 机械臂的目标位置的z值(m) 。 
         - `yaw`: 机械臂的目标姿态的yaw值(rad) 。
-        - `hand_coordinate`: 机械臂运动学的手系(0 or 1),默认右手系(1) 。
+        - `hand_coordinate`: 机械臂运动学的手系(False or True),默认右手系(True) 。
     - 返回值：
-        - `angle`: 包含机械臂4个关节角度的列表(rad) 。
+        - `(d, theta2, theta3, theta4)`: 包含机械臂1个直线模块距离和3关节角度的列表(rad) 。
 
 ```python
 #  查看使用方法
