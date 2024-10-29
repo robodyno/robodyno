@@ -12,31 +12,31 @@ from robodyno.robots.four_dof_scara_robot import four_dof_scara_robot
 #  打印整体库的介绍及例子
 print(four_dof_scara_robot.__doc__)
 ```
-```
-four_dof_scara_robot.py
-Time    :   2022/10/17
-Author  :   ryan 
-Version :   1.0
-Contact :   ryanzhang@163.com
-License :   (C)Copyright 2022, robottime / robodyno
+```python
+This module provides a class for controlling Robodyno Four DoF Scara Robot.
 
-4DoF Scara robot Driver
+The FourDoFScara class provided by this module is used to control Robodyno Four DoF Scara Robot
+through the CAN bus. It provides methods for setting Four DoF Scara Robot parameters, reading Four DoF Scara Robot
+states, and controlling the Four DoF Scara Robot to run in different space.
 
-  Typical usage example:
+Examples:
 
-  from robodyno.robots.four_dof_scara_robot import FourDoFScara
-  robot = FourDoFScara(
-    j1 = shoulder_motor,
-    j2 = upperarm_motor,
-    j3 = forearm_motor,
-    j4 = hand_motor,
-    l12 = 0.100,
-    l23 = 0.185,
-    l34 = 0.185,
-    l04 = 0.255
-    screw_lead = 0.0102,
-    end_effector = None
-  )
+    >>> from robodyno.interfaces import CanBus
+    >>> from robodyno.components import Motor, SliderModule
+    >>> from robodyno.robots.four_dof_scara_robot import FourDoFScara
+    >>> can = CanBus()
+    >>> class MyScara(FourDoFScara):
+    >>>     def __init__(self):
+    >>>         M1 = SliderModule(can, 0x10)
+    >>>         M2 = Motor(can, 0x11)
+    >>>         M3 = Motor(can, 0x12)
+    >>>         M4 = Motor(can, 0x13)
+    >>>         super().__init__(M1, M2, M3, M4, 0.24, 0.06, 0.150, 0.150, 0.045)
+    >>> arm = MyScara()
+    >>> arm.init()
+    >>> arm.get_joints_poses()
+    [0.0, 0.0, 0.0, 0.0]
+    >>> can.disconnect()
 ```
 
 #### 1.2 4-DoF-Scara-API
@@ -49,7 +49,7 @@ from robodyno.robots.four_dof_scara_robot import FourDoFScara
 `get_joints_poses()`
 - 读取机械臂关节的位置
     - 返回值：
-        - `poses`: 包含四个关节位置的列表
+        - `poses`: 包含1个直线模块距离(m)和3个关节位置(rad)的列表
 
 ```python
 #  查看使用方法
@@ -59,7 +59,10 @@ print(FourDoFScara.get_joints_poses.__doc__)
 Read joints positions to a list.
         
         Returns:
-            a list of 4 joint positions
+            (list): list of 1 slider distance(m) and 3 joint angles(rad)
+            
+        Raises:
+            RuntimeError: If the motor Joint is invalid.
 ```
 
 ##### 1.2.2 机械臂使能
@@ -70,7 +73,7 @@ Read joints positions to a list.
 #  查看使用方法
 print(FourDoFScara.enable.__doc__)
 ```
-```
+```python
 enable joints motors
 ```
 
@@ -82,7 +85,7 @@ enable joints motors
 #  查看使用方法
 print(FourDoFScara.disable.__doc__)
 ```
-```
+```python
 disable joints motors
 ```
 
@@ -96,7 +99,7 @@ disable joints motors
 #  查看使用方法
 print(FourDoFScara.init.__doc__)
 ```
-```
+```python
 Calibrate robot motors with given axes poses.
         
         Args:
@@ -114,7 +117,7 @@ Calibrate robot motors with given axes poses.
 #  查看使用方法
 print(FourDoFScara.set_joint_pos.__doc__)
 ```
-```
+```python
 Set joint angle with joint id and position
         
         Args:
@@ -134,7 +137,7 @@ Set joint angle with joint id and position
 #  查看使用方法
 print(FourDoFScara.joint_space_interpolated_motion.__doc__)
 ```
-```
+```python
 Robot interpolated motion in joint space.
         
         Args:
@@ -155,28 +158,28 @@ Robot interpolated motion in joint space.
         - `y_speed`: 机械臂y方向的插值运动速度(m/s),默认为None 。
         - `z_speed`: 机械臂z方向的插值运动速度(m/s),默认为None 。
         - `yaw_speed`: 机械臂z轴的插值旋转速度(rad/s),默认为None 。
-        - `hand_coordinate`: 机械臂运动学的手系(0 or 1),默认右手系(1) 。
+        - `hand_coordinate`: 机械臂运动学的手系(False or True),默认右手系(True) 。
         - `duration`: 笛卡尔空间的插值运动持续时间(s)，默认为0,其优先级低于速度插值。
 
 ```python
 #  查看使用方法
 print(FourDoFScara.cartesian_space_interpolated_motion.__doc__)
 ```
-```
+```python
 Robot Interpolated motion in cartesian space.
         
         Args:
-            x: target robot end x
-            y: target robot end y
-            z: target robot end z
-            yaw: target robot end yaw
-            x_speed: speed alone X dimension(m/s)
-            y_speed: speed alone Y dimension(m/s)
-            z_speed: speed alone Z dimension(m/s)
-            yaw_speed: rotation speed on Z axis(rad/s)
-            hand_coordinate: 0 is left hand coordinate system
-                             1 is right hand coordinate system
-            duration: default motion duration(s)
+            x (float): target robot end x
+            y (float): target robot end y
+            z (float): target robot end z
+            yaw (float): target robot end yaw
+            x_speed (float): speed alone X dimension(m/s)
+            y_speed (float): speed alone Y dimension(m/s)
+            z_speed (float): speed alone Z dimension(m/s)
+            yaw_speed (float): rotation speed on Z axis(rad/s)
+            hand_coordinate (bool): False is left hand coordinate system
+                                    True is right hand coordinate system
+            duration (float): default motion duration(s)
 ```
 
 ##### 1.2.8 机械臂回到初始位姿
@@ -189,7 +192,7 @@ Robot Interpolated motion in cartesian space.
 #  查看使用方法
 print(FourDoFScara.home.__doc__)
 ```
-```
+```python
 Move back to zero position.
         
         Args:
@@ -197,12 +200,15 @@ Move back to zero position.
 ```
 
 ##### 1.2.9 机械臂正向运动学
-`forward_kinematics(angles)`
+`forward_kinematics(d, theta2, theta3, theta4)`
 - 机械臂回的初始位姿
     - 参数： 
-        - `angles`: 包含机械臂4个关节角度的列表(rad) 。
+        - `d`: 直线模块的移动距离(m) 。
+        - `theta2`: 机械臂关节2的角度(rad) 。
+        - `theta3`: 机械臂关节3的角度(rad) 。
+        - `theta4`: 机械臂关节4的角度(rad) 。
     - 返回值：
-        - `(x, y, z, yaw)`: 机械臂末端位姿的元组 。
+        - `(x, y, z, yaw)`: 机械臂末端位姿的元组，包含三个位置和一个姿态。
 
 ```python
 #  查看使用方法
@@ -212,23 +218,26 @@ print(FourDoFScara.forward_kinematics.__doc__)
 Forward kinematics algorism
         
         Args:
-            angles: list of 4 joint angles(rad)
+            d: slider distance(m)
+            theta2: 2 joint angles(rad)
+            theta3: 3 joint angles(rad)
+            theta4: 4 joint angles(rad)
         
         Returns:
-            (x, y, z, yaw): tuples of 3 axis position and 1 axis posture
+            (tuple): (x, y, z, yaw) tuples of 3 axis position and 1 axis posture
 ```
 
 ##### 1.2.10 机械臂逆向运动学
-`inverse_kinematics(x, y, z, yaw, hand_coordinate)`
+`inverse_kinematics(x, y, z, yaw, hand_coordinate=True)`
 - 机械臂回的初始位姿
     - 参数： 
         - `x`: 机械臂的目标位置的x值(m) 。
         - `y`: 机械臂的目标位置的y值(m) 。 
         - `z`: 机械臂的目标位置的z值(m) 。 
         - `yaw`: 机械臂的目标姿态的yaw值(rad) 。
-        - `hand_coordinate`: 机械臂运动学的手系(0 or 1),默认右手系(1) 。
+        - `hand_coordinate`: 机械臂运动学的手系(False or True),默认右手系(True) 。
     - 返回值：
-        - `angle`: 包含机械臂4个关节角度的列表(rad) 。
+        - `(d, theta2, theta3, theta4)`: 包含机械臂1个直线模块距离和3关节角度的列表(rad) 。
 
 ```python
 #  查看使用方法
@@ -238,15 +247,18 @@ print(FourDoFScara.inverse_kinematics.__doc__)
 inverse kinematics algorism
         
         Args:
-            x: robot end x
-            y: robot end y
-            z: robot end z
-            yaw: robot end yaw
-            hand_coordinate: 0 is left hand coordinate system
-                             1 is right hand coordinate system
+            x (float): robot end x
+            y (float): robot end y
+            z (float): robot end z
+            yaw (float): robot end yaw
+            hand_coordinate (bool): False is left hand coordinate system
+                                    True is right hand coordinate system
         
         Returns:
-            list of 4 joint angles
+            (d, theta2, theta3, theta4): list of 1 slider distance(m) and 3 joint angles(rad)
+            
+        Raises:
+            ValueError: If the Scara Pose not in range.
 ```
 
 #### 1.3 具体使用实例
@@ -254,13 +266,13 @@ inverse kinematics algorism
 
 ##### 1.3.1 导入电机库和can总线
 ```python
-from robodyno.components import Motor
 from robodyno.interfaces import CanBus
+from robodyno.components import Motor, SliderModule
 can = CanBus()
 ```
 ##### 1.3.2 导入四自由度Scara机械臂的类
 ```python
-from robodyno_robots_python.four_dof_scara_robot import FourDoFScara
+from robodyno.robots.four_dof_scara_robot import FourDoFScara
 ```
 
 ##### 1.3.3 查看FourDoFScara类需要的参数
@@ -269,23 +281,22 @@ from robodyno_robots_python.four_dof_scara_robot import FourDoFScara
 print(four_dof_scara_robot.__doc__)
 ```
 ```
-4DoF Scara robot Driver
-
-  Typical usage example:
-
-  from robodyno.robots.four_dof_scara_robot import FourDoFScara
-  robot = FourDoFScara(
-    j1 = shoulder_motor,
-    j2 = upperarm_motor,
-    j3 = forearm_motor,
-    j4 = hand_motor,
-    l12 = 0.100,
-    l23 = 0.185,
-    l34 = 0.185,
-    l04 = 0.255
-    screw_lead = 0.0102,
-    end_effector = None
-  )
+    from robodyno.interfaces import CanBus
+    from robodyno.components import Motor, SliderModule
+    from robodyno.robots.four_dof_scara_robot import FourDoFScara
+    can = CanBus()
+    class MyScara(FourDoFScara):
+        def __init__(self):
+            M1 = SliderModule(can, 0x10)
+            M2 = Motor(can, 0x11)
+            M3 = Motor(can, 0x12)
+            M4 = Motor(can, 0x13)
+            super().__init__(M1, M2, M3, M4, 0.24, 0.06, 0.150, 0.150, 0.045)
+    arm = MyScara()
+    arm.init()
+    arm.get_joints_poses()
+    [0.0, 0.0, 0.0, 0.0]
+    can.disconnect()
 ```
 - 在上面实例中，可以了解到`FourDoFScara`类需要我们传入4个关节电机，以及运动学计算的具体尺寸(m)。
 
@@ -294,16 +305,16 @@ print(four_dof_scara_robot.__doc__)
 print(FourDoFScara.__doc__)
 ```
 ```
-4 DoF scara robot driver
+Controls Robodyno Four DoF Scara Robot through the CAN bus.
     
     Attributes:
-        joints: list of 4 joint motors
-        l12: link from joint 1 to joint 2  (m)
-        l23: link from joint 2 to joint 3  (m)
-        l34: link from joint 3 to joint 4  (m)
-        l04: link from world to joint 4 longitudinal distance (m)
-        screw_lead: screw lead (m)
-        end_effector: end effector object
+        joints (list): list of 4 joint motors
+        d1 (float): DH parameter d1 from link 1 to link 2  (m)
+        a1 (float): DH parameter a1 from link 1 to link 2  (m)
+        a2 (float): DH parameter a2 from link 2 to link 3  (m)
+        a3 (float): DH parameter a3 from link 3 to link 4  (m)
+        d4 (float): DH parameter d4 from link 4 to eelink  (m)
+        end_effector (object): end effector object
 ```
 - 四自由度Scara机械臂详细的尺寸说明如下图：
 ![U5EFnh.png](https://m1.im5i.com/2022/11/25/U5EFnh.png)
@@ -317,14 +328,19 @@ print(FourDoFScara.__doc__)
 
 ```python
 from math import pi, cos, sin
+from robodyno.interfaces import CanBus
+from robodyno.components import Motor, SliderModule
+from robodyno.robots.four_dof_scara_robot import FourDoFScara
+can = CanBus()
+
 class MyScara(FourDoFScara):
     def __init__(self):
-        M1 = Motor(can, 0x10)
+        M1 = SliderModule(can, 0x10)
         M2 = Motor(can, 0x11)
         M3 = Motor(can, 0x12)
         M4 = Motor(can, 0x13)
         
-        super().__init__(M1, M2, M3, M4, 0.06, 0.185, 0.185, 0.255, 0.01)
+        super().__init__(M1, M2, M3, M4, 0.24, 0.06, 0.150, 0.150, 0.045)
         self.start_theta = pi
 
     def circle(self, xo, yo, zo, yaw, r, num=50, sn=True):
@@ -334,8 +350,8 @@ class MyScara(FourDoFScara):
             xo: X coordinates of the center of the circle(m)
             yo: Y coordinates of the center of the circle(m)
             zo: Z coordinates of the center of the circle(m)
+            yaw: Robot end yaw(rad)
             r: Radius of circle(m)
-            yaw: Robot end yaw(yaw)
             num: Number of copies of a circle,fifty of copies of a circle by default
             sn: The direction of drawing a circle,Draw a circle clockwise by default
 
@@ -384,25 +400,36 @@ arm.init()
 
 - 关节坐标系
 ```python
-from ipywidgets import interact
 from math import pi
-@interact(a1=(-20*pi, 20*pi, 0.1), a2=(-pi, pi, 0.01), a3=(-pi, pi, 0.01), a4=(-pi, pi, 0.01))
-def calibrate(a1=0, a2=0, a3=0, a4=0):
-    arm.set_joint_pos(0, a1)
-    arm.set_joint_pos(1, a2)
-    arm.set_joint_pos(2, a3)
-    arm.set_joint_pos(3, a4)
+from ipywidgets import FloatSlider, interact, Checkbox
+
+scara_angle = arm.get_joints_poses()
+
+@interact(J1 = FloatSlider(value=scara_angle[0], min=-0.2, max=0.2, step=0.001, readout_format='.3f'), 
+          J2=(-pi, pi, 0.01), J3=(-pi, pi, 0.01), J4=(-pi, pi, 0.01))
+def calibrate(J1, J2=scara_angle[1], J3=scara_angle[2], J4=scara_angle[3]):
+    arm.joint_space_interpolated_motion((J1, J2, J3, J4))
 ```
 
 - 笛卡尔坐标系
 ```python
-from ipywidgets import interact
 from math import pi
-arm.joint_space_interpolated_motion(arm.inverse_kinematics(0.43, 0, 0.255, 0),duration = 2)
-@interact(x = (-125, 430, 1), y = (-430, 430, 1), z = (0, 400, 1), yaw = (-pi, pi, 0.01))
-def calibrate(x = 430, y = 0, z = 255, yaw = 0.0):
-    arm.joint_space_interpolated_motion(arm.inverse_kinematics(x/1000, y/1000, z/1000, yaw))
-    print(" ")
+from ipywidgets import FloatSlider, interact, Checkbox
+scara_x, scara_y, scara_z, scara_yaw = arm.forward_kinematics(*arm.get_joints_poses())
+
+@interact(
+    hand_coordinate = Checkbox(value=True, description="Hand Coordinate"),
+    x   = FloatSlider(value=scara_x  , min=-0.125, max=0.36, step=0.001, readout_format='.3f'),
+    y   = FloatSlider(value=scara_y  , min=-0.36,  max=0.36, step=0.001, readout_format='.3f'),
+    z   = FloatSlider(value=scara_z  , min=0,      max=0.4,  step=0.001, readout_format='.3f'),
+    yaw = FloatSlider(value=scara_yaw, min=-2*pi,  max=2*pi, step=0.01 , readout_format='.3f'),
+)
+def calibrate(x = scara_x, y = scara_y, z = scara_z, yaw = scara_yaw, hand_coordinate=True):
+    clear_output(wait=True)
+    arm.joint_space_interpolated_motion(
+        arm.inverse_kinematics(x, y, z, yaw, hand_coordinate), 
+        speeds=[1.0, 0.5, 0.5, 1.0]
+    )
 ```
 
 - 正向运动学
@@ -418,36 +445,36 @@ print(arm.forward_kinematics((0, 0, 1.57, 0)))
 print(arm.inverse_kinematics(*arm.forward_kinematics((arm.get_joints_poses()))))
 ```
 ```python
-print(arm.inverse_kinematics(0.43, 0, 0.235, 0))
+print(arm.inverse_kinematics(0.36, 0, 0.195, 0))
 ```
 
 - 关节空间运动
 ```python
-arm.joint_space_interpolated_motion(arm.inverse_kinematics(0.245, 0.185, 0.275, -1.57),duration = 5)
+arm.joint_space_interpolated_motion(arm.inverse_kinematics(0.21, 0.15, 0.195, 1.57),duration = 5)
 ```
 ```python
-arm.joint_space_interpolated_motion((-12.57, 0, 1.57, -1.57),speeds=[None,None,0.1,0.1],duration = 5)
+arm.joint_space_interpolated_motion((-0.01, 0, 1.57, -1.57),speeds=[None,None,0.1,0.1],duration = 5)
 ```
 
 - 笛卡尔空间运动
 ```python
-arm.cartesian_space_interpolated_motion((0.245, 0.185, 0.255, 1.57), duration = 5)
+arm.cartesian_space_interpolated_motion(0.21, 0.15, 0.195, 1.57, duration = 5)
 ```
 ```python
-arm.cartesian_space_interpolated_motion(*arm.forward_kinematics((-12.42, 0, 1.57, -1.57)), y_speed=0.01, hand_coordinate=0,duration = 5)
+arm.cartesian_space_interpolated_motion(*arm.forward_kinematics((-0.01, 0, 1.57, -1.57)), y_speed=0.01, hand_coordinate=0,duration = 5)
 ```
 
 - 画圆
 ```python
-arm.joint_space_interpolated_motion(arm.inverse_kinematics(0.2, 0.0, 0.275, 0.0),duration = 5)
-arm.joint_space_interpolated_motion(arm.circle(0.2, 0.0, 0.275, 0.0, 0.05, 50, False),duration = 2)
+arm.joint_space_interpolated_motion(arm.inverse_kinematics(0.25, 0.0, 0.195, 0.0),duration = 5)
+arm.joint_space_interpolated_motion(arm.circle(0.25, 0.0, 0.195, 0.0, 0.05, 50, False),duration = 2)
 for i in range(100):
-    arm.joint_space_interpolated_motion(arm.circle(0.2, 0.0, 0.275, 0.0, 0.05, 50, False))
-    arm.delay(0.05)
+    arm.joint_space_interpolated_motion(arm.circle(0.25, 0.0, 0.195, 0.0, 0.05, 50, False))
+    time.sleep(0.01)
 for j in range(100):
-    arm.joint_space_interpolated_motion(arm.circle(0.2, 0.0, 0.275, 0.0, 0.05, 50, True))
-    arm.delay(0.05)
-arm.joint_space_interpolated_motion(arm.inverse_kinematics(0.2, 0.0, 0.275, 0),duration = 2)
+    arm.joint_space_interpolated_motion(arm.circle(0.25, 0.0, 0.195, 0.0, 0.05, 50, True))
+    time.sleep(0.01)
+arm.joint_space_interpolated_motion(arm.inverse_kinematics(0.25, 0.0, 0.195, 0),duration = 2)
 ```
 
 - 回原点
@@ -475,33 +502,110 @@ arm.disable()
 
 ##### 2.1.1 正向运动学
 已知Scara四个关节电机的角度值，求解末端位姿$(x, y, z, yaw)$。
-- 以俯视角度构建下面坐标系求解正运动学  
-![U5Ejdo.png](https://m1.im5i.com/2022/11/25/U5Ejdo.png)
-<center>图4 Scara机械臂数学简化模型</center>
+- 机械臂的正向运动学方程基于以下公式计算变换矩阵$^0_4T$。已知直线模块升降距离$d_1$和关节角度$θ_{2−4}$。变换矩阵定义为:
+$$
+\begin{align}
+^0_6T(d_1, \theta_2, \theta_3, \theta_4) & = \begin{bmatrix}^0_4R & ^0P_{4} \\ 0 & 1 \\  \end{bmatrix} \\
+ & = \begin{bmatrix}^0\hat{X}_4 & ^0\hat{Y}_4 & ^0\hat{Z}_4 & ^0P_{4} \\ 0 & 0 & 0 & 1 \\  \end{bmatrix} \\ 
+ & =  \begin{bmatrix}^0\hat{X}_{4x} & ^0\hat{Y}_{4x} & ^0\hat{Z}_{4x} & ^0P_{4x} \\ ^0\hat{X}_{4y} & ^0\hat{Y}_{4y} & ^0\hat{Z}_{4y} & ^0P_{4y} \\ ^0\hat{X}_{4z} & ^0\hat{Y}_{4z} & ^0\hat{Z}_{4z} & ^0P_{4z} \\ 0 & 0 & 0 & 1 \\  \end{bmatrix}
+\end{align} \tag 1
+$$
 
-- 末端 $B$ 的 $x$ 坐标为向量 $OA$ 与向量 $AB$ 在 $x$ 轴上投影之和，末端 $B$ 的 $y$ 坐标亦然：
+- 在上式中，$^0\hat{X}_4$,$^0\hat{Y}_4$和$^0\hat{Z}_4$分别代表坐标系4相对于坐标系0在不同轴方向上的偏移旋转。
+- 我们可以把变换矩阵分解成一个对于每个关节的变换链给出
+$$^0_4T(d_1, \theta_2, \theta_3, \theta_4) = {^0_1T(d_1)}{^1_2T(\theta_2)}{^2_3T(\theta_3)}{^3_4T(\theta_4)} \tag 2$$
+
+- 因此，只需求出每个关节的变换矩阵通过矩阵相乘即可求出变换矩阵 ${^0_4T}$。
+
+- 以下面位姿来构建Scara机械臂的零位，并对每个关节建立坐标系。
+
+- 下面通过标准的DH矩阵来构建机械臂，其DH参数表为
+$$
+\begin{array}{c|cccc}
+i & \theta_i & d_i & \alpha_i & a_i \\
+\hline
+1 & 0 & d_1+\Delta d & \pi & a_1\\
+2 & \theta_2 & 0   & \pi & a_2\\
+3 & \theta_3 & 0   & \pi & a_3\\
+4 & \theta_4 & d_4 & \pi & 0\\
+\end{array}
+$$
+
+- 其中DH参数的含义为
+    - $\theta_i$ 为绕$\hat Z_{i-1}$轴从$\hat X_{i-1}$到$\hat X_{i}$的转角，绕$\hat Z_{i-1}$正向转动方向为正。
+    - $d_i$ 为沿$\hat Z_{i-1}$轴从$\hat X_{i-1}$到$\hat X_{i}$的距离，与$\hat Z_{i-1}$方向相同为正。
+    - $\alpha_i$ 为绕$\hat X_{i}$轴从$\hat Z_{i-1}$到$\hat Z_{i}$的转角，绕$\hat X_{i}$正向转动方向为正。
+    - $a_i$ 为沿$\hat X_{i}$轴从$\hat Z_{i-1}$到$\hat Z_{i}$的距离，与$\hat X_{i}$方向相同为正。
+
+- 可以使用DH参数来编写相邻连杆坐标系之间的转换，其中$link_{i-1}$和$link_i$之间的转换可由下式求出
+$$
+\begin{align}
+^{i-1}{_iT} & =  R_Z(\theta_i)D_Z(d_i)R_X(\alpha_i)D_X(a_i)\\
+ & = \begin{bmatrix} 
+ cos\theta_i & -sin\theta_icos\alpha_i & sin\theta_isin\alpha_i & a_icos\theta_i  \\
+ sin\theta_i & cos\theta_icos\alpha_i & -cos\theta_isin\alpha_i & a_isin\theta_i  \\
+ 0 & sin\alpha_i & cos\alpha_i & d_i  \\
+  0 & 0 & 0 & 1 \\  
+  \end{bmatrix} 
+ \end{align} \tag 3$$
+
+- 综上，根据DH参数表及式(3)可求得相邻连杆间的变换矩阵，再由式(2)进一步求得$^0_4T$。
+- 由式(1)再次分离可得
 $$
 \begin{cases}
- {x = L_{23}\cos\theta_2 + L_{34}\cos(\theta_2 + \theta_3)}  \\
- {y = L_{23}\sin\theta_2 + L_{34}\sin(\theta_2 + \theta_3)}
-\end{cases}
- \tag {1}$$
-
-- 第一轴为丝杆上下平移运动，设丝杆螺距 $s$ ，末端 $B$ 的 $z$ 坐标：
-$$z = \frac {\theta_1s}{2\pi} \tag {2}$$
-
-- 末端 $B$ 的姿态角 $yaw$ ：
-$$yaw = \theta_2 + \theta_3 + (-\theta_4)  \tag {3}$$
-
-- 综上，scara机器人的运动学正解为：
-$$
-\begin{cases}
- {x = L_{23}\cos\theta_2 + L_{34}\cos(\theta_2 + \theta_3)}  \\
- {y = L_{23}\sin\theta_2 + L_{34}\sin(\theta_2 + \theta_3)}  \\
- {z = \frac {\theta_1s}{2\pi}}                           \\
- {yaw = \theta_2 + \theta_3 + (-\theta_4) }
+ {x = {^0P_{4x}}}  \\
+ {y = {^0P_{4y}}}  \\
+ {z = {^0P_{4z}}}  \\
+ {-,-,yaw = \begin{bmatrix}
+ ^0\hat{X}_{4x} & ^0\hat{Y}_{4x} & ^0\hat{Z}_{4x}  \\ 
+ ^0\hat{X}_{4y} & ^0\hat{Y}_{4y} & ^0\hat{Z}_{4y}  \\ 
+ ^0\hat{X}_{4z} & ^0\hat{Y}_{4z} & ^0\hat{Z}_{4z}    \end{bmatrix}}  \\
 \end{cases}
  \tag {4}$$
+
+- 在式(4)中，旋转矩阵与欧拉角的转换可以使用下面的转角排列的公式计算
+*X-Y-Z固定角*
+$$
+\begin{align}
+^A_BR_{XYZ}(\gamma,\beta,\alpha) 
+& =  R_Z(\alpha)R_Y(\beta)R_X(\gamma)\\
+& = \begin{bmatrix}
+ cos\alpha & -sin\alpha & 0   \\
+ sin\alpha & cos\alpha & 0   \\
+ 0 & 0 & 1   \\
+\end{bmatrix}
+\begin{bmatrix}
+ cos\beta & 0 & sin\beta   \\
+  0 & 1 & 0   \\
+ -sin\beta & 0 & cos\beta   \\
+\end{bmatrix}
+\begin{bmatrix}
+ 1 & 0 & 0   \\
+ 0 & cos\gamma & -sin\gamma   \\
+ 0 & sin\gamma & cos\gamma   \\
+\end{bmatrix}
+\\
+& = \begin{bmatrix} 
+ cos\alpha\cos\beta & \cos\alpha\sin\beta\sin\gamma - \sin\alpha\cos\gamma & \cos\alpha\sin\beta\cos\gamma + \sin\alpha\sin\gamma   \\
+ sin\alpha\cos\beta & \sin\alpha\sin\beta\sin\gamma + \cos\alpha\cos\gamma & \sin\alpha\sin\beta\cos\gamma - \cos\alpha\sin\gamma   \\
+ -sin\beta & \cos\beta\sin\gamma & \cos\beta\cos\gamma   \\ 
+  \end{bmatrix} 
+  \\
+& = \begin{bmatrix}
+ r_{11} & r_{12} & r_{13}   \\
+ r_{21} & r_{22} & r_{23}   \\
+ r_{31} & r_{32} & r_{33}   \\
+\end{bmatrix}
+ \end{align} \tag 5$$
+- 则，$yaw$为
+$$
+\begin{cases}
+yaw = \alpha & = atan2(\frac{sin\alpha\cos\beta}{\cos\beta},\frac{cos\alpha\cos\beta}{\cos\beta})\\
+& = atan2(\frac{r_{21}}{\cos\beta},\frac{r_{11}}{\cos\beta})\\
+& = atan2(\frac{ ^0\hat{X}_{6y}}{\cos\beta},\frac{^0\hat{X}_{6x}}{\cos\beta})
+ \end{cases} 
+\tag 6$$
+
 
 
 ##### 2.1.2 逆向运动学
@@ -511,10 +615,10 @@ $$
 <center>图5 Scara机械臂逆解辅助线</center>
 
 - 连接 $OB$ ，过 $B$ 作 $BC$ 垂直于 $OA$ 于 $C$ ，在$\Delta OAB$中，由余弦定理得：
-$$\cos(\pi - \theta_3) = \frac {L_{23}^2 + L_{34}^2 - (x^2 + y^2)}{2L_{23}L_{34}}  \tag {5}$$
+$$\cos(\pi - \theta_3) = \frac {a_{2}^2 + a_{3}^2 - (x^2 + y^2)}{2a_{2}a_{3}}  \tag {5}$$
 
 - 记$c_3=cos\theta_3$ ，上式可写成：
-$$c_3 = \frac {x^2 + y^2 - L_{23}^2 - L_{34}^2}{2L_{23}L_{34}} \tag {6}$$
+$$c_3 = \frac {x^2 + y^2 - a_{2}^2 - a_{3}^2}{2a_{2}a_{3}} \tag {6}$$
 
 - 记$s_3=sin\theta_3$ ，则 $s_3$ 有两个解：
 $$s_3 =± \sqrt {1−c_3^2} \tag {7}$$
@@ -528,29 +632,31 @@ $$\theta_3 = atan2(s3, c3) \tag {8}$$
 $$\alpha = atan2(y, x) \tag {9}$$
 
 - 在$\Delta OBC$中，记$r=\|OB\|$：
-$$sin\beta = \frac {\|BC\|}{\|OB\|} = \frac {L_{34}s_3}{r} \tag {10}$$
+$$sin\beta = \frac {\|BC\|}{\|OB\|} = \frac {a_{3}s_3}{r} \tag {10}$$
 
-$$cos\beta = \frac {\|OC\|}{\|OB\|} = \frac {\|OA\| + \|AC\|}{\|OB\|} = \frac {L_{23} + L_{34}c_3}{r}  \tag {11}$$
+$$cos\beta = \frac {\|OC\|}{\|OB\|} = \frac {\|OA\| + \|AC\|}{\|OB\|} = \frac {a_{2} + a_{3}c_3}{r}  \tag {11}$$
 
 - 由于$r>0$，由上式得：
-$$\beta = atan2(\sin\beta,\cos\beta) = atan2(L_{34}s_3 , L_{23} + L_{34}c_3) \tag {12}$$
+$$\beta = atan2(\sin\beta,\cos\beta) = atan2(a_{3}s_3 , a_{2} + a_{3}c_3) \tag {12}$$
 
-- 至此，可求得$\theta_2$
-$$\theta_2 = \alpha - \beta = atan2(y, x) - atan2(L_{34}s_3 , L_{23} + L_{34}c_3) \tag {13}$$
-
-- 设丝杆螺距 $s$ ，可求得$\theta_1$：
-$$\theta_1 = \frac {2{\pi}z}{s} \tag {14}$$
+- 至此，可求得$\theta_2$, 由右手定则可知$\theta_2$的旋转方向与实际相反，因此需要翻转为$-\theta_2$。
+$$-\theta_2 = -(\alpha - \beta) = \beta -\alpha = atan2(a_{3}s_3 , a_{2} + a_{3}c_3) - atan2(y, x) \tag {13}$$
 
 - 可求得末端$\theta_4$:
-$$\theta_4 = \theta_2 + \theta_3 - yaw \tag {15}$$
+$$\theta_4 = \theta_3 - \theta_2 - yaw \tag {15}$$
+
+- 直线模块的变化量$\Delta d$为：
+$$\Delta d = z - d_1 + d_4 \tag {14}$$
+
+
 
 - 综上，Scara机器人的运动学逆解为：
 $$
 \begin{cases}
- {\theta_1 = \frac {2{\pi}z}{s}}  \\
- {\theta_2 = atan2(y, x) - atan2(L_{34}s_3 , L_{23} + L_{34}c_3)}  \\
+ {\Delta d = z - d_1 + d_4}  \\
+ {\theta_2 = atan2(a_{3}s_3 , a_{2} + a_{3}c_3) - atan2(y, x)}  \\
  {\theta_3 = atan2(s3, c3)}                           \\
- {\theta_4 = \theta_2 + \theta_3 - yaw }
+ {\theta_4 = \theta_3 - \theta_2 - yaw }
 \end{cases}
  \tag {16}$$
 

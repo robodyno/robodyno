@@ -30,17 +30,17 @@ states, and controlling the Four DoF Scara Robot to run in different space.
 
 Examples:
 
-    >>> from robodyno.components import Motor
     >>> from robodyno.interfaces import CanBus
+    >>> from robodyno.components import Motor, SliderModule
     >>> from robodyno.robots.four_dof_scara_robot import FourDoFScara
     >>> can = CanBus()
     >>> class MyScara(FourDoFScara):
     >>>     def __init__(self):
-    >>>         M1 = Motor(can, 0x10)
+    >>>         M1 = SliderModule(can, 0x10)
     >>>         M2 = Motor(can, 0x11)
     >>>         M3 = Motor(can, 0x12)
     >>>         M4 = Motor(can, 0x13)
-    >>>     super().__init__(M1, M2, M3, M4, 0.06, 0.185, 0.185, 0.255, 0.01)
+    >>>         super().__init__(M1, M2, M3, M4, 0.24, 0.06, 0.150, 0.150, 0.045)
     >>> arm = MyScara()
     >>> arm.init()
     >>> arm.get_joints_poses()
@@ -51,22 +51,23 @@ Examples:
 import time
 from math import pi, cos, sin, sqrt, atan2
 from ..utils.interpolations import linear_interpolation
+from ..utils.transformations import dh_matrix, euler_from_matrix, translation_from_matrix
 
 class FourDoFScara(object):
     """Controls Robodyno Four DoF Scara Robot through the CAN bus.
     
     Attributes:
         joints (list): list of 4 joint motors
-        l12 (float): link from joint 1 to joint 2  (m)
-        l23 (float): link from joint 2 to joint 3  (m)
-        l34 (float): link from joint 3 to joint 4  (m)
-        l04 (float): link from world to joint 4 longitudinal distance (m)
-        screw_lead (float): screw lead (m)
+        d1 (float): DH parameter d1 from link 1 to link 2  (m)
+        a1 (float): DH parameter a1 from link 1 to link 2  (m)
+        a2 (float): DH parameter a2 from link 2 to link 3  (m)
+        a3 (float): DH parameter a3 from link 3 to link 4  (m)
+        d4 (float): DH parameter d4 from link 4 to eelink  (m)
         end_effector (object): end effector object
 
     """
-    def __init__(self, j1, j2, j3, j4, l12: float, l23: float, l34: float, 
-                 l04: float, screw_lead: float, end_effector: object = None):
+    def __init__(self, j1, j2, j3, j4, d1: float, a1: float, a2: float, 
+                 a3: float, d4: float, end_effector: object = None):
         """Initializes robot with joints and links
         
         Args:
@@ -74,24 +75,24 @@ class FourDoFScara(object):
             j2 (Motor): upperarm_motor.
             j3 (Motor): forearm_motor.
             j4 (Motor): hand_motor.
-            l12 (float): link from joint 1 to joint 2  (m)
-            l23 (float): link from joint 2 to joint 3  (m)
-            l34 (float): link from joint 3 to joint 4  (m)
-            l04 (float): link from world to joint 4 longitudinal distance (m)
-            screw_lead (float): screw lead (m)
+            d1 (float): DH parameter d1 from link 1 to link 2  (m)
+            a1 (float): DH parameter a1 from link 1 to link 2  (m)
+            a2 (float): DH parameter a2 from link 2 to link 3  (m)
+            a3 (float): DH parameter a3 from link 3 to link 4  (m)
+            d4 (float): DH parameter d4 from link 4 to eelink  (m)
             end_effector (object): end effector object
         """
         self.joints = [j1, j2, j3, j4]
-        self.l12 = l12
-        self.l23 = l23
-        self.l34 = l34
-        self.l04 = l04
-        self.screw_lead = screw_lead
+        self.d1 = d1
+        self.a1 = a1
+        self.a2 = a2
+        self.a3 = a3
+        self.d4 = d4
         self.end_effector = end_effector
 
-        for m in self.joints:
+        for m in self.joints[1:]:
             m.position_filter_mode(8)
-        # self.motors[0].position_traj_mode(10,5,5)
+        # self.joints[0].position_traj_mode(12,40,40)
         self._axes_poses = [0 for i in range(4)]
         self._axes_zeros = [0 for i in range(4)]
 
@@ -99,7 +100,7 @@ class FourDoFScara(object):
         """Read joints positions to a list.
         
         Returns:
-            (list): a list of 4 joint positions
+            (list): list of 1 slider distance(m) and 3 joint angles(rad)
             
         Raises:
             RuntimeError: If the motor Joint is invalid.
@@ -195,11 +196,11 @@ class FourDoFScara(object):
             y_speed (float): speed alone Y dimension(m/s)
             z_speed (float): speed alone Z dimension(m/s)
             yaw_speed (float): rotation speed on Z axis(rad/s)
-            hand_coordinate (bool): 0 is left hand coordinate system
-                             1 is right hand coordinate system
+            hand_coordinate (bool): False is left hand coordinate system
+                                    True is right hand coordinate system
             duration (float): default motion duration(s)
         """
-        current_pose = self.forward_kinematics(self._axes_poses.copy())
+        current_pose = self.forward_kinematics(*self._axes_poses.copy())
         current_x = current_pose[0]
         current_y = current_pose[1]
         current_z = current_pose[2]
@@ -223,24 +224,31 @@ class FourDoFScara(object):
                 break
             time.sleep(0.05)
 
-    def forward_kinematics(self, angles: list) -> tuple:
+    def forward_kinematics(self, d: float, theta2: float, theta3: float, theta4: float) -> tuple:
         """Forward kinematics algorism
         
         Args:
-            angles (list): list of 4 joint angles(rad)
+            d: slider distance(m)
+            theta2: 2 joint angles(rad)
+            theta3: 3 joint angles(rad)
+            theta4: 4 joint angles(rad)
         
         Returns:
             (tuple): (x, y, z, yaw) tuples of 3 axis position and 1 axis posture
         """
-        x = self.l23 * cos(angles[1]) + self.l34 * cos(angles[1] + angles[2]) + self.l12
-        y = self.l23 * sin(angles[1]) + self.l34 * sin(angles[1] + angles[2])
-        z = angles[0] * self.screw_lead / (2 * pi) + self.l04
-        yaw = -angles[3] + angles[1] + angles[2]
+        T01 = dh_matrix(pi, self.a1, self.d1 + d, 0)
+        T12 = dh_matrix(pi, self.a2, 0          , theta2)
+        T23 = dh_matrix(pi, self.a3, 0          , theta3)
+        T34 = dh_matrix(pi, 0      , self.d4    , theta4)
 
+        T04 = T01 @ T12 @ T23 @ T34 
+        x, y, z = list(translation_from_matrix(T04))
+        _, _, yaw = euler_from_matrix(T04)
+        
         return (x, y, z, yaw)
     
     def inverse_kinematics(self, x: float, y: float, z: float, 
-                           yaw: float, hand_coordinate: bool = 1) -> list:
+                           yaw: float, hand_coordinate: bool = True) -> list:
         """inverse kinematics algorism
         
         Args:
@@ -248,41 +256,39 @@ class FourDoFScara(object):
             y (float): robot end y
             z (float): robot end z
             yaw (float): robot end yaw
-            hand_coordinate (bool): 0 is left hand coordinate system
-                             1 is right hand coordinate system
+            hand_coordinate (bool): False is left hand coordinate system
+                                    True is right hand coordinate system
         
         Returns:
-            (list): list of 4 joint angles
+            (d, theta2, theta3, theta4): list of 1 slider distance(m) and 3 joint angles(rad)
             
         Raises:
             ValueError: If the Scara Pose not in range.
         """
-        angle = [0, 0, 0, 0]
-        x -= self.l12
-        z -= self.l04
+        x -= self.a1
         
-        c3 = (x*x + y*y - self.l23*self.l23 - self.l34*self.l34) / (2.0 * self.l23 * self.l34)
+        c3 = (x*x + y*y - self.a2*self.a2 - self.a3*self.a3) / (2.0 * self.a2 * self.a3)
         temp = 1 - c3 * c3
         try:
-            if(hand_coordinate == 1):
+            if hand_coordinate:
                 s3 = sqrt(temp)  # right
-            elif(hand_coordinate == 0):
+            else:
                 s3 = -sqrt(temp) # left
         except ValueError:
             print("Pose not in range! Choose other Pose that is not a singularity")
             return self.get_joints_poses()
          
-        angle[2] = atan2(s3, c3)
+        theta3 = atan2(s3, c3)
          
         alpha = atan2(y, x)
         r = sqrt(x*x + y*y)
-        sin_beta = self.l34 * sin(angle[2]) / r
-        cos_beta = (self.l23 + self.l34 * cos(angle[2])) / r
+        sin_beta = self.a3 * sin(theta3) / r
+        cos_beta = (self.a2 + self.a3 * cos(theta3)) / r
         beta = atan2(sin_beta, cos_beta)
-        angle[1] = alpha - beta
         
-        angle[0] = (2*pi * z) / self.screw_lead
-        angle[3] = angle[1] + angle[2] - yaw
-         
-        return angle
+        theta2 = beta - alpha
+        theta4 = theta3 - theta2 - yaw
+        d = z - self.d1 +self.d4
+        
+        return (d, theta2, theta3, theta4)
         
