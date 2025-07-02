@@ -12,6 +12,7 @@ nav:
       - 组件:
           - deep-dive/components/index.md
           - 伺服减速电机: deep-dive/components/motor.md
+          - 小米赛博电机: deep-dive/components/mi-motor.md
           - 直线运动模组: deep-dive/components/slider-module.md
           - PWM 扩展模块: deep-dive/components/pwm-driver.md
           - 步进电机驱动模块: deep-dive/components/stepper-driver.md
@@ -53,6 +54,7 @@ nav:
           - can_bus:
               - references/components/can_bus/index.md
               - Motor: references/components/can_bus/motor.md
+              - MiMotor: references/components/can_bus/mi_motor.md
               - SliderModule: references/components/can_bus/slider_module.md
               - PwmDriver: references/components/can_bus/pwm_driver.md
               - StepperDriver: references/components/can_bus/stepper_driver.md
