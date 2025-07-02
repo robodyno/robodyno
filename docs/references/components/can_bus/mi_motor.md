@@ -1,0 +1,1 @@
+::: robodyno.components.can_bus.mi_motor

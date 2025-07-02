@@ -60,6 +60,7 @@ class Model(Enum):
     ROBODYNO_IMPACT_SENSOR = 0xA5
     ROBODYNO_PROXIMITY_SENSOR = 0xA6
 
+    CYBERGEAR = 0xF0
     THIRD_PARTY = 0xFF
 
     @classmethod

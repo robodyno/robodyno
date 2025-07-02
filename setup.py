@@ -106,6 +106,7 @@ setup(
             'ImpactSensor = robodyno.components.can_bus.impact_sensor:ImpactSensor',
             'MagneticSensor = robodyno.components.can_bus.magnetic_sensor:MagneticSensor',
             'ProximitySensor = robodyno.components.can_bus.proximity_sensor:ProximitySensor',
+            'MiMotor = robodyno.components.can_bus.mi_motor:MiMotor',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',
