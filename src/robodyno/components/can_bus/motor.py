@@ -123,6 +123,8 @@ class Motor(CanBusDevice):
                 self.__dict__.update(ROBOTTIME_PARAMS['pro_motor_common'])
             elif Model.is_plus(self.type):
                 self.__dict__.update(ROBOTTIME_PARAMS['plus_motor_common'])
+            elif Model.is_mini(self.type):
+                self.__dict__.update(ROBOTTIME_PARAMS['mini_motor_common'])
             self.available_velocity = fabs(
                 self.hw_max_vel_limit / self.reduction * 2.0 * pi
             )
