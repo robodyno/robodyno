@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Forward kinematics and inverse kinematics of `four_dof_scara_robot`([!38](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/38)).
 - README for a `four_dof_scara_robot`([!38](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/38)).
+- `setup.py`: restrict `setuptools` dependency to `<80.0`([!40](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/40))
 
 ### Added
 - `ProximitySensor` component([!36](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/36)).
