@@ -214,87 +214,49 @@ class CanBus(object):
         self,
         msg: can.Message,
         timeout: Optional[float] = None,
-        master_id: int = 0xFF,  # 默认主机ID
+        master_id: int = 0xFF,
     ) -> Optional[can.Message]:
-        """Send a CAN message and wait for matching response from MI motor.
+        """Send a CAN message and wait for the matching response from an MI motor.
 
         Args:
-            msg (can.Message): The CAN message to send.
-            timeout (Optional[float]): Timeout in seconds. If 0, don't wait for response.
-            master_id (int): Master device ID for filtering responses (default: 0xFF).
+            msg: The CAN message to send.
+            timeout: Timeout in seconds. If 0, return immediately without waiting.
+            master_id: Master device ID used for response filtering.
 
         Returns:
-            Optional[can.Message]: Matching response message or None.
+            The matching response message, or None if no response is expected.
 
         Raises:
-            TimeoutError: If timeout occurs while waiting for response.
+            TimeoutError: If no response is received within the timeout.
+            ValueError: If the sent command is not recognized.
         """
         with self._get_lock:
             start_time = time()
             sent_command = (msg.arbitration_id >> 24) & 0x1F
 
-            # 定义发送命令到期望响应的映射
             command_response_map = {
-                0x0: {  # command0 -> command0 response
-                    'commands': [0x0],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == 0xFE,  # 固定为0xFE
-                },
-                0x1: {  # command1 -> command2 response
-                    'commands': [0x2],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 主机ID
-                },
-                0x2: {  # command2 -> command2 response
-                    'commands': [0x2],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 主机ID
-                },
-                0x3: {  # command3 -> command2 response
-                    'commands': [0x2],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 主机ID
-                },
-                0x4: {  # command4 -> command2 response
-                    'commands': [0x2],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 主机ID
-                },
-                0x5: {  # command5 -> 可能的响应
-                    'commands': [0x2],  # 需要根据实际协议确认
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,
-                },
-                0x6: {  # command6 -> command2 response
-                    'commands': [0x2],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 主机ID
-                },
-                0x7: {  # command7 -> command0 response
-                    'commands': [0x0],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == 0xFE,  # 固定为0xFE
-                },
-                0x8: {  # command8 -> 需要根据实际协议确认
-                    'commands': [0x8],  # 或者其他响应命令
-                    'check_bit0_7': lambda bit0_7: True,  # 需要根据实际协议调整
-                },
-                0x9: {  # command9 -> command9 response
-                    'commands': [0x9],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 需要确认
-                },
-                0x11: {  # command17 -> command17 response
-                    'commands': [0x11],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 需要确认
-                },
-                0x12: {  # command18 -> command2 response
-                    'commands': [0x2],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 主机ID
-                },
-                0x16: {  # command22 -> command2 response (如果存在)
-                    'commands': [0x2],
-                    'check_bit0_7': lambda bit0_7: bit0_7 == master_id,  # 主机ID
-                },
+                0x0: {'commands': [0x0], 'check_bit0_7': lambda b: b == 0xFE},
+                0x1: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x2: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x3: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x4: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x5: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x6: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x7: {'commands': [0x0], 'check_bit0_7': lambda b: b == 0xFE},
+                0x8: {'commands': [0x8], 'check_bit0_7': lambda b: True},
+                0x9: {'commands': [0x9], 'check_bit0_7': lambda b: b == master_id},
+                0x11: {'commands': [0x11], 'check_bit0_7': lambda b: b == master_id},
+                0x12: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x16: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
             }
 
-            expected_response = command_response_map.get(sent_command)
-            if not expected_response:
+            expected = command_response_map.get(sent_command)
+            if not expected:
                 raise ValueError(f"Unknown command: 0x{sent_command:02X}")
 
             with self._rx_queue.mutex:
                 self._rx_queue.queue.clear()
+
             self._listening_event.set()
             self._bus.send(msg)
 
@@ -305,29 +267,24 @@ class CanBus(object):
             while True:
                 if timeout is not None and time() - start_time > timeout:
                     self._listening_event.clear()
-                    raise TimeoutError('Timeout when receiving data.')
+                    raise TimeoutError("Timeout waiting for response")
 
                 try:
                     rx_msg = self._rx_queue.get(timeout=0.001)
                 except Empty:
                     continue
 
-                # 必须是扩展帧
                 if not rx_msg.is_extended_id:
                     continue
 
-                command = (rx_msg.arbitration_id >> 24) & 0x1F  # bit24-28: 命令ID
-                bit0_7 = rx_msg.arbitration_id & 0xFF  # bit0-7: 根据命令不同含义不同
+                command = (rx_msg.arbitration_id >> 24) & 0x1F
+                bit0_7 = rx_msg.arbitration_id & 0xFF
 
-                # 检查是否是期望的响应命令
-                if command not in expected_response['commands']:
+                if command not in expected['commands']:
+                    continue
+                if not expected['check_bit0_7'](bit0_7):
                     continue
 
-                # 检查bit0-7是否符合期望（这是主要的过滤条件）
-                if not expected_response['check_bit0_7'](bit0_7):
-                    continue
-
-                # 条件匹配，返回这个消息
                 self._listening_event.clear()
                 return rx_msg
 
