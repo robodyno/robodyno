@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ROBODYN0_MINI` series to `class Model` in `src/robodyno/components/config/model.py` ([!37](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/37)).
 - `ProximitySensor` component([!36](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/36)).
 - Examples of ProximitySensor([!36](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/36)).
-- 'MiMotor' component([!39](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/39))
+- `MiMotor` component([!39](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/39))
 - Examples of component([!39](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/39))
 - Docs of component([!39](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/39))
 
