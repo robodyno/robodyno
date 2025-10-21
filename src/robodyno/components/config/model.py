@@ -37,12 +37,13 @@ class Model(Enum):
     ROBODYNO_PLUS_P12 = 0x10
     ROBODYNO_PLUS_P12A = 0x12
     ROBODYNO_PLUS_DIRECT = 0x1F
+    ROBODYNO_MINI_P100 = 0x20
+    ROBODYNO_MINI_REDUCER = 0x2E
+    ROBODYNO_MINI_DIRECT = 0x2F
 
     ROBODYNO_D_VAC01 = 0x61
     ROBODYNO_D_CNV02 = 0x80
     ROBODYNO_D_ADG03 = 0x20
-
-    ROBODYNO_NANO_P100 = 0x20
 
     ROBODYNO_BATTERY = 0x40
 
@@ -58,7 +59,9 @@ class Model(Enum):
     ROBODYNO_ULTRASONIC_SENSOR = 0xA4
     ROBODYNO_CLIFF_SENSOR = 0xA0
     ROBODYNO_IMPACT_SENSOR = 0xA5
+    ROBODYNO_PROXIMITY_SENSOR = 0xA6
 
+    CYBERGEAR = 0xF0
     THIRD_PARTY = 0xFF
 
     @classmethod
@@ -88,4 +91,13 @@ class Model(Enum):
             cls.ROBODYNO_PLUS_P12,
             cls.ROBODYNO_PLUS_P12A,
             cls.ROBODYNO_PLUS_DIRECT,
+        ]
+
+    @classmethod
+    def is_mini(cls, model):
+        """Check if the model is a plus model."""
+        return model in [
+            cls.ROBODYNO_MINI_P100,
+            cls.ROBODYNO_MINI_REDUCER,
+            cls.ROBODYNO_MINI_DIRECT,
         ]

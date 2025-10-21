@@ -210,6 +210,84 @@ class CanBus(object):
                     self._listening_event.clear()
                     return struct.unpack('<' + fmt, msg.data)
 
+    def mi_motor_send(
+        self,
+        msg: can.Message,
+        timeout: Optional[float] = None,
+        master_id: int = 0xFF,
+    ) -> Optional[can.Message]:
+        """Send a CAN message and wait for the matching response from an MI motor.
+
+        Args:
+            msg: The CAN message to send.
+            timeout: Timeout in seconds. If 0, return immediately without waiting.
+            master_id: Master device ID used for response filtering.
+
+        Returns:
+            The matching response message, or None if no response is expected.
+
+        Raises:
+            TimeoutError: If no response is received within the timeout.
+            ValueError: If the sent command is not recognized.
+        """
+        with self._get_lock:
+            start_time = time()
+            sent_command = (msg.arbitration_id >> 24) & 0x1F
+
+            command_response_map = {
+                0x0: {'commands': [0x0], 'check_bit0_7': lambda b: b == 0xFE},
+                0x1: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x2: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x3: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x4: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x5: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x6: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x7: {'commands': [0x0], 'check_bit0_7': lambda b: b == 0xFE},
+                0x8: {'commands': [0x8], 'check_bit0_7': lambda b: True},
+                0x9: {'commands': [0x9], 'check_bit0_7': lambda b: b == master_id},
+                0x11: {'commands': [0x11], 'check_bit0_7': lambda b: b == master_id},
+                0x12: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+                0x16: {'commands': [0x2], 'check_bit0_7': lambda b: b == master_id},
+            }
+
+            expected = command_response_map.get(sent_command)
+            if not expected:
+                raise ValueError(f"Unknown command: 0x{sent_command:02X}")
+
+            with self._rx_queue.mutex:
+                self._rx_queue.queue.clear()
+
+            self._listening_event.set()
+            self._bus.send(msg)
+
+            if timeout == 0:
+                self._listening_event.clear()
+                return None
+
+            while True:
+                if timeout is not None and time() - start_time > timeout:
+                    self._listening_event.clear()
+                    raise TimeoutError("Timeout waiting for response")
+
+                try:
+                    rx_msg = self._rx_queue.get(timeout=0.001)
+                except Empty:
+                    continue
+
+                if not rx_msg.is_extended_id:
+                    continue
+
+                command = (rx_msg.arbitration_id >> 24) & 0x1F
+                bit0_7 = rx_msg.arbitration_id & 0xFF
+
+                if command not in expected['commands']:
+                    continue
+                if not expected['check_bit0_7'](bit0_7):
+                    continue
+
+                self._listening_event.clear()
+                return rx_msg
+
     def subscribe(
         self, callback: Callable, device_id: int = -1, cmd_id: int = -1
     ) -> None:

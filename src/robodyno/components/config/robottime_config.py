@@ -41,6 +41,16 @@ ROBOTTIME_PARAMS = {
         'default_vel_kp': 0.1,
         'default_vel_ki': 0.5,
     },
+    'mini_motor_common': {
+        'available_current': 10,
+        'hw_torque_constant': 1,
+        'hw_default_vel_limit': 400,
+        'hw_max_vel_limit': 1000,
+        'default_current_limit': 10.0,
+        'default_pos_kp': 0.7,
+        'default_vel_kp': 0.22,
+        'default_vel_ki': 0.02,
+    },
     'motor': {
         Model.ROBODYNO_PRO_01B: {
             'reduction': -44,  # will be deprecated in 2.0
@@ -224,8 +234,36 @@ ROBOTTIME_PARAMS = {
             'default_vel_kp': 0.10,
             'default_vel_ki': 0.50,
         },
-        Model.ROBODYNO_NANO_P100: {
+        Model.ROBODYNO_MINI_P100: {
             'reduction': 100,
+            'available_velocity': 500,  # for develop
+            'available_torque': 100,  # for develop
+            'available_current': 100,  # for develop
+            'torque_constant': 0.25,
+            'with_brake': False,
+            'absolution_encoder': True,
+            'default_vel_limit': 10.0,
+            'default_current_limit': 0.5,
+            'default_pos_kp': 25.0,
+            'default_vel_kp': 200.0,
+            'default_vel_ki': 5.0,
+        },
+        Model.ROBODYNO_MINI_REDUCER: {
+            'reduction': 1,
+            'available_velocity': 500,  # for develop
+            'available_torque': 100,  # for develop
+            'available_current': 100,  # for develop
+            'torque_constant': 0.25,
+            'with_brake': False,
+            'absolution_encoder': True,
+            'default_vel_limit': 10.0,
+            'default_current_limit': 0.5,
+            'default_pos_kp': 25.0,
+            'default_vel_kp': 200.0,
+            'default_vel_ki': 5.0,
+        },
+        Model.ROBODYNO_MINI_DIRECT: {
+            'reduction': 1,
             'available_velocity': 500,  # for develop
             'available_torque': 100,  # for develop
             'available_current': 100,  # for develop

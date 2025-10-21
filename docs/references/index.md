@@ -18,6 +18,7 @@ Robodyno 的源代码遵循 [Apache License 2.0](https://www.apache.org/licenses
 - [CanBusDevice（CAN 总线设备）](components/can_bus/)
 
     - [Motor（伺服减速电机）](components/can_bus/motor/)
+    - [MiMotor（小米赛博电机）](components/can_bus/mi_motor/)
     - [SliderModule（直线运动模组）](components/can_bus/slider_module/)
     - [PwmDriver（PWM 扩展模块）](components/can_bus/pwm_driver/)
     - [StepperDriver（步进电机驱动模块）](components/can_bus/stepper_driver/)
@@ -29,6 +30,7 @@ Robodyno 的源代码遵循 [Apache License 2.0](https://www.apache.org/licenses
     - [CliffSensor（悬崖传感器）](components/can_bus/cliff_sensor/)
     - [ImpactSensor（防撞条传感器）](components/can_bus/impact_sensor/)
     - [MagneticSensor（磁导航传感器）](components/can_bus/magnetic_sensor/)
+    - [ProximitySensor（接近开关传感器）](components/can_bus/proximity_sensor/)
 
 - [WebotsDevice（Webots 设备）](components/webots/)
 

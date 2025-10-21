@@ -59,6 +59,8 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
     ],
     package_dir={
         '': 'src',
@@ -87,6 +89,7 @@ setup(
         'click >= 7.1.2',
         'python-can>=3.2.0, <4.0',
         'importlib-metadata',
+        'setuptools<80.0',
     ],
     extras_require={
         ':sys_platform == "win32"': ['candle-bus'],
@@ -105,6 +108,8 @@ setup(
             'CliffSensor = robodyno.components.can_bus.cliff_sensor:CliffSensor',
             'ImpactSensor = robodyno.components.can_bus.impact_sensor:ImpactSensor',
             'MagneticSensor = robodyno.components.can_bus.magnetic_sensor:MagneticSensor',
+            'ProximitySensor = robodyno.components.can_bus.proximity_sensor:ProximitySensor',
+            'MiMotor = robodyno.components.can_bus.mi_motor:MiMotor',
         ],
         'robodyno.components.webots': [
             'Motor = robodyno.components.webots.motor:Motor',
