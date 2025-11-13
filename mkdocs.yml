@@ -66,6 +66,7 @@ nav:
               - CliffSensor: references/components/can_bus/cliff_sensor.md
               - ImpactSensor: references/components/can_bus/impact_sensor.md
               - MagneticSensor: references/components/can_bus/magnetic_sensor.md
+              - ProximitySensor: references/components/can_bus/proximity_sensor.md
           - webots:
               - references/components/webots/index.md
               - Motor: references/components/webots/motor.md
