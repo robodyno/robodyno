@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Examples of component([!39](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/39))
 - Docs of component([!39](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/39))
 
+### Fixed
+- Removed version constraints for mkdocs and mkdocs-material in requirements.txt to resolve dependency conflicts([!44](http://101.42.250.169:8081/robodyno/robodyno/-/merge_requests/44))
+
 ## [1.7.1]
 
 ### Changed
