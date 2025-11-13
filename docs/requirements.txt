@@ -1,5 +1,5 @@
-mkdocs >= 1.4.2, < 2.0
-mkdocs-material >= 9.1.8, < 10.0
-jieba >= 0.42.1, < 0.43
-mike >= 1.1.2, < 2.0
-mkdocstrings[crystal,python] >= 0.21.2, < 0.22
+mkdocs
+mkdocs-material
+jieba
+mike < 2.0
+mkdocstrings[crystal,python] >= 0.21.2
