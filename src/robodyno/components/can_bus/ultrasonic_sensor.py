@@ -45,9 +45,9 @@ class UltrasonicSensor(CanBusDevice):
       fw_ver(float):Firmware version.
     """
 
-    _CMD_HEARTBEAT = 0x01
     _CMD_GET_DISTANCE = 0x02
     _CMD_CONFIG_CAN = 0x03
+    _CMD_HEARTBEAT = 0x04
 
     def __init__(self, can: CanBus, id_: int = 0x35):
         """Initializes the ultrasonic sensor driver.
