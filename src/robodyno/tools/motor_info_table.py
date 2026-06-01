@@ -55,7 +55,7 @@ def motor_info_table(motor: Motor) -> Table:
     table = Table(
         title=(
             f'[cyan][0x{motor.id:02X}][/] '
-            f'[green]{motor.type.name}({fabs(motor.reduction):.0f})[/] '
+            f'[green]{motor.type.name}({fabs(motor.reduction):.1f})[/] '
             f'[yellow]{motor.fw_ver}[/]'
         ),
         title_style=Style(italic=False, bold=True),

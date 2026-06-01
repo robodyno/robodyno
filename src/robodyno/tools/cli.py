@@ -69,7 +69,7 @@ def list_devices(ctx: click.Context) -> None:
             )
             name = Model(type_).name
             if data and (Model.is_pro(Model(type_)) or Model.is_plus(Model(type_)) or Model.is_mini(Model(type_))):
-                name = f'{name}({fabs(data):.0f})'
+                name = f'{name}({fabs(data):.1f})'
             table.add_row(f'0x{device_id:02X}', name, f'{main_ver}.{sub_ver}')
         except TimeoutError:
             continue
