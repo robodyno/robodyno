@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Corrected the measurement scaling logic for `ImuSensor` gyroscope and accelerometer data. (Fixed incorrect division by range factor `k`).
+- Fixed a bug in `mi_motor/api_list.ipynb` where the scanning loop prematurely exited after finding the first mi_motor, now properly listing all connected mi_motors on the CAN bus.
 
 ## [1.7.2]
 
