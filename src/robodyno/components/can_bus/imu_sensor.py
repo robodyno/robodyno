@@ -76,7 +76,7 @@ class ImuSensor(CanBusDevice):
             raise ValueError(f'Device of id {id_} is not a imu sensor')
         self._quaternion = (0, 0, 0, 1)
         self._euler = (0, 0, 0)
-        self._gyro_factor = pi / 23592.96  # raw to rad/s
+        self._gyro_factor = pi / 23592.96  # raw to rad/s (1/131.072 * pi/180)
         self._accel_factor = 9.80665 / 16384.0  # raw to m/s^2
         self._can.subscribe(
             callback=self._heartbeat_callback,
@@ -234,9 +234,9 @@ class ImuSensor(CanBusDevice):
             return None
         k = 2**gyro_range
         return (
-            x * self._gyro_factor / k,
-            y * self._gyro_factor / k,
-            z * self._gyro_factor / k,
+            x * self._gyro_factor * k,
+            y * self._gyro_factor * k,
+            z * self._gyro_factor * k,
         )
 
     def get_accel(self, timeout: Optional[float] = None) -> Optional[tuple]:
@@ -256,7 +256,7 @@ class ImuSensor(CanBusDevice):
             return None
         k = 2**accel_range
         return (
-            x * self._accel_factor / k,
-            y * self._accel_factor / k,
-            z * self._accel_factor / k,
+            x * self._accel_factor * k,
+            y * self._accel_factor * k,
+            z * self._accel_factor * k,
         )
