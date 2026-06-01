@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.3]
+
 ### Changed
 - Modified the display format of the motor reduction ratio from 0 to 1 decimal place (e.g., from `66` to `65.5`).
 
